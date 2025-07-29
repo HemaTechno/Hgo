@@ -3,27 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hema Tech | بوابة التقنية المميزة</title>
+    <title>Hema Tech | الوجهة الرقمية الفاخرة</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4361ee;
-            --primary-dark: #3a0ca3;
-            --secondary: #f72585;
+            --primary: #6a11cb;
+            --primary-dark: #4a00e0;
+            --secondary: #ff3cac;
             --light: #f8f9fa;
             --dark: #1a1a2e;
             --gold: #ffd700;
             --silver: #c0c0c0;
+            --diamond: #b9f2ff;
             --facebook: #1877f2;
             --telegram: #0088cc;
             --discord: #5865f2;
             --whatsapp: #25d366;
             --youtube: #ff0000;
             --instagram: #e1306c;
-            --transition: all 0.3s ease;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            --border-radius: 12px;
+            --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            --border-radius: 24px;
+            --glass: rgba(255, 255, 255, 0.15);
+            --glow: 0 0 25px rgba(106, 17, 203, 0.5);
         }
 
         * {
@@ -34,197 +37,361 @@
         }
 
         body {
-            background: #f8f9fa;
-            color: #333;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            line-height: 1.6;
+            line-height: 1.8;
+            overflow-x: hidden;
         }
 
         .main-container {
-            background: white;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow), var(--glow);
             width: 100%;
             max-width: 800px;
             overflow: hidden;
+            position: relative;
             transition: var(--transition);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transform-style: preserve-3d;
+        }
+
+        .main-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            z-index: -1;
+            animation: rotate 15s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .header {
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            padding: 40px 30px;
+            padding: 60px 40px;
             text-align: center;
             position: relative;
+            overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            z-index: 2;
+            box-shadow: 0 0 20px var(--gold);
         }
 
         .logo-container {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px;
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 25px;
             display: flex;
             justify-content: center;
             align-items: center;
+            filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.3));
+        }
+
+        .logo-border {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 3px solid var(--gold);
+            border-radius: 50%;
+            box-shadow: 0 0 30px var(--gold);
+            animation: pulse 3s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px var(--gold); }
+            100% { box-shadow: 0 0 40px var(--gold); }
         }
 
         .logo {
-            width: 100%;
-            height: 100%;
-            background: white;
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, white, #f0f0f0);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: rotate(15deg) scale(1.05);
         }
 
         .logo img {
-            width: 60px;
-            height: 60px;
+            width: 70px;
+            height: 70px;
             object-fit: contain;
         }
 
         h1 {
-            font-size: 32px;
-            margin-bottom: 10px;
+            font-size: 36px;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
             font-weight: 700;
         }
 
-        .header p {
-            color: rgba(255,255,255,0.9);
-            font-size: 16px;
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 3px;
+            box-shadow: 0 0 10px var(--gold);
         }
 
         .content {
-            padding: 40px 30px;
+            padding: 50px 40px;
             text-align: center;
+            position: relative;
+        }
+
+        .content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
         }
 
         p {
-            color: #555;
+            color: rgba(255,255,255,0.9);
             margin-bottom: 30px;
+            font-weight: 300;
             font-size: 18px;
         }
 
         .countdown {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 30px 0;
+            gap: 25px;
+            margin: 40px 0;
         }
 
         .countdown-item {
-            background: #f1f3f5;
-            border-radius: 8px;
-            padding: 15px;
-            min-width: 80px;
-            box-shadow: var(--shadow);
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 25px;
+            min-width: 100px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             transition: var(--transition);
         }
 
         .countdown-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--gold);
         }
 
         .countdown-value {
-            font-size: 32px;
+            font-size: 42px;
             font-weight: 700;
-            color: var(--primary);
+            color: white;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to bottom, var(--gold), var(--diamond));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .countdown-label {
-            font-size: 14px;
-            color: #666;
-            margin-top: 5px;
+            font-size: 16px;
+            color: rgba(255,255,255,0.8);
+            text-transform: uppercase;
+            margin-top: 10px;
+            letter-spacing: 1px;
         }
 
         .btn-container {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 30px;
+            gap: 25px;
+            margin-top: 40px;
         }
 
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            padding: 15px 30px;
+            padding: 20px 45px;
             border-radius: 50px;
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
             transition: var(--transition);
             border: none;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+            box-shadow: 0 15px 35px rgba(106, 17, 203, 0.5);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
         .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
-            background: var(--primary-dark);
+            transform: translateY(-5px);
+            box-shadow: 0 20px 45px rgba(106, 17, 203, 0.7);
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn-secondary {
-            background: white;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            box-shadow: none;
+            background: transparent;
+            border: 2px solid var(--gold);
+            color: var(--gold);
+            box-shadow: 0 15px 35px rgba(255, 215, 0, 0.3);
         }
 
         .btn-secondary:hover {
-            background: #f1f3f5;
-            color: var(--primary-dark);
+            background: rgba(255, 215, 0, 0.1);
+            box-shadow: 0 20px 45px rgba(255, 215, 0, 0.5);
+            color: white;
         }
 
         .footer {
-            background: #f1f3f5;
-            padding: 30px;
+            background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+            padding: 50px 30px;
             text-align: center;
+            position: relative;
+            clip-path: polygon(0 10%, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--gold), transparent);
+            box-shadow: 0 0 15px var(--gold);
         }
 
         .social-title {
-            font-size: 22px;
-            margin-bottom: 15px;
-            color: var(--primary);
+            font-size: 28px;
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+            font-weight: 700;
+        }
+
+        .social-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 3px;
+            box-shadow: 0 0 10px var(--gold);
         }
 
         .social-subtitle {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 16px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 30px;
+            font-weight: 300;
+            font-size: 18px;
         }
 
         .social-links {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin: 25px 0;
+            gap: 25px;
+            margin: 40px 0;
+            flex-wrap: wrap;
         }
 
         .social-link {
-            width: 50px;
-            height: 50px;
+            width: 70px;
+            height: 70px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 28px;
             transition: var(--transition);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255,255,255,0.3);
         }
 
         .social-link:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transform: translateY(-10px) scale(1.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+
+        .social-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .social-link:hover::before {
+            opacity: 1;
         }
 
         .facebook { background: var(--facebook); }
@@ -235,50 +402,92 @@
         .instagram { background: var(--instagram); }
 
         .copyright {
-            font-size: 14px;
-            color: #888;
-            margin-top: 30px;
+            font-size: 16px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 40px;
+            font-weight: 300;
         }
 
         .copyright span {
-            color: var(--primary);
+            color: var(--gold);
             font-weight: 500;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .diamond-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .diamond {
+            position: absolute;
+            background: rgba(185, 242, 255, 0.3);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation: float 15s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
         }
 
         @media (max-width: 768px) {
             .header, .content {
-                padding: 30px 20px;
+                padding: 40px 25px;
             }
             
             h1 {
-                font-size: 28px;
+                font-size: 32px;
             }
             
             .countdown {
-                gap: 10px;
+                gap: 15px;
+                flex-wrap: wrap;
             }
             
             .countdown-item {
-                min-width: 70px;
-                padding: 12px;
+                min-width: 80px;
+                padding: 20px;
             }
             
             .countdown-value {
-                font-size: 28px;
+                font-size: 36px;
             }
             
             .btn-container {
                 flex-direction: column;
-                gap: 10px;
+                gap: 15px;
+            }
+            
+            .btn {
+                padding: 18px 40px;
+            }
+            
+            .social-link {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
             }
         }
 
         @media (max-width: 480px) {
             .header {
-                padding: 30px 15px;
+                padding: 40px 20px;
+                clip-path: polygon(0 0, 100% 0, 100% 95%, 0 100%);
             }
             
             .logo-container {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .logo {
                 width: 80px;
                 height: 80px;
             }
@@ -289,7 +498,7 @@
             }
             
             h1 {
-                font-size: 24px;
+                font-size: 28px;
             }
             
             p {
@@ -297,30 +506,39 @@
             }
             
             .countdown-item {
-                min-width: 60px;
-                padding: 10px;
+                min-width: 70px;
+                padding: 15px;
             }
             
             .countdown-value {
-                font-size: 24px;
+                font-size: 32px;
+            }
+            
+            .social-link {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
             }
         }
     </style>
 </head>
 <body>
+    <div class="diamond-effect" id="diamonds"></div>
+    
     <div class="main-container">
         <div class="header">
             <div class="logo-container">
+                <div class="logo-border"></div>
                 <div class="logo">
-                    <img src="https://i.ibb.co/50CVZgJ/20250729-025522.png" alt="شعار Hema Tech">
+                    <img src="https://i.ibb.co/50CVZgJ/20250729-025522.png" alt="شعار Hema Tech الفاخر">
                 </div>
             </div>
             <h1>Hema Tech</h1>
-            <p>بوابتك إلى عالم التقنية المميزة</p>
+            <p>الوجهة الرقمية الأكثر تميزًا وفخامة</p>
         </div>
         
         <div class="content">
-            <p>نحن نعمل على تحسين تجربتك. سيتم تحويلك تلقائياً إلى النسخة الجديدة خلال ثوانٍ قليلة.</p>
+            <p>نقدم لكم تجربة فريدة من نوعها. جاري تحويلكم إلى النسخة المميزة من منصتنا خلال ثوانٍ قليلة.</p>
             
             <div class="countdown">
                 <div class="countdown-item">
@@ -330,14 +548,14 @@
             </div>
             
             <div class="btn-container">
-                <a href="https://best-cash.net/BotCloud" class="btn">الدخول الآن</a>
+                <a href="https://best-cash.net/BotCloud" class="btn">الدخول الآن <i class="fas fa-arrow-left ml-2"></i></a>
                 <button class="btn btn-secondary" id="cancelBtn">البقاء هنا</button>
             </div>
         </div>
         
         <div class="footer">
             <h3 class="social-title">تواصل معنا</h3>
-            <p class="social-subtitle">كن جزءاً من مجتمعنا التقني</p>
+            <p class="social-subtitle">انضم إلى مجتمعنا الفاخر واحصل على أفضل العروض</p>
             
             <div class="social-links">
                 <a href="https://www.facebook.com/share/1FpNhn9nYo/" class="social-link facebook" target="_blank">
@@ -361,7 +579,7 @@
             </div>
             
             <div class="copyright">
-                © 2025 جميع الحقوق محفوظة لـ <span>Hema Tech</span>
+                © 2025 جميع الحقوق محفوظة لـ <span>Hema Tech</span> | إبراهيم منصور
             </div>
         </div>
     </div>
@@ -374,9 +592,33 @@
         // عناصر DOM
         const secondsElement = document.getElementById('seconds');
         const cancelBtn = document.getElementById('cancelBtn');
+        const diamondsContainer = document.getElementById('diamonds');
         
         let seconds = defaultDelay;
         let redirectTimer;
+        
+        // إنشاء تأثير الألماس
+        function createDiamonds() {
+            const diamondCount = 15;
+            
+            for (let i = 0; i < diamondCount; i++) {
+                const diamond = document.createElement('div');
+                diamond.classList.add('diamond');
+                
+                const size = Math.random() * 30 + 10;
+                diamond.style.width = `${size}px`;
+                diamond.style.height = `${size}px`;
+                
+                diamond.style.left = `${Math.random() * 100}%`;
+                diamond.style.top = `${Math.random() * 100 + 100}%`;
+                
+                const duration = Math.random() * 20 + 15;
+                const delay = Math.random() * 10;
+                diamond.style.animation = `float ${duration}s linear ${delay}s infinite`;
+                
+                diamondsContainer.appendChild(diamond);
+            }
+        }
         
         // بدء العداد
         function startCountdown() {
@@ -388,7 +630,11 @@
                 
                 if (seconds <= 0) {
                     clearInterval(redirectTimer);
-                    window.location.href = redirectUrl;
+                    document.querySelector('.main-container').style.transform = 'scale(0.9)';
+                    document.querySelector('.main-container').style.opacity = '0';
+                    setTimeout(() => {
+                        window.location.href = redirectUrl;
+                    }, 500);
                 }
             }, 1000);
         }
@@ -396,21 +642,47 @@
         // إلغاء التوجيه
         function cancelRedirect() {
             clearInterval(redirectTimer);
-            secondsElement.textContent = '0';
-            document.querySelector('h1').textContent = 'شكراً لبقائك معنا';
-            document.querySelector('.content p').textContent = 'يمكنك تصفح الموقع الحالي أو الانتقال إلى النسخة الجديدة عند الرغبة.';
-            cancelBtn.style.display = 'none';
+            
+            // تأثيرات الإلغاء
+            document.querySelector('.main-container').style.animation = 'none';
+            document.querySelector('.main-container').style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                document.querySelector('.main-container').style.transform = 'scale(1)';
+                
+                // تغيير المحتوى
+                secondsElement.textContent = '0';
+                document.querySelector('h1').textContent = 'شكراً لبقائك معنا';
+                document.querySelector('.content p').innerHTML = 'نقدر ثقتك بنا. يمكنك تصفح الموقع الحالي أو الانتقال إلى النسخة المميزة عند رغبتك.<br><span style="color: var(--gold); font-weight: 500;">نتمنى لك تجربة فاخرة!</span>';
+                cancelBtn.style.display = 'none';
+                
+                // تغيير لون الخلفية
+                document.body.style.background = 'linear-gradient(135deg, #1a1a2e, #16213e)';
+            }, 300);
         }
         
         // تعيين الأحداث
         cancelBtn.addEventListener('click', cancelRedirect);
         document.querySelector('.btn').addEventListener('click', function(e) {
             e.preventDefault();
-            window.location.href = redirectUrl;
+            document.querySelector('.main-container').style.transform = 'scale(1.1)';
+            document.querySelector('.main-container').style.opacity = '0.7';
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 300);
         });
         
-        // بدء العد التنازلي
+        // بدء التأثيرات
+        createDiamonds();
         startCountdown();
+        
+        // تأثيرات الظهور
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                document.querySelector('.main-container').style.opacity = '1';
+                document.querySelector('.main-container').style.transform = 'translateY(0)';
+            }, 100);
+        });
     </script>
 </body>
 </html>
