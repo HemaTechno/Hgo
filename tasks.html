@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>عرض المهام</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function loadTasks() {
+      const classId = window.location.pathname.split("/").pop().replace(".html", "");
+      const classesQuery = query(collection(db, "classes"), where("classId", "==", classId));
+      const classSnap = await getDocs(classesQuery);
+
+      if (classSnap.empty) {
+        document.getElementById("content").innerHTML = '<p class="text-red-600">لم يتم العثور على الصفحة</p>';
+        return;
+      }
+
+      const classData = classSnap.docs[0].data();
+      document.getElementById("title").textContent = classData.name;
+      document.getElementById("desc").textContent = classData.description;
+
+      if (classData.imageUrl) {
+        const img = document.createElement('img');
+        img.src = classData.imageUrl;
+        img.alt = "صورة";
+        img.className = "w-full h-48 object-cover rounded-xl mb-4";
+        document.getElementById("header").prepend(img);
+      }
+
+      // تحميل المهام المرتبطة بنفس classId
+      const tasksQuery = query(collection(db, "tasks"), where("pageId", "==", classId));
+      const taskSnap = await getDocs(tasksQuery);
+
+      const tasksContainer = document.getElementById("tasks");
+
+      if (taskSnap.empty) {
+        tasksContainer.innerHTML = '<p class="text-gray-500 text-center">لا توجد مهام حاليًا</p>';
+        return;
+      }
+
+      taskSnap.forEach(doc => {
+        const task = doc.data();
+        const box = document.createElement('div');
+        box.className = "bg-white rounded-xl shadow p-4 space-y-2";
+
+        if (task.imageUrl) {
+          box.innerHTML += `<img src="${task.imageUrl}" alt="" class="rounded w-full h-40 object-cover">`;
+        }
+
+        box.innerHTML += `
+          <h3 class="text-lg font-bold text-blue-700">${task.name}</h3>
+          <p class="text-sm text-gray-600">المنصة: ${task.platform}</p>
+          <p class="text-sm">نوع المهمة: ${task.type}</p>
+          <p class="text-sm">${task.description || ''}</p>
+          <a href="${task.link}" target="_blank" class="inline-block mt-2 px-4 py-2 bg-blue-600 text-white rounded-xl">الذهاب للمهمة</a>
+        `;
+
+        tasksContainer.appendChild(box);
+      });
+    }
+
+    loadTasks();
+  </script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+  <div class="max-w-3xl mx-auto">
+    <div id="header" class="mb-6">
+      <h1 id="title" class="text-3xl font-bold mb-1"></h1>
+      <p id="desc" class="text-gray-600"></p>
+    </div>
+
+    <div id="content">
+      <div id="tasks" class="grid gap-4"></div>
+    </div>
+  </div>
+</body>
+</html>
