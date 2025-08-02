@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إنشاء رابط صفحة المهام</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+
+    const firebaseConfig = {
+  apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
+  authDomain: "t-shirt-94ff7.firebaseapp.com",
+  projectId: "t-shirt-94ff7",
+  storageBucket: "t-shirt-94ff7.appspot.com",
+  messagingSenderId: "367396012881",
+  appId: "1:367396012881:web:3127607d5ced7678e64970"
+};
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('class-form');
+      const resultDiv = document.getElementById('result');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('name').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const id = document.getElementById('classId').value.trim();
+        const imageFile = document.getElementById('image').files[0];
+
+        if (!name || !id) {
+          alert('يرجى إدخال العنوان و ID الصفحة');
+          return;
+        }
+
+        let imageUrl = '';
+        if (imageFile) {
+          const imgRef = storageRef(storage, `classes/${Date.now()}_${imageFile.name}`);
+          await uploadBytes(imgRef, imageFile);
+          imageUrl = await getDownloadURL(imgRef);
+        }
+
+        try {
+          await addDoc(collection(db, 'classes'), {
+            name,
+            classId: id,
+            description,
+            imageUrl,
+            createdAt: Date.now()
+          });
+
+          const shortLink = `${location.origin}/go/${id}`;
+          resultDiv.innerHTML = `
+            <div class="bg-green-100 text-green-800 p-4 rounded-xl mt-6 text-center">
+              ✅ تم إنشاء الصفحة بنجاح<br>
+              <span class="font-bold">انسخ الرابط المختصر:</span><br>
+              <input type="text" readonly value="${shortLink}" class="text-center w-full mt-2 border rounded p-2 bg-white" onclick="this.select()">
+            </div>
+          `;
+
+          form.reset();
+        } catch (err) {
+          console.error(err);
+          alert('حدث خطأ أثناء إنشاء الصفحة');
+        }
+      });
+    });
+  </script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
+    <h1 class="text-2xl font-bold mb-4 text-center">إنشاء صفحة مهام مختصرة</h1>
+    <form id="class-form" class="space-y-4">
+      <div>
+        <label for="name" class="block font-medium">العنوان</label>
+        <input id="name" type="text" required class="w-full border rounded p-2 mt-1" placeholder="مثال: مهام الصف الأول" />
+      </div>
+
+      <div>
+        <label for="classId" class="block font-medium">ID الصفحة (اسم الملف)</label>
+        <input id="classId" type="text" required class="w-full border rounded p-2 mt-1" placeholder="مثال: first-tasks" />
+      </div>
+
+      <div>
+        <label for="description" class="block font-medium">الوصف</label>
+        <textarea id="description" rows="3" class="w-full border rounded p-2 mt-1"></textarea>
+      </div>
+
+      <div>
+        <label for="image" class="block font-medium">صورة للصفحة (اختياري)</label>
+        <input id="image" type="file" accept="image/*" class="mt-1" />
+      </div>
+
+      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-xl font-semibold hover:bg-green-700 transition">إنشاء الصفحة</button>
+    </form>
+
+    <div id="result"></div>
+  </div>
+</body>
+</html>
+
