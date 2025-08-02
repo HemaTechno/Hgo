@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>جاري التوجيه...</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+  apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
+  authDomain: "t-shirt-94ff7.firebaseapp.com",
+  projectId: "t-shirt-94ff7",
+  storageBucket: "t-shirt-94ff7.appspot.com",
+  messagingSenderId: "367396012881",
+  appId: "1:367396012881:web:3127607d5ced7678e64970"
+};
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    async function redirectToTaskPage() {
+      const pathParts = window.location.pathname.split("/");
+      const pageId = pathParts[pathParts.length - 1].replace(".html", "");
+
+      if (!pageId) return;
+
+      const q = query(collection(db, "classes"), where("classId", "==", pageId));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        // مثال: التوجيه لصفحة باسم ID
+        window.location.href = `/${pageId}.html`;
+      } else {
+        document.body.innerHTML = '<div class="text-center text-red-600 mt-10 font-bold">الرابط غير صالح أو الصفحة غير موجودة</div>';
+      }
+    }
+
+    redirectToTaskPage();
+  </script>
+</head>
+<body class="bg-gray-100 text-center text-xl font-semibold pt-20">
+  جاري التوجيه إلى الصفحة المطلوبة...
+</body>
+</html>
