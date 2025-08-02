@@ -1,15 +1,35 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إنشاء رابط صفحة المهام</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-storage.js";
+  <meta charset="UTF-8">
+  <title>إنشاء مهمة</title>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f7f7f7; }
+    .task { border: 1px solid #ccc; padding: 10px; margin-top: 10px; background: #fff; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h2>إنشاء مهمة</h2>
+  <input type="text" id="title" placeholder="العنوان"><br><br>
+  <textarea id="description" placeholder="الوصف"></textarea><br><br>
+  
+  <div id="tasks"></div>
+  <button onclick="addTask()">➕ إضافة مهمة</button><br><br>
 
+  <input type="text" id="finalLink" placeholder="رابط التحويل بعد تنفيذ المهام"><br><br>
+  
+  <input type="file" id="image"><br><br>
+  
+  <button onclick="createAll()">✅ إنشاء</button>
+  <div id="result"></div>
+
+  <script>
+    // إعداد الفايربيس
     const firebaseConfig = {
   apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
   authDomain: "t-shirt-94ff7.firebaseapp.com",
@@ -18,90 +38,75 @@
   messagingSenderId: "367396012881",
   appId: "1:367396012881:web:3127607d5ced7678e64970"
 };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('class-form');
-      const resultDiv = document.getElementById('result');
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+    let taskIndex = 0;
 
-        const name = document.getElementById('name').value.trim();
-        const description = document.getElementById('description').value.trim();
-        const id = document.getElementById('classId').value.trim();
-        const imageFile = document.getElementById('image').files[0];
+    function addTask() {
+      const div = document.createElement('div');
+      div.className = 'task';
+      div.innerHTML = `
+        <label>المنصة:</label>
+        <select class="platform">
+          <option value="facebook">فيسبوك</option>
+          <option value="discord">ديسكورد</option>
+          <option value="telegram">تيليجرام</option>
+          <option value="youtube">يوتيوب</option>
+          <option value="roblox">روبلكس</option>
+        </select><br>
+        <label>نوع المهمة:</label>
+        <input type="text" class="action" placeholder="مثلاً: اشترك في القناة"><br>
+        <label>رابط المهمة:</label>
+        <input type="text" class="link" placeholder="ضع الرابط هنا"><br>
+      `;
+      document.getElementById('tasks').appendChild(div);
+    }
 
-        if (!name || !id) {
-          alert('يرجى إدخال العنوان و ID الصفحة');
-          return;
-        }
+    async function createAll() {
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const finalLink = document.getElementById('finalLink').value.trim();
+      const imageFile = document.getElementById('image').files[0];
 
-        let imageUrl = '';
-        if (imageFile) {
-          const imgRef = storageRef(storage, `classes/${Date.now()}_${imageFile.name}`);
-          await uploadBytes(imgRef, imageFile);
-          imageUrl = await getDownloadURL(imgRef);
-        }
+      const taskElements = document.querySelectorAll('.task');
+      const tasks = [];
 
-        try {
-          await addDoc(collection(db, 'classes'), {
-            name,
-            classId: id,
-            description,
-            imageUrl,
-            createdAt: Date.now()
-          });
-
-          const shortLink = `${location.origin}/go/${id}`;
-          resultDiv.innerHTML = `
-            <div class="bg-green-100 text-green-800 p-4 rounded-xl mt-6 text-center">
-              ✅ تم إنشاء الصفحة بنجاح<br>
-              <span class="font-bold">انسخ الرابط المختصر:</span><br>
-              <input type="text" readonly value="${shortLink}" class="text-center w-full mt-2 border rounded p-2 bg-white" onclick="this.select()">
-            </div>
-          `;
-
-          form.reset();
-        } catch (err) {
-          console.error(err);
-          alert('حدث خطأ أثناء إنشاء الصفحة');
+      taskElements.forEach(el => {
+        const platform = el.querySelector('.platform').value;
+        const action = el.querySelector('.action').value.trim();
+        const link = el.querySelector('.link').value.trim();
+        if (platform && action && link) {
+          tasks.push({ platform, action, link });
         }
       });
-    });
+
+      let imageUrl = "";
+      if (imageFile) {
+        const storageRef = storage.ref('tasks/' + Date.now() + "_" + imageFile.name);
+        await storageRef.put(imageFile);
+        imageUrl = await storageRef.getDownloadURL();
+      }
+
+      const docRef = await db.collection("taskGroups").add({
+        title,
+        description,
+        tasks,
+        finalLink,
+        imageUrl,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      const link = `view-task.html?id=${docRef.id}`;
+      document.getElementById('result').innerHTML = `
+        <p>✅ تم الإنشاء بنجاح!</p>
+        <input type="text" value="${link}" readonly style="width: 100%">
+        <button onclick="navigator.clipboard.writeText('${link}')">📋 نسخ الرابط</button>
+      `;
+    }
   </script>
-</head>
-<body class="bg-gray-100 p-6">
-  <div class="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-lg">
-    <h1 class="text-2xl font-bold mb-4 text-center">إنشاء صفحة مهام مختصرة</h1>
-    <form id="class-form" class="space-y-4">
-      <div>
-        <label for="name" class="block font-medium">العنوان</label>
-        <input id="name" type="text" required class="w-full border rounded p-2 mt-1" placeholder="مثال: مهام الصف الأول" />
-      </div>
-
-      <div>
-        <label for="classId" class="block font-medium">ID الصفحة (اسم الملف)</label>
-        <input id="classId" type="text" required class="w-full border rounded p-2 mt-1" placeholder="مثال: first-tasks" />
-      </div>
-
-      <div>
-        <label for="description" class="block font-medium">الوصف</label>
-        <textarea id="description" rows="3" class="w-full border rounded p-2 mt-1"></textarea>
-      </div>
-
-      <div>
-        <label for="image" class="block font-medium">صورة للصفحة (اختياري)</label>
-        <input id="image" type="file" accept="image/*" class="mt-1" />
-      </div>
-
-      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded-xl font-semibold hover:bg-green-700 transition">إنشاء الصفحة</button>
-    </form>
-
-    <div id="result"></div>
-  </div>
 </body>
 </html>
 
