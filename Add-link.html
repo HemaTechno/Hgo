@@ -1,43 +1,288 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>إنشاء مهمة</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>منشئ المهام الاحترافي</title>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f7f7f7; }
-    .task { border: 1px solid #ccc; padding: 10px; margin-top: 10px; background: #fff; }
-    button { margin-top: 10px; }
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --accent-color: #4cc9f0;
+      --light-color: #f8f9fa;
+      --dark-color: #212529;
+      --success-color: #2ecc71;
+      --danger-color: #e74c3c;
+      --border-radius: 8px;
+      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background-color: #f5f7ff;
+      color: var(--dark-color);
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: var(--border-radius);
+      box-shadow: var(--box-shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      color: var(--secondary-color);
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-weight: 700;
+    }
+    
+    h2 {
+      color: var(--primary-color);
+      margin-bottom: 1rem;
+      font-weight: 500;
+      border-bottom: 2px solid var(--accent-color);
+      padding-bottom: 0.5rem;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--dark-color);
+    }
+    
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1rem;
+      transition: var(--transition);
+    }
+    
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.2);
+    }
+    
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    .task {
+      background-color: var(--light-color);
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+      border-left: 4px solid var(--accent-color);
+      transition: var(--transition);
+    }
+    
+    .task:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--border-radius);
+      font-family: 'Tajawal', sans-serif;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+    
+    .btn-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background-color: #27ae60;
+      transform: translateY(-2px);
+    }
+    
+    .btn-danger {
+      background-color: var(--danger-color);
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #c0392b;
+      transform: translateY(-2px);
+    }
+    
+    .btn i {
+      margin-left: 0.5rem;
+    }
+    
+    #tasks {
+      margin-top: 1.5rem;
+    }
+    
+    #result {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background-color: #e8f5e9;
+      border-radius: var(--border-radius);
+      border-left: 4px solid var(--success-color);
+      display: none;
+    }
+    
+    #result input {
+      margin: 1rem 0;
+      padding: 0.75rem;
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-family: 'Tajawal', sans-serif;
+    }
+    
+    .file-input {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    
+    .file-input input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: var(--border-radius);
+      font-family: 'Tajawal', sans-serif;
+    }
+    
+    .file-input label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--dark-color);
+    }
+    
+    .actions {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+    }
+    
+    .platform-icon {
+      margin-left: 0.5rem;
+      color: var(--primary-color);
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .card {
+        padding: 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <h2>إنشاء مهمة</h2>
-  <input type="text" id="title" placeholder="العنوان"><br><br>
-  <textarea id="description" placeholder="الوصف"></textarea><br><br>
-  
-  <div id="tasks"></div>
-  <button onclick="addTask()">➕ إضافة مهمة</button><br><br>
-
-  <input type="text" id="finalLink" placeholder="رابط التحويل بعد تنفيذ المهام"><br><br>
-  
-  <input type="file" id="image"><br><br>
-  
-  <button onclick="createAll()">✅ إنشاء</button>
-  <div id="result"></div>
+  <div class="container">
+    <div class="card">
+      <h1><i class="fas fa-tasks"></i> منشئ المهام الاحترافي</h1>
+      
+      <div class="form-group">
+        <label for="title">عنوان المهمة</label>
+        <input type="text" id="title" placeholder="أدخل عنواناً واضحاً للمهمة">
+      </div>
+      
+      <div class="form-group">
+        <label for="description">وصف المهمة</label>
+        <textarea id="description" placeholder="أدخل وصفاً تفصيلياً للمهمة"></textarea>
+      </div>
+      
+      <h2><i class="fas fa-list-check"></i> المهام الفرعية</h2>
+      <div id="tasks"></div>
+      
+      <button class="btn btn-primary" onclick="addTask()">
+        <i class="fas fa-plus"></i> إضافة مهمة فرعية
+      </button>
+      
+      <div class="form-group" style="margin-top: 2rem;">
+        <label for="finalLink">رابط التحويل النهائي</label>
+        <input type="text" id="finalLink" placeholder="رابط الصفحة التي سيتم التحويل إليها بعد إكمال المهام">
+      </div>
+      
+      <div class="file-input">
+        <label for="image">صورة المهمة (اختياري)</label>
+        <input type="file" id="image" accept="image/*">
+      </div>
+      
+      <div class="actions">
+        <button class="btn btn-success" onclick="createAll()">
+          <i class="fas fa-check"></i> إنشاء المهمة
+        </button>
+      </div>
+      
+      <div id="result"></div>
+    </div>
+  </div>
 
   <script>
     // إعداد الفايربيس
     const firebaseConfig = {
-  apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
-  authDomain: "t-shirt-94ff7.firebaseapp.com",
-  projectId: "t-shirt-94ff7",
-  storageBucket: "t-shirt-94ff7.appspot.com",
-  messagingSenderId: "367396012881",
-  appId: "1:367396012881:web:3127607d5ced7678e64970"
-};
+      apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
+      authDomain: "t-shirt-94ff7.firebaseapp.com",
+      projectId: "t-shirt-94ff7",
+      storageBucket: "t-shirt-94ff7.appspot.com",
+      messagingSenderId: "367396012881",
+      appId: "1:367396012881:web:3127607d5ced7678e64970"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -45,24 +290,53 @@
 
     let taskIndex = 0;
 
+    function getPlatformIcon(platform) {
+      const icons = {
+        facebook: 'fab fa-facebook',
+        discord: 'fab fa-discord',
+        telegram: 'fab fa-telegram',
+        youtube: 'fab fa-youtube',
+        roblox: 'fas fa-gamepad'
+      };
+      return icons[platform] || 'fas fa-link';
+    }
+
     function addTask() {
       const div = document.createElement('div');
       div.className = 'task';
       div.innerHTML = `
-        <label>المنصة:</label>
-        <select class="platform">
-          <option value="facebook">فيسبوك</option>
-          <option value="discord">ديسكورد</option>
-          <option value="telegram">تيليجرام</option>
-          <option value="youtube">يوتيوب</option>
-          <option value="roblox">روبلكس</option>
-        </select><br>
-        <label>نوع المهمة:</label>
-        <input type="text" class="action" placeholder="مثلاً: اشترك في القناة"><br>
-        <label>رابط المهمة:</label>
-        <input type="text" class="link" placeholder="ضع الرابط هنا"><br>
+        <div class="form-group">
+          <label>المنصة <i class="${getPlatformIcon('facebook')} platform-icon"></i></label>
+          <select class="platform" onchange="updatePlatformIcon(this)">
+            <option value="facebook">فيسبوك</option>
+            <option value="discord">ديسكورد</option>
+            <option value="telegram">تيليجرام</option>
+            <option value="youtube">يوتيوب</option>
+            <option value="roblox">روبلكس</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>نوع المهمة</label>
+          <input type="text" class="action" placeholder="مثال: اشترك في القناة، اضغط لايك، انضم للسيرفر">
+        </div>
+        
+        <div class="form-group">
+          <label>رابط المهمة</label>
+          <input type="text" class="link" placeholder="https://example.com">
+        </div>
+        
+        <button class="btn btn-danger" onclick="this.parentNode.remove()" style="margin-top: 0.5rem;">
+          <i class="fas fa-trash"></i> حذف المهمة
+        </button>
       `;
       document.getElementById('tasks').appendChild(div);
+    }
+
+    function updatePlatformIcon(selectElement) {
+      const platform = selectElement.value;
+      const iconElement = selectElement.parentElement.querySelector('.platform-icon');
+      iconElement.className = getPlatformIcon(platform) + ' platform-icon';
     }
 
     async function createAll() {
@@ -70,6 +344,11 @@
       const description = document.getElementById('description').value.trim();
       const finalLink = document.getElementById('finalLink').value.trim();
       const imageFile = document.getElementById('image').files[0];
+
+      if (!title || !description) {
+        alert('الرجاء إدخال عنوان ووصف للمهمة');
+        return;
+      }
 
       const taskElements = document.querySelectorAll('.task');
       const tasks = [];
@@ -83,28 +362,50 @@
         }
       });
 
-      let imageUrl = "";
-      if (imageFile) {
-        const storageRef = storage.ref('tasks/' + Date.now() + "_" + imageFile.name);
-        await storageRef.put(imageFile);
-        imageUrl = await storageRef.getDownloadURL();
+      if (tasks.length === 0) {
+        alert('الرجاء إضافة على الأقل مهمة فرعية واحدة');
+        return;
       }
 
-      const docRef = await db.collection("taskGroups").add({
-        title,
-        description,
-        tasks,
-        finalLink,
-        imageUrl,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+      let imageUrl = "";
+      if (imageFile) {
+        try {
+          const storageRef = storage.ref('tasks/' + Date.now() + "_" + imageFile.name);
+          await storageRef.put(imageFile);
+          imageUrl = await storageRef.getDownloadURL();
+        } catch (error) {
+          console.error('Error uploading image:', error);
+        }
+      }
 
-      const link = `view-task.html?id=${docRef.id}`;
-      document.getElementById('result').innerHTML = `
-        <p>✅ تم الإنشاء بنجاح!</p>
-        <input type="text" value="${link}" readonly style="width: 100%">
-        <button onclick="navigator.clipboard.writeText('${link}')">📋 نسخ الرابط</button>
-      `;
+      try {
+        const docRef = await db.collection("taskGroups").add({
+          title,
+          description,
+          tasks,
+          finalLink,
+          imageUrl,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        const link = `${window.location.origin}/view-task.html?id=${docRef.id}`;
+        const resultDiv = document.getElementById('result');
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = `
+          <h3 style="color: var(--success-color);"><i class="fas fa-check-circle"></i> تم إنشاء المهمة بنجاح!</h3>
+          <p>يمكنك مشاركة الرابط التالي مع المستخدمين:</p>
+          <input type="text" value="${link}" readonly>
+          <button class="btn btn-primary" onclick="navigator.clipboard.writeText('${link}')">
+            <i class="fas fa-copy"></i> نسخ الرابط
+          </button>
+        `;
+        
+        // Scroll to result
+        resultDiv.scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        console.error('Error creating task:', error);
+        alert('حدث خطأ أثناء إنشاء المهمة. الرجاء المحاولة مرة أخرى.');
+      }
     }
   </script>
 </body>
