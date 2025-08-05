@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -35,7 +36,7 @@
   <h1>Add New Task</h1>
   <input type="text" id="title" placeholder="Title" /><br>
   <textarea id="description" placeholder="Description"></textarea><br>
-  <input type="text" id="imageUrl" placeholder="Image URL" /><br>
+  <input type="file" id="imageUpload" /><br>
   <select id="platform" onchange="updateActions()">
     <option value="">Select Platform</option>
     <option value="YouTube">YouTube</option>
@@ -109,25 +110,31 @@
     window.addTask = async function() {
       const title = document.getElementById('title').value;
       const description = document.getElementById('description').value;
-      const imageUrl = document.getElementById('imageUrl').value;
+      const imageFile = document.getElementById('imageUpload').files[0];
       const redirectUrl = document.getElementById('redirectUrl').value;
 
-      const taskData = {
-        title,
-        description,
-        imageUrl,
-        actions,
-        redirectUrl,
-        createdAt: new Date()
-      };
+      const reader = new FileReader();
+      reader.onloadend = async function() {
+        const imageUrl = reader.result;
+        const taskData = {
+          title,
+          description,
+          imageUrl,
+          actions,
+          redirectUrl,
+          createdAt: new Date()
+        };
 
-      const docRef = await addDoc(collection(db, 'tasks'), taskData);
-      const link = `${window.location.origin}/task.html?id=${docRef.id}`;
-      alert(`تمت إضافة المهمة! انسخ الرابط: ${link}`);
+        const docRef = await addDoc(collection(db, 'tasks'), taskData);
+        const link = `${window.location.origin}/task.html?id=${docRef.id}`;
+        alert(`تمت إضافة المهمة! انسخ الرابط: ${link}`);
+        actions = [];
+        document.getElementById('actionList').innerHTML = '';
+      }
 
-      // إعادة تعيين البيانات
-      actions = [];
-      document.getElementById('actionList').innerHTML = '';
+      if (imageFile) {
+        reader.readAsDataURL(imageFile);
+      }
     }
   </script>
 </body>
