@@ -1,207 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Create Task</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Manager</title>
   <style>
-    :root {
-      --primary: #4361ee;
-      --primary-dark: #3a56d4;
-      --light: #f8f9fa;
-      --dark: #212529;
-      --gray: #6c757d;
-      --border-radius: 8px;
-      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      --transition: all 0.3s ease;
-    }
-
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f0f2f5;
-      margin: 0;
+      font-family: Arial, sans-serif;
+      margin: 20px;
       padding: 0;
+      background-color: #f4f4f9;
     }
-
-    .container {
-      max-width: 800px;
-      margin: 2rem auto;
-      background: white;
-      padding: 2rem;
-      border-radius: var(--border-radius);
-      box-shadow: var(--box-shadow);
-    }
-
     h1 {
       text-align: center;
-      color: var(--primary);
-      margin-bottom: 2rem;
     }
-
-    .form-group {
-      margin-bottom: 1rem;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: bold;
-    }
-
-    input, select, textarea {
+    input, textarea, select, button {
       width: 100%;
-      padding: 0.75rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: var(--border-radius);
+      margin-bottom: 10px;
+      padding: 10px;
+      box-sizing: border-box;
     }
-
-    textarea {
-      resize: vertical;
-    }
-
-    .image-upload-container {
-      border: 2px dashed #ccc;
-      padding: 1rem;
-      text-align: center;
-      cursor: pointer;
-      border-radius: var(--border-radius);
-      margin-bottom: 1rem;
-    }
-
-    .image-upload-container:hover {
-      border-color: var(--primary);
-    }
-
-    #imagePreview {
-      display: none;
-      margin-top: 1rem;
-      max-width: 100%;
-      border-radius: var(--border-radius);
-    }
-
-    .btn {
-      width: 100%;
-      padding: 0.75rem;
-      background: var(--primary);
+    button {
+      background-color: #007bff;
       color: white;
-      font-size: 1rem;
       border: none;
-      border-radius: var(--border-radius);
       cursor: pointer;
-      transition: var(--transition);
     }
-
-    .btn:hover {
-      background: var(--primary-dark);
-    }
-
-    .loading {
-      display: none;
-      text-align: center;
-      margin-top: 1rem;
-    }
-
-    .loading i {
-      animation: spin 1s linear infinite;
-      font-size: 1.5rem;
-      color: var(--primary);
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    button:hover {
+      background-color: #0056b3;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Create New Task</h1>
+  <h1>Add New Task</h1>
+  <input type="text" id="title" placeholder="Title" /><br>
+  <textarea id="description" placeholder="Description"></textarea><br>
+  <input type="text" id="imageUrl" placeholder="Image URL" /><br>
+  <select id="platform" onchange="updateActions()">
+    <option value="">Select Platform</option>
+    <option value="YouTube">YouTube</option>
+    <option value="Facebook">Facebook</option>
+    <option value="WhatsApp">WhatsApp</option>
+    <option value="Telegram">Telegram</option>
+    <option value="Discord">Discord</option>
+  </select><br>
+  <select id="action">
+    <option value="">Select Action</option>
+  </select><br>
+  <button onclick="addAction()">Add Action</button><br>
+  <ul id="actionList"></ul>
+  <input type="text" id="redirectUrl" placeholder="Redirect URL" /><br>
+  <button onclick="addTask()">Add Task</button>
 
-    <div class="form-group">
-      <label for="title">Title</label>
-      <input id="title" type="text" placeholder="Enter task title" />
-    </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-    <div class="form-group">
-      <label for="description">Description</label>
-      <textarea id="description" placeholder="Enter task description"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label>Task Image</label>
-      <div class="image-upload-container" onclick="document.getElementById('fileInput').click()">
-        <i class="fas fa-upload"></i>
-        <p>Click to upload an image</p>
-        <input type="file" id="fileInput" style="display: none" accept="image/*" />
-        <img id="imagePreview" />
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label for="platform">Platform</label>
-      <select id="platform" onchange="updateActions()">
-        <option value=\"\">Select Platform</option>
-        <option value=\"YouTube\">YouTube</option>
-        <option value=\"Facebook\">Facebook</option>
-        <option value=\"WhatsApp\">WhatsApp</option>
-        <option value=\"Telegram\">Telegram</option>
-        <option value=\"Discord\">Discord</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="action">Action</label>
-      <select id="action">
-        <option value=\"\">Select Action</option>
-      </select>
-    </div>
-
-    <div class="form-group">
-      <label for="redirectUrl">Redirect URL</label>
-      <input id="redirectUrl" type="text" placeholder="Enter redirect URL" />
-    </div>
-
-    <button class="btn" onclick="addTask()">Create Task</button>
-    <div class="loading" id="loadingIndicator">
-      <i class="fas fa-spinner"></i>
-    </div>
-  </div>
-
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
-
-  <script>
     const firebaseConfig = {
-      apiKey: \"AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM\",
-      authDomain: \"t-shirt-94ff7.firebaseapp.com\",
-      projectId: \"t-shirt-94ff7\",
-      storageBucket: \"t-shirt-94ff7.appspot.com\",
-      messagingSenderId: \"367396012881\",
-      appId: \"1:367396012881:web:3127607d5ced7678e64970\"
+      apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
+      authDomain: "t-shirt-94ff7.firebaseapp.com",
+      projectId: "t-shirt-94ff7",
+      storageBucket: "t-shirt-94ff7.appspot.com",
+      messagingSenderId: "367396012881",
+      appId: "1:367396012881:web:3127607d5ced7678e64970"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
     const actionsMap = {
-      YouTube: [\"Subscribe to channel\", \"Like the video\", \"Comment on video\"],
-      Facebook: [\"Like the page\", \"Share the post\", \"Comment on post\"],
-      WhatsApp: [\"Join group\", \"Send message\"],
-      Telegram: [\"Join channel\", \"Join group\"],
-      Discord: [\"Join server\", \"Engage in channel\"]
+      YouTube: ["اشترك في القناة", "أعجب بالفيديو", "علق على الفيديو"],
+      Facebook: ["أعجب بالصفحة", "شارك المنشور", "علق على المنشور"],
+      WhatsApp: ["انضم للجروب", "ارسل رسالة"],
+      Telegram: ["انضم للقناة", "انضم للجروب"],
+      Discord: ["انضم للسيرفر", "تفاعل في قناة"]
     };
 
-    function updateActions() {
-      const platform = document.getElementById(\"platform\").value;
-      const actionSelect = document.getElementById(\"action\");
-      actionSelect.innerHTML = '<option value=\"\">Select Action</option>';
+    let actions = [];
+
+    window.updateActions = function() {
+      const platform = document.getElementById('platform').value;
+      const actionSelect = document.getElementById('action');
+      actionSelect.innerHTML = '<option value="">Select Action</option>';
+
       if (actionsMap[platform]) {
         actionsMap[platform].forEach(action => {
-          const option = document.createElement(\"option\");
+          const option = document.createElement('option');
           option.value = action;
           option.textContent = action;
           actionSelect.appendChild(option);
@@ -209,75 +93,45 @@
       }
     }
 
-    document.getElementById(\"fileInput\").addEventListener(\"change\", function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(evt) {
-          const img = document.getElementById(\"imagePreview\");
-          img.src = evt.target.result;
-          img.style.display = \"block\";
-        };
-        reader.readAsDataURL(file);
+    window.addAction = function() {
+      const platform = document.getElementById('platform').value;
+      const action = document.getElementById('action').value;
+
+      if (platform && action) {
+        actions.push({ platform, action });
+        const actionList = document.getElementById('actionList');
+        const li = document.createElement('li');
+        li.textContent = `${platform}: ${action}`;
+        actionList.appendChild(li);
       }
-    });
+    }
 
-    async function addTask() {
-      const title = document.getElementById(\"title\").value.trim();
-      const description = document.getElementById(\"description\").value.trim();
-      const platform = document.getElementById(\"platform\").value;
-      const action = document.getElementById(\"action\").value;
-      const redirectUrl = document.getElementById(\"redirectUrl\").value.trim();
-      const fileInput = document.getElementById(\"fileInput\");
+    window.addTask = async function() {
+      const title = document.getElementById('title').value;
+      const description = document.getElementById('description').value;
+      const imageUrl = document.getElementById('imageUrl').value;
+      const redirectUrl = document.getElementById('redirectUrl').value;
 
-      if (!title || !description || !platform || !action || !redirectUrl) {
-        alert(\"Please fill in all fields.\");
-        return;
-      }
+      const taskData = {
+        title,
+        description,
+        imageUrl,
+        actions,
+        redirectUrl,
+        createdAt: new Date()
+      };
 
-      document.getElementById(\"loadingIndicator\").style.display = \"block\";
+      const docRef = await addDoc(collection(db, 'tasks'), taskData);
+      const link = `${window.location.origin}/task.html?id=${docRef.id}`;
+      alert(`تمت إضافة المهمة! انسخ الرابط: ${link}`);
 
-      try {
-        let imageUrl = \"\";
-        if (fileInput.files[0]) {
-          const file = fileInput.files[0];
-          const storageRef = storage.ref(\"task_images/\" + file.name);
-          const snapshot = await storageRef.put(file);
-          imageUrl = await snapshot.ref.getDownloadURL();
-        }
-
-        const taskData = {
-          title,
-          description,
-          imageUrl,
-          platform,
-          action,
-          redirectUrl,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-
-        const docRef = await db.collection(\"tasks\").add(taskData);
-        const link = `${window.location.origin}/task.html?id=${docRef.id}`;
-        alert(\"Task created! Share this link:\\n\" + link);
-
-        document.getElementById(\"title\").value = \"\";
-        document.getElementById(\"description\").value = \"\";
-        document.getElementById(\"platform\").value = \"\";
-        document.getElementById(\"action\").innerHTML = '<option value=\"\">Select Action</option>';
-        document.getElementById(\"redirectUrl\").value = \"\";
-        document.getElementById(\"imagePreview\").src = \"\";
-        document.getElementById(\"imagePreview\").style.display = \"none\";
-        fileInput.value = \"\";
-
-      } catch (err) {
-        console.error(\"Error creating task:\", err);
-        alert(\"Error creating task. Please try again.\");
-      } finally {
-        document.getElementById(\"loadingIndicator\").style.display = \"none\";
-      }
+      // إعادة تعيين البيانات
+      actions = [];
+      document.getElementById('actionList').innerHTML = '';
     }
   </script>
 </body>
 </html>
+
 
 
