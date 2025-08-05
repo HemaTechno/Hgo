@@ -1,44 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Task Manager</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Task</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     :root {
       --primary: #4361ee;
       --primary-dark: #3a56d4;
-      --secondary: #3f37c9;
       --light: #f8f9fa;
       --dark: #212529;
       --gray: #6c757d;
-      --success: #4cc9f0;
       --border-radius: 8px;
       --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       --transition: all 0.3s ease;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f7ff;
-      color: var(--dark);
-      line-height: 1.6;
-      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
       margin: 0;
+      padding: 0;
     }
 
     .container {
       max-width: 800px;
       margin: 2rem auto;
-      padding: 2rem;
       background: white;
+      padding: 2rem;
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
     }
@@ -46,128 +36,65 @@
     h1 {
       text-align: center;
       color: var(--primary);
-      margin-bottom: 1.5rem;
-      font-weight: 600;
-      position: relative;
-      padding-bottom: 0.5rem;
-    }
-
-    h1::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80px;
-      height: 3px;
-      background: var(--primary);
-      border-radius: 3px;
+      margin-bottom: 2rem;
     }
 
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     label {
       display: block;
       margin-bottom: 0.5rem;
-      font-weight: 500;
-      color: var(--dark);
+      font-weight: bold;
     }
 
-    input, textarea, select {
+    input, select, textarea {
       width: 100%;
-      padding: 12px 15px;
-      border: 1px solid #ddd;
-      border-radius: var(--border-radius);
+      padding: 0.75rem;
       font-size: 1rem;
-      transition: var(--transition);
-      background-color: var(--light);
-    }
-
-    input:focus, textarea:focus, select:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+      border: 1px solid #ccc;
+      border-radius: var(--border-radius);
     }
 
     textarea {
-      min-height: 100px;
       resize: vertical;
     }
 
-    .btn {
-      display: inline-block;
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: var(--border-radius);
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 500;
-      transition: var(--transition);
-      width: 100%;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .btn:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-    }
-
     .image-upload-container {
-      border: 2px dashed #ddd;
-      border-radius: var(--border-radius);
-      padding: 1.5rem;
+      border: 2px dashed #ccc;
+      padding: 1rem;
       text-align: center;
-      margin-bottom: 1.5rem;
       cursor: pointer;
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
+      border-radius: var(--border-radius);
+      margin-bottom: 1rem;
     }
 
     .image-upload-container:hover {
       border-color: var(--primary);
     }
 
-    .image-upload-container i {
-      font-size: 2.5rem;
-      color: var(--gray);
-      margin-bottom: 0.5rem;
-    }
-
-    .image-upload-container p {
-      color: var(--gray);
-      margin-bottom: 0;
-    }
-
     #imagePreview {
       display: none;
-      max-width: 100%;
-      max-height: 200px;
       margin-top: 1rem;
+      max-width: 100%;
       border-radius: var(--border-radius);
     }
 
-    #fileInput {
-      display: none;
+    .btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--primary);
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: var(--transition);
     }
 
-    .platform-icon {
-      margin-right: 8px;
-      font-size: 1.1rem;
-    }
-
-    select option {
-      padding: 10px;
+    .btn:hover {
+      background: var(--primary-dark);
     }
 
     .loading {
@@ -177,118 +104,104 @@
     }
 
     .loading i {
-      color: var(--primary);
-      font-size: 1.5rem;
       animation: spin 1s linear infinite;
+      font-size: 1.5rem;
+      color: var(--primary);
     }
 
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
-
-    @media (max-width: 768px) {
-      .container {
-        margin: 1rem;
-        padding: 1.5rem;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1><i class="fas fa-tasks"></i> Create New Task</h1>
-    
+    <h1>Create New Task</h1>
+
     <div class="form-group">
-      <label for="title">Task Title</label>
-      <input type="text" id="title" placeholder="Enter task title" />
+      <label for="title">Title</label>
+      <input id="title" type="text" placeholder="Enter task title" />
     </div>
-    
+
     <div class="form-group">
       <label for="description">Description</label>
       <textarea id="description" placeholder="Enter task description"></textarea>
     </div>
-    
+
     <div class="form-group">
       <label>Task Image</label>
       <div class="image-upload-container" onclick="document.getElementById('fileInput').click()">
-        <i class="fas fa-cloud-upload-alt"></i>
-        <p>Click to upload image or drag and drop</p>
-        <img id="imagePreview" alt="Image Preview">
-        <input type="file" id="fileInput" accept="image/*">
+        <i class="fas fa-upload"></i>
+        <p>Click to upload an image</p>
+        <input type="file" id="fileInput" style="display: none" accept="image/*" />
+        <img id="imagePreview" />
       </div>
     </div>
-    
+
     <div class="form-group">
       <label for="platform">Platform</label>
       <select id="platform" onchange="updateActions()">
-        <option value="">Select Platform</option>
-        <option value="YouTube"><i class="fab fa-youtube platform-icon"></i> YouTube</option>
-        <option value="Facebook"><i class="fab fa-facebook platform-icon"></i> Facebook</option>
-        <option value="WhatsApp"><i class="fab fa-whatsapp platform-icon"></i> WhatsApp</option>
-        <option value="Telegram"><i class="fab fa-telegram platform-icon"></i> Telegram</option>
-        <option value="Discord"><i class="fab fa-discord platform-icon"></i> Discord</option>
+        <option value=\"\">Select Platform</option>
+        <option value=\"YouTube\">YouTube</option>
+        <option value=\"Facebook\">Facebook</option>
+        <option value=\"WhatsApp\">WhatsApp</option>
+        <option value=\"Telegram\">Telegram</option>
+        <option value=\"Discord\">Discord</option>
       </select>
     </div>
-    
+
     <div class="form-group">
       <label for="action">Action</label>
       <select id="action">
-        <option value="">Select Action</option>
+        <option value=\"\">Select Action</option>
       </select>
     </div>
-    
+
     <div class="form-group">
       <label for="redirectUrl">Redirect URL</label>
-      <input type="text" id="redirectUrl" placeholder="Enter redirect URL" />
+      <input id="redirectUrl" type="text" placeholder="Enter redirect URL" />
     </div>
-    
-    <button class="btn" onclick="addTask()">
-      <span id="btnText">Create Task</span>
-      <div class="loading" id="loadingIndicator">
-        <i class="fas fa-spinner"></i>
-      </div>
-    </button>
+
+    <button class="btn" onclick="addTask()">Create Task</button>
+    <div class="loading" id="loadingIndicator">
+      <i class="fas fa-spinner"></i>
+    </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.x/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.x/firebase-storage.js"></script>
-  
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+
   <script>
-    // Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
-      authDomain: "t-shirt-94ff7.firebaseapp.com",
-      projectId: "t-shirt-94ff7",
-      storageBucket: "t-shirt-94ff7.appspot.com",
-      messagingSenderId: "367396012881",
-      appId: "1:367396012881:web:3127607d5ced7678e64970"
+      apiKey: \"AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM\",
+      authDomain: \"t-shirt-94ff7.firebaseapp.com\",
+      projectId: \"t-shirt-94ff7\",
+      storageBucket: \"t-shirt-94ff7.appspot.com\",
+      messagingSenderId: \"367396012881\",
+      appId: \"1:367396012881:web:3127607d5ced7678e64970\"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // Platform actions mapping
     const actionsMap = {
-      YouTube: ["Subscribe to channel", "Like the video", "Comment on video"],
-      Facebook: ["Like the page", "Share the post", "Comment on post"],
-      WhatsApp: ["Join group", "Send message"],
-      Telegram: ["Join channel", "Join group"],
-      Discord: ["Join server", "Engage in channel"]
+      YouTube: [\"Subscribe to channel\", \"Like the video\", \"Comment on video\"],
+      Facebook: [\"Like the page\", \"Share the post\", \"Comment on post\"],
+      WhatsApp: [\"Join group\", \"Send message\"],
+      Telegram: [\"Join channel\", \"Join group\"],
+      Discord: [\"Join server\", \"Engage in channel\"]
     };
 
-    // Update actions based on selected platform
     function updateActions() {
-      const platform = document.getElementById('platform').value;
-      const actionSelect = document.getElementById('action');
-      actionSelect.innerHTML = '<option value="">Select Action</option>';
-
+      const platform = document.getElementById(\"platform\").value;
+      const actionSelect = document.getElementById(\"action\");
+      actionSelect.innerHTML = '<option value=\"\">Select Action</option>';
       if (actionsMap[platform]) {
         actionsMap[platform].forEach(action => {
-          const option = document.createElement('option');
+          const option = document.createElement(\"option\");
           option.value = action;
           option.textContent = action;
           actionSelect.appendChild(option);
@@ -296,51 +209,43 @@
       }
     }
 
-    // Handle image upload preview
-    document.getElementById('fileInput').addEventListener('change', function(e) {
+    document.getElementById(\"fileInput\").addEventListener(\"change\", function(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(event) {
-          const preview = document.getElementById('imagePreview');
-          preview.src = event.target.result;
-          preview.style.display = 'block';
+        reader.onload = function(evt) {
+          const img = document.getElementById(\"imagePreview\");
+          img.src = evt.target.result;
+          img.style.display = \"block\";
         };
         reader.readAsDataURL(file);
       }
     });
 
-    // Add new task to Firestore
     async function addTask() {
-      const title = document.getElementById('title').value.trim();
-      const description = document.getElementById('description').value.trim();
-      const platform = document.getElementById('platform').value;
-      const action = document.getElementById('action').value;
-      const redirectUrl = document.getElementById('redirectUrl').value.trim();
-      const fileInput = document.getElementById('fileInput');
-      
-      // Validate inputs
+      const title = document.getElementById(\"title\").value.trim();
+      const description = document.getElementById(\"description\").value.trim();
+      const platform = document.getElementById(\"platform\").value;
+      const action = document.getElementById(\"action\").value;
+      const redirectUrl = document.getElementById(\"redirectUrl\").value.trim();
+      const fileInput = document.getElementById(\"fileInput\");
+
       if (!title || !description || !platform || !action || !redirectUrl) {
-        alert('Please fill in all required fields');
+        alert(\"Please fill in all fields.\");
         return;
       }
 
-      // Show loading indicator
-      document.getElementById('btnText').style.display = 'none';
-      document.getElementById('loadingIndicator').style.display = 'block';
-      
+      document.getElementById(\"loadingIndicator\").style.display = \"block\";
+
       try {
-        let imageUrl = '';
-        
-        // Upload image if selected
+        let imageUrl = \"\";
         if (fileInput.files[0]) {
           const file = fileInput.files[0];
-          const storageRef = storage.ref(`task_images/${file.name}`);
+          const storageRef = storage.ref(\"task_images/\" + file.name);
           const snapshot = await storageRef.put(file);
           imageUrl = await snapshot.ref.getDownloadURL();
         }
-        
-        // Create task data
+
         const taskData = {
           title,
           description,
@@ -351,35 +256,28 @@
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        // Add to Firestore
-        const docRef = await db.collection('tasks').add(taskData);
-        
-        // Generate task link
+        const docRef = await db.collection(\"tasks\").add(taskData);
         const link = `${window.location.origin}/task.html?id=${docRef.id}`;
-        
-        // Show success message
-        alert(`Task created successfully!\n\nShare this link:\n${link}`);
-        
-        // Reset form
-        document.getElementById('title').value = '';
-        document.getElementById('description').value = '';
-        document.getElementById('platform').value = '';
-        document.getElementById('action').innerHTML = '<option value="">Select Action</option>';
-        document.getElementById('redirectUrl').value = '';
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('imagePreview').src = '';
-        fileInput.value = '';
-        
-      } catch (error) {
-        console.error('Error adding task: ', error);
-        alert('An error occurred while creating the task. Please try again.');
+        alert(\"Task created! Share this link:\\n\" + link);
+
+        document.getElementById(\"title\").value = \"\";
+        document.getElementById(\"description\").value = \"\";
+        document.getElementById(\"platform\").value = \"\";
+        document.getElementById(\"action\").innerHTML = '<option value=\"\">Select Action</option>';
+        document.getElementById(\"redirectUrl\").value = \"\";
+        document.getElementById(\"imagePreview\").src = \"\";
+        document.getElementById(\"imagePreview\").style.display = \"none\";
+        fileInput.value = \"\";
+
+      } catch (err) {
+        console.error(\"Error creating task:\", err);
+        alert(\"Error creating task. Please try again.\");
       } finally {
-        // Hide loading indicator
-        document.getElementById('btnText').style.display = 'inline';
-        document.getElementById('loadingIndicator').style.display = 'none';
+        document.getElementById(\"loadingIndicator\").style.display = \"none\";
       }
     }
   </script>
 </body>
-        </html>
+</html>
+
 
