@@ -1,231 +1,195 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>منشئ المهام الاحترافي</title>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <title>Advanced Task Manager</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary-color: #4361ee;
-      --secondary-color: #3a0ca3;
-      --accent-color: #4cc9f0;
-      --light-color: #f8f9fa;
-      --dark-color: #212529;
-      --success-color: #2ecc71;
-      --danger-color: #e74c3c;
+      --primary: #4361ee;
+      --primary-dark: #3a56d4;
+      --secondary: #3f37c9;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --gray: #6c757d;
+      --success: #4cc9f0;
       --border-radius: 8px;
-      --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       --transition: all 0.3s ease;
     }
-    
+
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
-    
+
     body {
-      font-family: 'Tajawal', sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #f5f7ff;
-      color: var(--dark-color);
+      color: var(--dark);
       line-height: 1.6;
       padding: 0;
       margin: 0;
     }
-    
+
     .container {
       max-width: 800px;
-      margin: 0 auto;
+      margin: 2rem auto;
       padding: 2rem;
-    }
-    
-    .card {
-      background-color: white;
+      background: white;
       border-radius: var(--border-radius);
       box-shadow: var(--box-shadow);
-      padding: 2rem;
-      margin-bottom: 2rem;
     }
-    
+
     h1 {
-      color: var(--secondary-color);
       text-align: center;
+      color: var(--primary);
       margin-bottom: 1.5rem;
-      font-weight: 700;
-    }
-    
-    h2 {
-      color: var(--primary-color);
-      margin-bottom: 1rem;
-      font-weight: 500;
-      border-bottom: 2px solid var(--accent-color);
+      font-weight: 600;
+      position: relative;
       padding-bottom: 0.5rem;
     }
-    
+
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px;
+    }
+
     .form-group {
       margin-bottom: 1.5rem;
     }
-    
+
     label {
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 500;
-      color: var(--dark-color);
+      color: var(--dark);
     }
-    
-    input[type="text"],
-    textarea,
-    select {
+
+    input, textarea, select {
       width: 100%;
-      padding: 0.75rem;
+      padding: 12px 15px;
       border: 1px solid #ddd;
       border-radius: var(--border-radius);
-      font-family: 'Tajawal', sans-serif;
       font-size: 1rem;
       transition: var(--transition);
+      background-color: var(--light);
     }
-    
-    input[type="text"]:focus,
-    textarea:focus,
-    select:focus {
+
+    input:focus, textarea:focus, select:focus {
       outline: none;
-      border-color: var(--accent-color);
-      box-shadow: 0 0 0 3px rgba(76, 201, 240, 0.2);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
     }
-    
+
     textarea {
-      min-height: 120px;
+      min-height: 100px;
       resize: vertical;
     }
-    
-    .task {
-      background-color: var(--light-color);
-      border-radius: var(--border-radius);
-      padding: 1.5rem;
-      margin-top: 1.5rem;
-      border-left: 4px solid var(--accent-color);
-      transition: var(--transition);
-    }
-    
-    .task:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-    }
-    
+
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.75rem 1.5rem;
+      display: inline-block;
+      background: var(--primary);
+      color: white;
       border: none;
+      padding: 12px 24px;
       border-radius: var(--border-radius);
-      font-family: 'Tajawal', sans-serif;
+      cursor: pointer;
       font-size: 1rem;
       font-weight: 500;
+      transition: var(--transition);
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .image-upload-container {
+      border: 2px dashed #ddd;
+      border-radius: var(--border-radius);
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
       cursor: pointer;
       transition: var(--transition);
-      text-decoration: none;
+      position: relative;
+      overflow: hidden;
     }
-    
-    .btn-primary {
-      background-color: var(--primary-color);
-      color: white;
+
+    .image-upload-container:hover {
+      border-color: var(--primary);
     }
-    
-    .btn-primary:hover {
-      background-color: var(--secondary-color);
-      transform: translateY(-2px);
+
+    .image-upload-container i {
+      font-size: 2.5rem;
+      color: var(--gray);
+      margin-bottom: 0.5rem;
     }
-    
-    .btn-success {
-      background-color: var(--success-color);
-      color: white;
+
+    .image-upload-container p {
+      color: var(--gray);
+      margin-bottom: 0;
     }
-    
-    .btn-success:hover {
-      background-color: #27ae60;
-      transform: translateY(-2px);
-    }
-    
-    .btn-danger {
-      background-color: var(--danger-color);
-      color: white;
-    }
-    
-    .btn-danger:hover {
-      background-color: #c0392b;
-      transform: translateY(-2px);
-    }
-    
-    .btn i {
-      margin-left: 0.5rem;
-    }
-    
-    #tasks {
-      margin-top: 1.5rem;
-    }
-    
-    #result {
-      margin-top: 2rem;
-      padding: 1.5rem;
-      background-color: #e8f5e9;
+
+    #imagePreview {
+      display: none;
+      max-width: 100%;
+      max-height: 200px;
+      margin-top: 1rem;
       border-radius: var(--border-radius);
-      border-left: 4px solid var(--success-color);
+    }
+
+    #fileInput {
       display: none;
     }
-    
-    #result input {
-      margin: 1rem 0;
-      padding: 0.75rem;
-      width: 100%;
-      border: 1px solid #ddd;
-      border-radius: var(--border-radius);
-      font-family: 'Tajawal', sans-serif;
-    }
-    
-    .file-input {
-      position: relative;
-      margin-bottom: 1.5rem;
-    }
-    
-    .file-input input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: var(--border-radius);
-      font-family: 'Tajawal', sans-serif;
-    }
-    
-    .file-input label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-      color: var(--dark-color);
-    }
-    
-    .actions {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 1.5rem;
-    }
-    
+
     .platform-icon {
-      margin-left: 0.5rem;
-      color: var(--primary-color);
+      margin-right: 8px;
+      font-size: 1.1rem;
     }
-    
+
+    select option {
+      padding: 10px;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    .loading i {
+      color: var(--primary);
+      font-size: 1.5rem;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     @media (max-width: 768px) {
       .container {
-        padding: 1rem;
-      }
-      
-      .card {
+        margin: 1rem;
         padding: 1.5rem;
       }
     }
@@ -233,48 +197,66 @@
 </head>
 <body>
   <div class="container">
-    <div class="card">
-      <h1><i class="fas fa-tasks"></i> منشئ المهام الاحترافي</h1>
-      
-      <div class="form-group">
-        <label for="title">عنوان المهمة</label>
-        <input type="text" id="title" placeholder="أدخل عنواناً واضحاً للمهمة">
-      </div>
-      
-      <div class="form-group">
-        <label for="description">وصف المهمة</label>
-        <textarea id="description" placeholder="أدخل وصفاً تفصيلياً للمهمة"></textarea>
-      </div>
-      
-      <h2><i class="fas fa-list-check"></i> المهام الفرعية</h2>
-      <div id="tasks"></div>
-      
-      <button class="btn btn-primary" onclick="addTask()">
-        <i class="fas fa-plus"></i> إضافة مهمة فرعية
-      </button>
-      
-      <div class="form-group" style="margin-top: 2rem;">
-        <label for="finalLink">رابط التحويل النهائي</label>
-        <input type="text" id="finalLink" placeholder="رابط الصفحة التي سيتم التحويل إليها بعد إكمال المهام">
-      </div>
-      
-      <div class="file-input">
-        <label for="image">صورة المهمة (اختياري)</label>
-        <input type="file" id="image" accept="image/*">
-      </div>
-      
-      <div class="actions">
-        <button class="btn btn-success" onclick="createAll()">
-          <i class="fas fa-check"></i> إنشاء المهمة
-        </button>
-      </div>
-      
-      <div id="result"></div>
+    <h1><i class="fas fa-tasks"></i> Create New Task</h1>
+    
+    <div class="form-group">
+      <label for="title">Task Title</label>
+      <input type="text" id="title" placeholder="Enter task title" />
     </div>
+    
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" placeholder="Enter task description"></textarea>
+    </div>
+    
+    <div class="form-group">
+      <label>Task Image</label>
+      <div class="image-upload-container" onclick="document.getElementById('fileInput').click()">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>Click to upload image or drag and drop</p>
+        <img id="imagePreview" alt="Image Preview">
+        <input type="file" id="fileInput" accept="image/*">
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label for="platform">Platform</label>
+      <select id="platform" onchange="updateActions()">
+        <option value="">Select Platform</option>
+        <option value="YouTube"><i class="fab fa-youtube platform-icon"></i> YouTube</option>
+        <option value="Facebook"><i class="fab fa-facebook platform-icon"></i> Facebook</option>
+        <option value="WhatsApp"><i class="fab fa-whatsapp platform-icon"></i> WhatsApp</option>
+        <option value="Telegram"><i class="fab fa-telegram platform-icon"></i> Telegram</option>
+        <option value="Discord"><i class="fab fa-discord platform-icon"></i> Discord</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="action">Action</label>
+      <select id="action">
+        <option value="">Select Action</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="redirectUrl">Redirect URL</label>
+      <input type="text" id="redirectUrl" placeholder="Enter redirect URL" />
+    </div>
+    
+    <button class="btn" onclick="addTask()">
+      <span id="btnText">Create Task</span>
+      <div class="loading" id="loadingIndicator">
+        <i class="fas fa-spinner"></i>
+      </div>
+    </button>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.x/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.x/firebase-storage.js"></script>
+  
   <script>
-    // إعداد الفايربيس
+    // Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
       authDomain: "t-shirt-94ff7.firebaseapp.com",
@@ -284,130 +266,120 @@
       appId: "1:367396012881:web:3127607d5ced7678e64970"
     };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    let taskIndex = 0;
+    // Platform actions mapping
+    const actionsMap = {
+      YouTube: ["Subscribe to channel", "Like the video", "Comment on video"],
+      Facebook: ["Like the page", "Share the post", "Comment on post"],
+      WhatsApp: ["Join group", "Send message"],
+      Telegram: ["Join channel", "Join group"],
+      Discord: ["Join server", "Engage in channel"]
+    };
 
-    function getPlatformIcon(platform) {
-      const icons = {
-        facebook: 'fab fa-facebook',
-        discord: 'fab fa-discord',
-        telegram: 'fab fa-telegram',
-        youtube: 'fab fa-youtube',
-        roblox: 'fas fa-gamepad'
-      };
-      return icons[platform] || 'fas fa-link';
+    // Update actions based on selected platform
+    function updateActions() {
+      const platform = document.getElementById('platform').value;
+      const actionSelect = document.getElementById('action');
+      actionSelect.innerHTML = '<option value="">Select Action</option>';
+
+      if (actionsMap[platform]) {
+        actionsMap[platform].forEach(action => {
+          const option = document.createElement('option');
+          option.value = action;
+          option.textContent = action;
+          actionSelect.appendChild(option);
+        });
+      }
     }
 
-    function addTask() {
-      const div = document.createElement('div');
-      div.className = 'task';
-      div.innerHTML = `
-        <div class="form-group">
-          <label>المنصة <i class="${getPlatformIcon('facebook')} platform-icon"></i></label>
-          <select class="platform" onchange="updatePlatformIcon(this)">
-            <option value="facebook">فيسبوك</option>
-            <option value="discord">ديسكورد</option>
-            <option value="telegram">تيليجرام</option>
-            <option value="youtube">يوتيوب</option>
-            <option value="roblox">روبلكس</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label>نوع المهمة</label>
-          <input type="text" class="action" placeholder="مثال: اشترك في القناة، اضغط لايك، انضم للسيرفر">
-        </div>
-        
-        <div class="form-group">
-          <label>رابط المهمة</label>
-          <input type="text" class="link" placeholder="https://example.com">
-        </div>
-        
-        <button class="btn btn-danger" onclick="this.parentNode.remove()" style="margin-top: 0.5rem;">
-          <i class="fas fa-trash"></i> حذف المهمة
-        </button>
-      `;
-      document.getElementById('tasks').appendChild(div);
-    }
+    // Handle image upload preview
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const preview = document.getElementById('imagePreview');
+          preview.src = event.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
 
-    function updatePlatformIcon(selectElement) {
-      const platform = selectElement.value;
-      const iconElement = selectElement.parentElement.querySelector('.platform-icon');
-      iconElement.className = getPlatformIcon(platform) + ' platform-icon';
-    }
-
-    async function createAll() {
+    // Add new task to Firestore
+    async function addTask() {
       const title = document.getElementById('title').value.trim();
       const description = document.getElementById('description').value.trim();
-      const finalLink = document.getElementById('finalLink').value.trim();
-      const imageFile = document.getElementById('image').files[0];
-
-      if (!title || !description) {
-        alert('الرجاء إدخال عنوان ووصف للمهمة');
+      const platform = document.getElementById('platform').value;
+      const action = document.getElementById('action').value;
+      const redirectUrl = document.getElementById('redirectUrl').value.trim();
+      const fileInput = document.getElementById('fileInput');
+      
+      // Validate inputs
+      if (!title || !description || !platform || !action || !redirectUrl) {
+        alert('Please fill in all required fields');
         return;
       }
 
-      const taskElements = document.querySelectorAll('.task');
-      const tasks = [];
-
-      taskElements.forEach(el => {
-        const platform = el.querySelector('.platform').value;
-        const action = el.querySelector('.action').value.trim();
-        const link = el.querySelector('.link').value.trim();
-        if (platform && action && link) {
-          tasks.push({ platform, action, link });
-        }
-      });
-
-      if (tasks.length === 0) {
-        alert('الرجاء إضافة على الأقل مهمة فرعية واحدة');
-        return;
-      }
-
-      let imageUrl = "";
-      if (imageFile) {
-        try {
-          const storageRef = storage.ref('tasks/' + Date.now() + "_" + imageFile.name);
-          await storageRef.put(imageFile);
-          imageUrl = await storageRef.getDownloadURL();
-        } catch (error) {
-          console.error('Error uploading image:', error);
-        }
-      }
-
+      // Show loading indicator
+      document.getElementById('btnText').style.display = 'none';
+      document.getElementById('loadingIndicator').style.display = 'block';
+      
       try {
-        const docRef = await db.collection("taskGroups").add({
+        let imageUrl = '';
+        
+        // Upload image if selected
+        if (fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const storageRef = storage.ref(`task_images/${file.name}`);
+          const snapshot = await storageRef.put(file);
+          imageUrl = await snapshot.ref.getDownloadURL();
+        }
+        
+        // Create task data
+        const taskData = {
           title,
           description,
-          tasks,
-          finalLink,
           imageUrl,
+          platform,
+          action,
+          redirectUrl,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        };
 
-        const link = `${window.location.origin}/view-task.html?id=${docRef.id}`;
-        const resultDiv = document.getElementById('result');
-        resultDiv.style.display = 'block';
-        resultDiv.innerHTML = `
-          <h3 style="color: var(--success-color);"><i class="fas fa-check-circle"></i> تم إنشاء المهمة بنجاح!</h3>
-          <p>يمكنك مشاركة الرابط التالي مع المستخدمين:</p>
-          <input type="text" value="${link}" readonly>
-          <button class="btn btn-primary" onclick="navigator.clipboard.writeText('${link}')">
-            <i class="fas fa-copy"></i> نسخ الرابط
-          </button>
-        `;
+        // Add to Firestore
+        const docRef = await db.collection('tasks').add(taskData);
         
-        // Scroll to result
-        resultDiv.scrollIntoView({ behavior: 'smooth' });
+        // Generate task link
+        const link = `${window.location.origin}/task.html?id=${docRef.id}`;
+        
+        // Show success message
+        alert(`Task created successfully!\n\nShare this link:\n${link}`);
+        
+        // Reset form
+        document.getElementById('title').value = '';
+        document.getElementById('description').value = '';
+        document.getElementById('platform').value = '';
+        document.getElementById('action').innerHTML = '<option value="">Select Action</option>';
+        document.getElementById('redirectUrl').value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('imagePreview').src = '';
+        fileInput.value = '';
+        
       } catch (error) {
-        console.error('Error creating task:', error);
-        alert('حدث خطأ أثناء إنشاء المهمة. الرجاء المحاولة مرة أخرى.');
+        console.error('Error adding task: ', error);
+        alert('An error occurred while creating the task. Please try again.');
+      } finally {
+        // Hide loading indicator
+        document.getElementById('btnText').style.display = 'inline';
+        document.getElementById('loadingIndicator').style.display = 'none';
       }
     }
   </script>
 </body>
-</html>
+        </html>
 
