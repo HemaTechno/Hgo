@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>تأكيد التحميل</title>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
+  authDomain: "t-shirt-94ff7.firebaseapp.com",
+  projectId: "t-shirt-94ff7",
+  storageBucket: "t-shirt-94ff7.appspot.com",
+  messagingSenderId: "367396012881",
+  appId: "1:367396012881:web:3127607d5ced7678e64970"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const urlParams = new URLSearchParams(window.location.search);
+const token = urlParams.get("token");
+
+if (token) {
+  const docRef = doc(db, "tokens", token);
+  updateDoc(docRef, { verified: true })
+    .then(() => {
+      document.body.innerHTML = "<h2>✅ تم إرسال رابط التحميل في تيليجرام</h2>";
+    })
+    .catch(() => {
+      document.body.innerHTML = "<h2>❌ حدث خطأ أثناء التحقق</h2>";
+    });
+} else {
+  document.body.innerHTML = "<h2>❌ رابط غير صالح</h2>";
+}
+</script>
+</head>
+<body>
+<h2>جارٍ التحقق...</h2>
+</body>
+</html>
