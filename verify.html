@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>التحقق</title>
+  <script type="module">
+    // Import Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // إعدادات Firebase
+    const firebaseConfig = {
+  apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
+  authDomain: "t-shirt-94ff7.firebaseapp.com",
+  projectId: "t-shirt-94ff7",
+  storageBucket: "t-shirt-94ff7.appspot.com",
+  messagingSenderId: "367396012881",
+  appId: "1:367396012881:web:3127607d5ced7678e64970"
+};
+
+    // تشغيل Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // جلب userId من الرابط (مثلاً bot يرسل رابط فيه ?id=USER_ID)
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get("id");
+
+    async function verifyUser() {
+      if (!userId) {
+        document.body.innerHTML = "<h2>❌ رابط غير صالح</h2>";
+        return;
+      }
+
+      try {
+        // تخزين حالة التحقق في Firestore
+        await setDoc(doc(db, "verified_users", userId), {
+          verified: true,
+          timestamp: new Date()
+        });
+
+        document.body.innerHTML = `
+          <h2>✅ تم التحقق بنجاح!</h2>
+          <p>يمكنك العودة للبوت الآن.</p>
+        `;
+      } catch (error) {
+        console.error("Error:", error);
+        document.body.innerHTML = "<h2>❌ حصل خطأ</h2>";
+      }
+    }
+
+    verifyUser();
+  </script>
+</head>
+<body>
+  <h1>جارٍ التحقق...</h1>
+</body>
+</html>
+
