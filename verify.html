@@ -6,15 +6,19 @@
   <title>Firebase Verify</title>
 </head>
 <body>
-  <h1>🔥 Firebase Test</h1>
-  <div id="result"></div>
+  <h1>التحقق من ربط الحساب</h1>
 
-  <!-- Firebase CDN -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  <!-- Firebase App (always required) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+
+  <!-- Firebase Auth -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <!-- Firebase Firestore -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
-    // ✅ هنا حط إعدادات مشروعك من Firebase Console
+    // إعدادات Firebase (بدل البيانات دي من مشروعك على Firebase)
     const firebaseConfig = {
       apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
       authDomain: "t-shirt-94ff7.firebaseapp.com",
@@ -23,24 +27,32 @@
       messagingSenderId: "367396012881",
       appId: "1:367396012881:web:3127607d5ced7678e64970"
     };
-    // ✅ تهيئة Firebase
-    const app = firebase.initializeApp(firebaseConfig);
+
+    // تهيئة Firebase
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // ✅ مثال: قراءة بيانات
-    db.collection("users").get().then(snapshot => {
-      let html = "<ul>";
-      snapshot.forEach(doc => {
-        html += `<li>${doc.id} => ${JSON.stringify(doc.data())}</li>`;
+    // مثال: جلب ID من الرابط ?user=XXXX
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get("user");
+
+    if (userId) {
+      db.collection("users").doc(userId).get().then(doc => {
+        if (doc.exists) {
+          alert("✅ الحساب موجود: " + JSON.stringify(doc.data()));
+        } else {
+          alert("❌ الحساب غير موجود");
+        }
+      }).catch(err => {
+        console.error("Firestore Error:", err);
       });
-      html += "</ul>";
-      document.getElementById("result").innerHTML = html;
-    }).catch(err => {
-      document.getElementById("result").innerText = "Error: " + err.message;
-    });
+    } else {
+      alert("⚠️ مفيش user في الرابط");
+    }
   </script>
 </body>
 </html>
+
 
 
 
