@@ -1,17 +1,20 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>صفحة التحقق</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Firebase Verify</title>
 </head>
 <body>
-  <h2>✅ جاري التحقق من إنجازك للمهام...</h2>
-  <div id="status"></div>
+  <h1>🔥 Firebase Test</h1>
+  <div id="result"></div>
+
+  <!-- Firebase CDN -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
 
   <script>
-    // اكتب بيانات firebaseConfig هنا
+    // ✅ هنا حط إعدادات مشروعك من Firebase Console
     const firebaseConfig = {
       apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
       authDomain: "t-shirt-94ff7.firebaseapp.com",
@@ -20,30 +23,24 @@
       messagingSenderId: "367396012881",
       appId: "1:367396012881:web:3127607d5ced7678e64970"
     };
-
-    // Initialize Firebase
+    // ✅ تهيئة Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // جِب الـ userId من اللينك
-    const params = new URLSearchParams(window.location.search);
-    const userId = params.get("user");
-
-    if (userId) {
-      db.collection("verified_users").doc(userId).set({
-        userId: userId,
-        done: true,
-        time: Date.now()
-      }).then(() => {
-        document.getElementById("status").innerText = "🎉 تم التحقق بنجاح! ارجع للبوت.";
-      }).catch((err) => {
-        document.getElementById("status").innerText = "❌ حصل خطأ: " + err.message;
+    // ✅ مثال: قراءة بيانات
+    db.collection("users").get().then(snapshot => {
+      let html = "<ul>";
+      snapshot.forEach(doc => {
+        html += `<li>${doc.id} => ${JSON.stringify(doc.data())}</li>`;
       });
-    } else {
-      document.getElementById("status").innerText = "❌ مفيش User ID في الرابط.";
-    }
+      html += "</ul>";
+      document.getElementById("result").innerHTML = html;
+    }).catch(err => {
+      document.getElementById("result").innerText = "Error: " + err.message;
+    });
   </script>
 </body>
 </html>
+
 
 
