@@ -27,21 +27,23 @@
       background-color: #fff3cd;
       color: #856404;
     }
+    .loading {
+      background-color: #e2e3e5;
+      color: #383d41;
+    }
   </style>
 </head>
 <body>
   <h1>التحقق من ربط الحساب</h1>
-  <div id="message" class="message"></div>
+  <div id="message" class="message loading">جاري التحميل...</div>
 
-  <!-- Firebase App (always required) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <!-- Firebase Auth -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <!-- Firebase Firestore -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <script>
-    // إعدادات Firebase (بدل البيانات دي من مشروعك على Firebase)
+    // إعدادات Firebase - استبدلها بقيم مشروعك
     const firebaseConfig = {
       apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
       authDomain: "t-shirt-94ff7.firebaseapp.com",
@@ -50,47 +52,69 @@
       messagingSenderId: "367396012881",
       appId: "1:367396012881:web:3127607d5ced7678e64970"
     };
+
     function showMessage(text, type) {
       const messageEl = document.getElementById('message');
       messageEl.textContent = text;
       messageEl.className = 'message ' + type;
     }
 
-    try {
-      // تهيئة Firebase
-      if (!firebase || !firebase.initializeApp) {
-        throw new Error("Firebase لم يتم تحميله بشكل صحيح");
-      }
-      
-      const app = firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
+    async function initFirebase() {
+      try {
+        // التحقق من وجود Firebase
+        if (typeof firebase === 'undefined') {
+          throw new Error('Firebase لم يتم تحميله');
+        }
 
-      // مثال: جلب ID من الرابط ?user=XXXX
-      const urlParams = new URLSearchParams(window.location.search);
-      const userId = urlParams.get("user");
+        // تهيئة Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-      if (userId) {
-        db.collection("users").doc(userId).get().then(doc => {
-          if (doc.exists) {
-            showMessage(`✅ الحساب موجود: ${JSON.stringify(doc.data())}`, 'success');
-          } else {
-            showMessage("❌ الحساب غير موجود", 'error');
-          }
-        }).catch(err => {
-          console.error("Firestore Error:", err);
-          showMessage("حدث خطأ في الاتصال بقاعدة البيانات", 'error');
+        // تمكين وضع عدم الاتصال (اختياري)
+        db.enablePersistence().catch(err => {
+          console.warn('لا يمكن تمكين وضع عدم الاتصال:', err);
         });
-      } else {
-        showMessage("⚠️ يرجى إضافة معرّف المستخدم في الرابط (?user=YOUR_ID)", 'warning');
+
+        // جلب معرّف المستخدم من الرابط
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('user');
+
+        if (!userId) {
+          showMessage('⚠️ يرجى إضافة معرّف المستخدم في الرابط (?user=YOUR_ID)', 'warning');
+          return;
+        }
+
+        // محاولة الاتصال مع مهلة زمنية
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('انتهت مهلة الاتصال')), 10000)
+        );
+
+        const docPromise = db.collection("users").doc(userId).get();
+        
+        const doc = await Promise.race([docPromise, timeoutPromise]);
+
+        if (doc.exists) {
+          showMessage(`✅ الحساب موجود: ${JSON.stringify(doc.data())}`, 'success');
+        } else {
+          showMessage('❌ الحساب غير موجود', 'error');
+        }
+      } catch (err) {
+        console.error('حدث خطأ:', err);
+        
+        if (err.code === 'permission-denied') {
+          showMessage('❌ ليس لديك صلاحية الوصول إلى البيانات', 'error');
+        } else if (err.code === 'unavailable') {
+          showMessage('❌ لا يمكن الاتصال بخادم Firebase. يرجى التحقق من اتصال الإنترنت', 'error');
+        } else if (err.message.includes('انتهت مهلة الاتصال')) {
+          showMessage('❌ انتهت مهلة الاتصال بالخادم', 'error');
+        } else {
+          showMessage(`❌ حدث خطأ: ${err.message}`, 'error');
+        }
       }
-    } catch (err) {
-      console.error("Initialization Error:", err);
-      showMessage("حدث خطأ في تحميل التطبيق: " + err.message, 'error');
     }
+
+    // بدء التطبيق
+    document.addEventListener('DOMContentLoaded', initFirebase);
   </script>
 </body>
 </html>
-
-
-
-
