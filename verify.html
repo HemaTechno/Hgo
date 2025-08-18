@@ -4,16 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Firebase Verify</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      text-align: center;
+    }
+    .message {
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 5px;
+    }
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .warning {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+  </style>
 </head>
 <body>
   <h1>التحقق من ربط الحساب</h1>
+  <div id="message" class="message"></div>
 
   <!-- Firebase App (always required) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-
   <!-- Firebase Auth -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
   <!-- Firebase Firestore -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -27,27 +50,42 @@
       messagingSenderId: "367396012881",
       appId: "1:367396012881:web:3127607d5ced7678e64970"
     };
+    function showMessage(text, type) {
+      const messageEl = document.getElementById('message');
+      messageEl.textContent = text;
+      messageEl.className = 'message ' + type;
+    }
 
-    // تهيئة Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    try {
+      // تهيئة Firebase
+      if (!firebase || !firebase.initializeApp) {
+        throw new Error("Firebase لم يتم تحميله بشكل صحيح");
+      }
+      
+      const app = firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
 
-    // مثال: جلب ID من الرابط ?user=XXXX
-    const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get("user");
+      // مثال: جلب ID من الرابط ?user=XXXX
+      const urlParams = new URLSearchParams(window.location.search);
+      const userId = urlParams.get("user");
 
-    if (userId) {
-      db.collection("users").doc(userId).get().then(doc => {
-        if (doc.exists) {
-          alert("✅ الحساب موجود: " + JSON.stringify(doc.data()));
-        } else {
-          alert("❌ الحساب غير موجود");
-        }
-      }).catch(err => {
-        console.error("Firestore Error:", err);
-      });
-    } else {
-      alert("⚠️ مفيش user في الرابط");
+      if (userId) {
+        db.collection("users").doc(userId).get().then(doc => {
+          if (doc.exists) {
+            showMessage(`✅ الحساب موجود: ${JSON.stringify(doc.data())}`, 'success');
+          } else {
+            showMessage("❌ الحساب غير موجود", 'error');
+          }
+        }).catch(err => {
+          console.error("Firestore Error:", err);
+          showMessage("حدث خطأ في الاتصال بقاعدة البيانات", 'error');
+        });
+      } else {
+        showMessage("⚠️ يرجى إضافة معرّف المستخدم في الرابط (?user=YOUR_ID)", 'warning');
+      }
+    } catch (err) {
+      console.error("Initialization Error:", err);
+      showMessage("حدث خطأ في تحميل التطبيق: " + err.message, 'error');
     }
   </script>
 </body>
