@@ -12,73 +12,269 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
+  <!-- Font Awesome للايقونات -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Animate.css للحركات -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
   <!-- Monetag SDK -->
-<script src='//libtl.com/sdk.js' data-zone='9747739' data-sdk='show_9747739'></script>
+  <script src='//libtl.com/sdk.js' data-zone='9747739' data-sdk='show_9747739'></script>
+  
   <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+    
+    body {
+      font-family: 'Tajawal', sans-serif;
+    }
+    
+    .gold-gradient {
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+    }
+    
+    .diamond-btn {
+      background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+      box-shadow: 0 4px 15px 0 rgba(0, 210, 255, 0.5);
+    }
+    
+    .ad-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+    }
+    
+    .ad-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%;
+      max-width: 400px;
+      background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    .countdown {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #f6d365;
+      text-shadow: 0 0 10px rgba(246, 211, 101, 0.5);
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .coin-animation {
+      animation: coinSpin 1s ease-out;
+    }
+    
+    @keyframes coinSpin {
+      0% { transform: scale(0) rotate(0deg); }
+      100% { transform: scale(1) rotate(360deg); }
+    }
+    
+    .progress-bar {
+      transition: width 0.5s ease-in-out;
+    }
+    
+    .nav-btn.active {
+      position: relative;
+    }
+    
+    .nav-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 6px;
+      background: #3b82f6;
+      border-radius: 50%;
+    }
+  </style>
 </head>
 <body class="bg-gray-900 text-white flex flex-col min-h-screen">
 
   <!-- Header -->
-  <header class="bg-gray-800 p-4 flex justify-between items-center">
-    <h1 class="text-xl font-bold">🚀 Mini App</h1>
-    <div id="coinsBox" class="bg-blue-600 px-4 py-1 rounded-full">🪙 0</div>
+  <header class="bg-gray-800 p-4 flex justify-between items-center shadow-lg">
+    <h1 class="text-xl font-bold gold-gradient bg-clip-text text-transparent">🚀 Mini App</h1>
+    <div id="coinsBox" class="bg-blue-600 px-4 py-1 rounded-full flex items-center gap-1 shadow-md">
+      <i class="fas fa-coins animate-pulse"></i> 
+      <span id="coinsValue">0</span>
+    </div>
   </header>
 
   <!-- Pages -->
   <main id="pageHome" class="flex-1 p-6 text-center">
-    <div class="bg-gray-800 rounded-2xl p-6 shadow-lg">
-      <h2 class="text-lg mb-2">رصيدك الحالي</h2>
-      <p id="coins" class="text-4xl font-bold">0 🪙</p>
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 shadow-xl border border-gray-700">
+      <h2 class="text-lg mb-2 text-gray-300">رصيدك الحالي</h2>
+      <p id="coins" class="text-5xl font-bold gold-gradient bg-clip-text text-transparent my-4">0 <i class="fas fa-coins"></i></p>
+      <button onclick="showPage('tasks')" class="diamond-btn px-6 py-3 rounded-xl text-white font-bold mt-4">
+        ابدأ كسب النقود <i class="fas fa-arrow-left ml-2"></i>
+      </button>
+    </div>
+    
+    <div class="mt-8 bg-gradient-to-br from-blue-900 to-blue-700 rounded-2xl p-5 shadow-xl border border-blue-600">
+      <h3 class="text-lg mb-3"><i class="fas fa-trophy mr-2"></i>المتصدرون</h3>
+      <div id="leaderboard" class="text-right space-y-2">
+        <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-50 rounded-lg">
+          <span class="text-yellow-400">#1</span>
+          <span>مستخدم 1</span>
+          <span>1500 <i class="fas fa-coins text-yellow-400"></i></span>
+        </div>
+        <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-50 rounded-lg">
+          <span class="text-gray-300">#2</span>
+          <span>مستخدم 2</span>
+          <span>1200 <i class="fas fa-coins text-yellow-400"></i></span>
+        </div>
+        <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-50 rounded-lg">
+          <span class="text-yellow-600">#3</span>
+          <span>مستخدم 3</span>
+          <span>900 <i class="fas fa-coins text-yellow-400"></i></span>
+        </div>
+      </div>
     </div>
   </main>
 
   <main id="pageTasks" class="hidden flex-1 p-6 text-center">
-    <div class="bg-gray-800 rounded-2xl p-6 shadow-lg space-y-4">
-      <h2 class="text-lg">🎥 المهام اليومية</h2>
-      <div class="w-full bg-gray-700 rounded-full h-2">
-        <div id="progressBar" class="bg-blue-500 h-2 rounded-full w-0"></div>
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 shadow-xl border border-gray-700 space-y-6">
+      <h2 class="text-xl font-bold"><i class="fas fa-film mr-2"></i>المهام اليومية</h2>
+      
+      <div class="space-y-2">
+        <div class="flex justify-between text-sm text-gray-300">
+          <span>تقدمك اليوم</span>
+          <span id="taskInfo">0 / 100 إعلان</span>
+        </div>
+        <div class="w-full bg-gray-700 rounded-full h-3">
+          <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full progress-bar"></div>
+        </div>
       </div>
-      <p id="taskInfo">0 / 100 إعلان اليوم</p>
-      <button id="watchAdBtn" class="bg-blue-600 px-4 py-2 rounded-xl">🎥 شاهد إعلان</button>
+      
+      <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
+        <h3 class="text-lg mb-2">شاهد الإعلان واحصل على مكافأة</h3>
+        <p class="text-gray-400 text-sm mb-4">اضغط على الزر بالأسفل وشاهد الإعلان لمدة 30 ثانية</p>
+        <button id="watchAdBtn" class="diamond-btn px-6 py-3 rounded-xl text-white font-bold text-lg pulse w-full">
+          <i class="fas fa-play-circle mr-2"></i>شاهد إعلان
+        </button>
+      </div>
+      
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
+          <div class="text-blue-400 text-2xl"><i class="fas fa-bolt"></i></div>
+          <div class="text-sm">سريع</div>
+        </div>
+        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
+          <div class="text-green-400 text-2xl"><i class="fas fa-lock-open"></i></div>
+          <div class="text-sm">مجاني</div>
+        </div>
+        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
+          <div class="text-yellow-400 text-2xl"><i class="fas fa-gift"></i></div>
+          <div class="text-sm">مكافآت</div>
+        </div>
+      </div>
     </div>
   </main>
 
   <main id="pageProfile" class="hidden flex-1 p-6 text-center">
-    <div class="bg-gray-800 rounded-2xl p-6 shadow-lg space-y-2">
-      <h2 class="text-lg mb-4">👤 حسابك</h2>
-      <p id="userId">Telegram ID: -</p>
-      <p>Coins: <span id="coinsProfile">0</span></p>
-      <p>Tasks Today: <span id="tasksProfile">0</span>/100</p>
+    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 shadow-xl border border-gray-700 space-y-4">
+      <div class="w-20 h-20 mx-auto rounded-full gold-gradient flex items-center justify-center">
+        <i class="fas fa-user text-white text-3xl"></i>
+      </div>
+      <h2 class="text-xl font-bold">👤 حسابك</h2>
+      
+      <div class="space-y-3 text-right">
+        <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+          <span class="text-gray-400">المعرف:</span>
+          <span id="userId">-</span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+          <span class="text-gray-400">النقاط:</span>
+          <span id="coinsProfile" class="text-yellow-400">0 <i class="fas fa-coins"></i></span>
+        </div>
+        <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
+          <span class="text-gray-400">الإعلانات اليوم:</span>
+          <span id="tasksProfile">0</span>/100
+        </div>
+      </div>
+      
+      <div class="pt-4 border-t border-gray-700">
+        <button class="px-4 py-2 bg-red-600 bg-opacity-20 text-red-400 rounded-lg text-sm">
+          <i class="fas fa-sign-out-alt mr-1"></i> تسجيل الخروج
+        </button>
+      </div>
     </div>
   </main>
 
   <!-- Bottom Nav -->
-  <nav class="flex justify-around bg-gray-800 py-3 border-t border-gray-700">
-    <button onclick="showPage('home')" class="text-blue-400">🏠</button>
-    <button onclick="showPage('tasks')" class="text-gray-400">🎥</button>
-    <button onclick="showPage('profile')" class="text-gray-400">👤</button>
+  <nav class="flex justify-around bg-gray-800 py-3 border-t border-gray-700 shadow-lg">
+    <button onclick="showPage('home')" class="nav-btn text-blue-400 active"><i class="fas fa-home text-lg"></i></button>
+    <button onclick="showPage('tasks')" class="nav-btn text-gray-400"><i class="fas fa-film text-lg"></i></button>
+    <button onclick="showPage('profile')" class="nav-btn text-gray-400"><i class="fas fa-user text-lg"></i></button>
   </nav>
 
+  <!-- Ad Modal -->
+  <div id="adModal" class="ad-modal">
+    <div class="ad-content">
+      <div class="gold-gradient p-4 text-center">
+        <h2 class="text-xl font-bold"><i class="fas fa-ad mr-2"></i>إعلان</h2>
+      </div>
+      
+      <div class="p-6 text-center">
+        <div class="countdown mb-4" id="countdown">30</div>
+        <p class="text-gray-300 mb-6">جاري تحميل الإعلان، يرجى الانتظار...</p>
+        
+        <div class="w-full bg-gray-700 rounded-full h-2 mb-6">
+          <div id="adProgress" class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"></div>
+        </div>
+        
+        <div class="animate__animated animate__pulse animate__infinite infinite animate__slower text-yellow-400 text-4xl mb-4">
+          <i class="fas fa-coins"></i>
+        </div>
+        
+        <p class="text-gray-400 text-sm">ستحصل على <span class="text-yellow-400">1</span> عملة بعد انتهاء الإعلان</p>
+      </div>
+    </div>
+  </div>
+
 <script>
-  // ✅ Firebase Config (غير القيم دي ببيانات مشروعك)
+  // ✅ Firebase Config
   const firebaseConfig = {
-  apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
-  authDomain: "hhhhhh-d4fb8.firebaseapp.com",
-  databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
-  projectId: "hhhhhh-d4fb8",
-  storageBucket: "hhhhhh-d4fb8.appspot.com",
-  messagingSenderId: "24512338206",
-  appId: "1:24512338206:web:dfe045db59bd3434a2110f",
-  measurementId: "G-HD4R7GNQ5H"
-};
+    apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+    authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+    databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+    projectId: "hhhhhh-d4fb8",
+    storageBucket: "hhhhhh-d4fb8.appspot.com",
+    messagingSenderId: "24512338206",
+    appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+    measurementId: "G-HD4R7GNQ5H"
+  };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
   // Telegram User
   const tg = window.Telegram.WebApp;
   const userId = tg?.initDataUnsafe?.user?.id?.toString() || "guest";
-  document.getElementById("userId").textContent = "Telegram ID: " + userId;
+  document.getElementById("userId").textContent = userId;
 
   // User Data
   let coins = 0;
@@ -108,65 +304,135 @@
 
   // Update UI
   function updateUI() {
-    document.getElementById("coins").textContent = coins + " 🪙";
-    document.getElementById("coinsBox").textContent = "🪙 " + coins;
+    document.getElementById("coins").innerHTML = coins + ' <i class="fas fa-coins"></i>';
+    document.getElementById("coinsValue").textContent = coins;
+    document.getElementById("coinsBox").classList.add('animate__pulse');
+    setTimeout(() => {
+      document.getElementById("coinsBox").classList.remove('animate__pulse');
+    }, 1000);
+    
     document.getElementById("coinsProfile").textContent = coins;
     document.getElementById("tasksProfile").textContent = tasksToday;
-    document.getElementById("taskInfo").textContent = tasksToday + "/" + DAILY_LIMIT + " إعلان اليوم";
+    document.getElementById("taskInfo").textContent = tasksToday + "/" + DAILY_LIMIT + " إعلان";
     document.getElementById("progressBar").style.width = (tasksToday/DAILY_LIMIT*100)+"%";
   }
 
   // Watch Ad
-  document.getElementById("watchAdBtn").addEventListener("click", async () => {
+  document.getElementById("watchAdBtn").addEventListener("click", () => {
     if (tasksToday >= DAILY_LIMIT) {
-      return alert("❌ وصلت الحد اليومي");
+      showNotification("❌ وصلت الحد اليومي للإعلانات", "error");
+      return;
     }
-
+    
+    // عرض نافذة الإعلان
+    const adModal = document.getElementById("adModal");
+    adModal.style.display = "block";
+    
+    // تعطيل الزر أثناء عرض الإعلان
     const btn = document.getElementById("watchAdBtn");
     btn.disabled = true;
-    btn.textContent = "⏳ الإعلان قيد العرض...";
-
-    // Monetag Ad (5 ثواني بين كل إعلان)
-    window.show_9747739({
-      type: 'inApp',
-      inAppSettings: { 
-        frequency: 1,
-        capping: 0.0014,   // 5 ثواني
-        interval: 5,       // 5 ثواني
-        timeout: 1,        // الإعلان يظهر بعد ثانية
-        everyPage: false 
+    
+    // بدء العد التنازلي
+    let countdown = 30;
+    const countdownElement = document.getElementById("countdown");
+    const adProgress = document.getElementById("adProgress");
+    
+    const countdownInterval = setInterval(() => {
+      countdown--;
+      countdownElement.textContent = countdown;
+      adProgress.style.width = ((30 - countdown) / 30 * 100) + "%";
+      
+      if (countdown <= 0) {
+        clearInterval(countdownInterval);
+        finishAdViewing();
       }
-    });
-
-    // بعد 30 ثانية (مدة الإعلان)
-    setTimeout(async () => {
-      coins++;
-      tasksToday++;
-      await db.collection("users").doc(userId).set({
-        coins,
-        tasksToday,
-        lastTaskDate: new Date().toISOString().split("T")[0]
-      }, { merge: true });
-      updateUI();
-      alert("✅ مبروك! كسبت 1 كوين بعد مشاهدة الإعلان");
-      btn.disabled = false;
-      btn.textContent = "🎥 شاهد إعلان";
-    }, 30000);
+    }, 1000);
+    
+    // تشغيل الإعلان بعد ثانية واحدة
+    setTimeout(() => {
+      window.show_9747739({
+        type: 'inApp',
+        inAppSettings: { 
+          frequency: 1,
+          capping: 0.0014,
+          interval: 5,
+          timeout: 1,
+          everyPage: false 
+        }
+      });
+    }, 1000);
   });
+
+  // إنهاء عرض الإعلان
+  async function finishAdViewing() {
+    // إخفاء نافذة الإعلان
+    document.getElementById("adModal").style.display = "none";
+    
+    // زيادة الرصيد
+    coins++;
+    tasksToday++;
+    
+    // حفظ البيانات في Firebase
+    await db.collection("users").doc(userId).set({
+      coins,
+      tasksToday,
+      lastTaskDate: new Date().toISOString().split("T")[0]
+    }, { merge: true });
+    
+    // تحديث الواجهة
+    updateUI();
+    
+    // إعادة تمكين زر مشاهدة الإعلان
+    document.getElementById("watchAdBtn").disabled = false;
+    
+    // عرض رسالة النجاح
+    showNotification("✅ مبروك! لقد ربحت 1 عملة", "success");
+    
+    // تأثير العملة
+    document.getElementById("coins").classList.add("coin-animation");
+    setTimeout(() => {
+      document.getElementById("coins").classList.remove("coin-animation");
+    }, 1000);
+  }
+
+  // عرض الإشعارات
+  function showNotification(message, type) {
+    const notification = document.createElement("div");
+    notification.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown ${
+      type === "error" ? "bg-red-600" : "bg-green-600"
+    }`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+      notification.classList.add("animate__fadeOutUp");
+      setTimeout(() => {
+        document.body.removeChild(notification);
+      }, 1000);
+    }, 3000);
+  }
 
   // Pages
   function showPage(page) {
     document.querySelectorAll("main").forEach(m => m.classList.add("hidden"));
     document.getElementById("page"+page.charAt(0).toUpperCase()+page.slice(1)).classList.remove("hidden");
-    document.querySelectorAll("nav button").forEach(btn => btn.classList.replace("text-blue-400","text-gray-400"));
-    document.querySelector(`nav button[onclick=\"showPage('${page}')\"]`).classList.replace("text-gray-400","text-blue-400");
+    
+    // تحديث أزرار التنقل
+    document.querySelectorAll("nav button").forEach(btn => {
+      btn.classList.remove("text-blue-400");
+      btn.classList.add("text-gray-400");
+      btn.classList.remove("active");
+    });
+    
+    const activeBtn = document.querySelector(`nav button[onclick="showPage('${page}')"]`);
+    activeBtn.classList.add("text-blue-400", "active");
+    activeBtn.classList.remove("text-gray-400");
   }
 
+  // تهيئة التطبيق
   loadUser();
 </script>
 
 </body>
 </html>
-
-
-
