@@ -42,9 +42,16 @@
       transition: all 0.3s ease;
     }
     
-    .diamond-btn:hover {
+    .diamond-btn:hover:not(:disabled) {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px 0 rgba(0, 210, 255, 0.7);
+    }
+    
+    .diamond-btn:disabled {
+      background: #4b5563;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
     }
     
     .ad-modal {
@@ -131,7 +138,6 @@
     }
     
     .ad-container {
-      display: none;
       margin: 20px 0;
       min-height: 250px;
       background: rgba(0, 0, 0, 0.2);
@@ -140,6 +146,28 @@
       align-items: center;
       justify-content: center;
       color: #666;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 20px;
+      border-radius: 8px;
+      z-index: 1001;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      animation: slideIn 0.3s ease-out, fadeOut 0.5s ease-in 2.5s forwards;
+    }
+    
+    @keyframes slideIn {
+      from { top: -50px; opacity: 0; }
+      to { top: 20px; opacity: 1; }
+    }
+    
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; visibility: hidden; }
     }
   </style>
 </head>
@@ -318,6 +346,10 @@
   const DAILY_LIMIT = 100;
   const AD_DURATION = 15; // 15 ثانية
 
+  // متغيرات التحكم بالإعلان
+  let isAdPlaying = false;
+  let adScriptLoaded = false;
+
   // Load User
   async function loadUser() {
     const today = new Date().toISOString().split("T")[0];
@@ -356,6 +388,11 @@
 
   // Watch Ad
   document.getElementById("watchAdBtn").addEventListener("click", () => {
+    if (isAdPlaying) {
+      showNotification("⏳ الإعلان قيد التشغيل بالفعل", "info");
+      return;
+    }
+    
     if (tasksToday >= DAILY_LIMIT) {
       showNotification("❌ وصلت الحد اليومي للإعلانات", "error");
       return;
@@ -364,10 +401,12 @@
     // عرض نافذة الإعلان
     const adModal = document.getElementById("adModal");
     adModal.style.display = "block";
+    isAdPlaying = true;
     
     // تعطيل الزر أثناء عرض الإعلان
     const btn = document.getElementById("watchAdBtn");
     btn.disabled = true;
+    btn.classList.remove("pulse");
     
     // بدء العد التنازلي (15 ثانية)
     let countdown = AD_DURATION;
@@ -386,36 +425,43 @@
     }, 1000);
     
     // تحميل وتشغيل الإعلان بعد تأخير بسيط
-    setTimeout(() => {
-      // إنشاء عنصر الإعلان ديناميكياً فقط عند النقر
+    if (!adScriptLoaded) {
       const adScript = document.createElement('script');
       adScript.src = '//libtl.com/sdk.js';
       adScript.setAttribute('data-zone', '9747739');
       adScript.setAttribute('data-sdk', 'show_9747739');
+      adScript.onload = () => {
+        adScriptLoaded = true;
+        playAd();
+      };
       document.head.appendChild(adScript);
-      
-      // تشغيل الإعلان بعد تحميل السكريبت
-      setTimeout(() => {
-        if (typeof window.show_9747739 === 'function') {
-          window.show_9747739({
-            type: 'inApp',
-            inAppSettings: { 
-              frequency: 1,
-              capping: 0.0014,
-              interval: 5,
-              timeout: 0.5,
-              everyPage: false 
-            }
-          });
-        }
-      }, 1000);
-    }, 500);
+    } else {
+      playAd();
+    }
   });
+
+  // تشغيل الإعلان
+  function playAd() {
+    if (typeof window.show_9747739 === 'function') {
+      window.show_9747739({
+        type: 'inApp',
+        inAppSettings: { 
+          frequency: 1,
+          capping: 0.0014,
+          interval: 5,
+          timeout: 0.5,
+          everyPage: false 
+        }
+      });
+    }
+  }
 
   // إنهاء عرض الإعلان
   async function finishAdViewing() {
     // إخفاء نافذة الإعلان
-    document.getElementById("adModal").style.display = "none";
+    const adModal = document.getElementById("adModal");
+    adModal.style.display = "none";
+    isAdPlaying = false;
     
     // زيادة الرصيد
     coins++;
@@ -432,7 +478,9 @@
     updateUI();
     
     // إعادة تمكين زر مشاهدة الإعلان
-    document.getElementById("watchAdBtn").disabled = false;
+    const btn = document.getElementById("watchAdBtn");
+    btn.disabled = false;
+    btn.classList.add("pulse");
     
     // عرض رسالة النجاح
     showNotification("✅ مبروك! لقد ربحت 1 عملة", "success");
@@ -446,16 +494,23 @@
 
   // عرض الإشعارات
   function showNotification(message, type) {
+    // إزالة أي إشعارات سابقة
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(notification => notification.remove());
+    
     const notification = document.createElement("div");
-    notification.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg shadow-lg z-50 ${
-      type === "error" ? "bg-red-600" : "bg-green-600"
+    notification.className = `notification ${
+      type === "error" ? "bg-red-600" : 
+      type === "info" ? "bg-blue-600" : "bg-green-600"
     }`;
     notification.textContent = message;
     
     document.body.appendChild(notification);
     
     setTimeout(() => {
-      notification.remove();
+      if (notification.parentNode) {
+        notification.remove();
+      }
     }, 3000);
   }
 
