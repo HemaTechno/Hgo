@@ -3,382 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mini App Coins - كويزات ربحية</title>
+  <title>Mini App Coins</title>
 
   <!-- TailwindCSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
-  <!-- Animate.css -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-
   <!-- Monetag SDK -->
-<script src='//libtl.com/sdk.js' data-zone='9747739' data-sdk='show_9747739'></script>
-  <!-- Telegram SDK -->
+<script src='//libtl.com/sdk.js' data-zone='9747739' data-sdk='show_9747739'></script>  <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
-    
-    :root {
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --secondary: #f59e0b;
-      --dark: #1f2937;
-      --darker: #111827;
-    }
-    
-    body {
-      font-family: 'Tajawal', sans-serif;
-      background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
-      min-height: 100vh;
-    }
-    
-    .card {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      transition: all 0.3s ease;
-    }
-    
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    }
-    
-    .nav-btn {
-      transition: all 0.3s ease;
-      position: relative;
-    }
-    
-    .nav-btn.active {
-      color: var(--primary);
-    }
-    
-    .nav-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--primary);
-    }
-    
-    .progress-bar {
-      overflow: hidden;
-      position: relative;
-    }
-    
-    .progress-bar::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-      border-radius: 10px;
-      animation: fill 1s ease-in-out;
-    }
-    
-    .coin-animation {
-      animation: bounce 0.5s infinite alternate;
-    }
-    
-    @keyframes bounce {
-      from { transform: translateY(0) scale(1); }
-      to { transform: translateY(-5px) scale(1.1); }
-    }
-    
-    @keyframes fill {
-      from { width: 0%; }
-    }
-    
-    .btn-glow {
-      box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
-    }
-    
-    .btn-glow:hover {
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.8);
-    }
-    
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-  </style>
 </head>
-<body class="flex flex-col min-h-screen text-white">
+<body class="bg-gray-900 text-white flex flex-col min-h-screen">
 
   <!-- Header -->
-  <header class="bg-gray-800/80 backdrop-blur-md p-4 flex justify-between items-center sticky top-0 z-10 border-b border-gray-700">
-    <div class="flex items-center">
-      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center mr-2">
-        <i class="fas fa-rocket"></i>
-      </div>
-      <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">كويزات ربحية</h1>
-    </div>
-    <div id="coinsBox" class="bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 rounded-full flex items-center shadow-lg">
-      <span class="coin-animation mr-2">🪙</span> 
-      <span id="coinsValue" class="font-bold">0</span>
-    </div>
+  <header class="bg-gray-800 p-4 flex justify-between items-center">
+    <h1 class="text-xl font-bold">🚀 Mini App</h1>
+    <div id="coinsBox" class="bg-blue-600 px-4 py-1 rounded-full">🪙 0</div>
   </header>
 
-  <!-- Loading Screen -->
-  <div id="loadingScreen" class="fixed inset-0 bg-gray-900 flex flex-col items-center justify-center z-50 transition-opacity duration-500">
-    <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-    <p class="text-xl">جاري التحميل...</p>
-  </div>
-
   <!-- Pages -->
-  <main id="pageHome" class="flex-1 p-6">
-    <div class="card p-6 mb-6 text-center pulse">
-      <h2 class="text-lg mb-2 text-gray-300">رصيدك الحالي</h2>
-      <p id="coins" class="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400">0 🪙</p>
-      <p class="text-sm text-gray-400 mt-2">يمكنك سحب الرصيد عند وصولك إلى 1000 عملة</p>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4 mb-6">
-      <div class="card p-4 text-center">
-        <div class="w-12 h-12 mx-auto bg-indigo-500/20 rounded-full flex items-center justify-center mb-2">
-          <i class="fas fa-video text-indigo-400"></i>
-        </div>
-        <h3 class="font-medium">المهام</h3>
-        <p class="text-xs text-gray-400">اكسب بالمشاهدة</p>
-      </div>
-      
-      <div class="card p-4 text-center">
-        <div class="w-12 h-12 mx-auto bg-amber-500/20 rounded-full flex items-center justify-center mb-2">
-          <i class="fas fa-gift text-amber-400"></i>
-        </div>
-        <h3 class="font-medium">المكافآت</h3>
-        <p class="text-xs text-gray-400">مكافآت يومية</p>
-      </div>
-      
-      <div class="card p-4 text-center">
-        <div class="w-12 h-12 mx-auto bg-green-500/20 rounded-full flex items-center justify-center mb-2">
-          <i class="fas fa-users text-green-400"></i>
-        </div>
-        <h3 class="font-medium">الإحالات</h3>
-        <p class="text-xs text-gray-400">ادعِ أصدقاءك</p>
-      </div>
-      
-      <div class="card p-4 text-center">
-        <div class="w-12 h-12 mx-auto bg-red-500/20 rounded-full flex items-center justify-center mb-2">
-          <i class="fas fa-award text-red-400"></i>
-        </div>
-        <h3 class="font-medium">التصنيف</h3>
-        <p class="text-xs text-gray-400">المتصدرين</p>
-      </div>
-    </div>
-
-    <div class="card p-5">
-      <h2 class="text-lg font-bold mb-4 flex items-center">
-        <i class="fas fa-bolt text-amber-400 ml-2"></i>
-        عروض سريعة
-      </h2>
-      
-      <div class="space-y-3">
-        <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl">
-          <div class="flex items-center">
-            <div class="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center ml-2">
-              <i class="fas fa-coins text-amber-400"></i>
-            </div>
-            <div>
-              <p class="font-medium">شاهد إعلانًا</p>
-              <p class="text-xs text-gray-400">+5 عملات</p>
-            </div>
-          </div>
-          <button class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg text-sm transition-colors">ابدأ</button>
-        </div>
-        
-        <div class="flex items-center justify-between p-3 bg-gray-700/50 rounded-xl">
-          <div class="flex items-center">
-            <div class="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center ml-2">
-              <i class="fas fa-download text-green-400"></i>
-            </div>
-            <div>
-              <p class="font-medium">حمّل تطبيقًا</p>
-              <p class="text-xs text-gray-400">+50 عملة</p>
-            </div>
-          </div>
-          <button class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg text-sm transition-colors">ابدأ</button>
-        </div>
-      </div>
+  <main id="pageHome" class="flex-1 p-6 text-center">
+    <div class="bg-gray-800 rounded-2xl p-6 shadow-lg">
+      <h2 class="text-lg mb-2">رصيدك الحالي</h2>
+      <p id="coins" class="text-4xl font-bold">0 🪙</p>
     </div>
   </main>
 
-  <main id="pageTasks" class="hidden flex-1 p-6">
-    <div class="card p-6 mb-6">
-      <h2 class="text-lg font-bold mb-4 flex items-center">
-        <i class="fas fa-video text-indigo-400 ml-2"></i>
-        المهام اليومية
-      </h2>
-      
-      <div class="mb-4">
-        <div class="flex justify-between text-sm mb-1">
-          <span>تقدم اليوم</span>
-          <span id="taskInfo">0 / 100</span>
-        </div>
-        <div class="w-full bg-gray-700 rounded-full h-3 progress-bar">
-          <div id="progressBar" class="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full"></div>
-        </div>
+  <main id="pageTasks" class="hidden flex-1 p-6 text-center">
+    <div class="bg-gray-800 rounded-2xl p-6 shadow-lg space-y-4">
+      <h2 class="text-lg">🎥 المهام اليومية</h2>
+      <div class="w-full bg-gray-700 rounded-full h-2">
+        <div id="progressBar" class="bg-blue-500 h-2 rounded-full w-0"></div>
       </div>
-      
-      <button id="watchAdBtn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 py-3 rounded-xl font-bold btn-glow transition-all flex items-center justify-center">
-        <i class="fas fa-play-circle ml-2"></i>
-        شاهد إعلانًا (+1 عملة)
-      </button>
-      
-      <p class="text-xs text-center text-gray-400 mt-3">يمكنك مشاهدة 100 إعلان يوميًا كحد أقصى</p>
-    </div>
-    
-    <h2 class="text-lg font-bold mb-4 flex items-center">
-      <i class="fas fa-list-check text-green-400 ml-2"></i>
-      مهام أخرى
-    </h2>
-    
-    <div class="space-y-3">
-      <div class="card p-4 flex items-center justify-between">
-        <div class="flex items-center">
-          <div class="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center ml-2">
-            <i class="fas fa-user-plus text-blue-400"></i>
-          </div>
-          <div>
-            <p class="font-medium">ادعُ صديقًا</p>
-            <p class="text-xs text-gray-400">+100 عملة لكل صديق</p>
-          </div>
-        </div>
-        <button class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg text-sm transition-colors">ابدأ</button>
-      </div>
-      
-      <div class="card p-4 flex items-center justify-between">
-        <div class="flex items-center">
-          <div class="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center ml-2">
-            <i class="fas fa-calendar-check text-amber-400"></i>
-          </div>
-          <div>
-            <p class="font-medium">تسجيل يومي</p>
-            <p class="text-xs text-gray-400">+10 عملات يوميًا</p>
-          </div>
-        </div>
-        <button class="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-lg text-sm transition-colors">احصل عليها</button>
-      </div>
+      <p id="taskInfo">0 / 100 إعلان اليوم</p>
+      <button id="watchAdBtn" class="bg-blue-600 px-4 py-2 rounded-xl">🎥 شاهد إعلان</button>
     </div>
   </main>
 
-  <main id="pageProfile" class="hidden flex-1 p-6">
-    <div class="flex flex-col items-center mb-6">
-      <div class="w-24 h-24 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 p-1 mb-3">
-        <div class="w-full h-full rounded-full bg-gray-800 flex items-center justify-center">
-          <i class="fas fa-user text-3xl"></i>
-        </div>
-      </div>
-      <h2 class="text-xl font-bold">المستخدم</h2>
-      <p id="userId" class="text-gray-400 text-sm">Telegram ID: -</p>
-    </div>
-    
-    <div class="card p-5 mb-6">
-      <h2 class="text-lg font-bold mb-4 flex items-center">
-        <i class="fas fa-chart-simple text-green-400 ml-2"></i>
-        إحصائياتك
-      </h2>
-      
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-gray-700/30 p-3 rounded-lg text-center">
-          <div class="text-2xl font-bold text-indigo-400 mb-1"><span id="coinsProfile">0</span></div>
-          <p class="text-xs text-gray-300">العملات</p>
-        </div>
-        
-        <div class="bg-gray-700/30 p-3 rounded-lg text-center">
-          <div class="text-2xl font-bold text-amber-400 mb-1"><span id="tasksProfile">0</span>/100</div>
-          <p class="text-xs text-gray-300">مهام اليوم</p>
-        </div>
-        
-        <div class="bg-gray-700/30 p-3 rounded-lg text-center">
-          <div class="text-2xl font-bold text-blue-400 mb-1">0</div>
-          <p class="text-xs text-gray-300">الإحالات</p>
-        </div>
-        
-        <div class="bg-gray-700/30 p-3 rounded-lg text-center">
-          <div class="text-2xl font-bold text-green-400 mb-1">0</div>
-          <p class="text-xs text-gray-300">الأيام</p>
-        </div>
-      </div>
-    </div>
-    
-    <div class="card p-5">
-      <h2 class="text-lg font-bold mb-4 flex items-center">
-        <i class="fas fa-gear text-gray-400 ml-2"></i>
-        الإعدادات
-      </h2>
-      
-      <div class="space-y-3">
-        <button class="w-full text-right py-3 px-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-between">
-          <span>الحساب</span>
-          <i class="fas fa-chevron-left text-gray-400"></i>
-        </button>
-        
-        <button class="w-full text-right py-3 px-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-between">
-          <span>الإشعارات</span>
-          <i class="fas fa-chevron-left text-gray-400"></i>
-        </button>
-        
-        <button class="w-full text-right py-3 px-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-between">
-          <span>الدعم</span>
-          <i class="fas fa-chevron-left text-gray-400"></i>
-        </button>
-        
-        <button class="w-full text-right py-3 px-4 bg-gray-700/50 hover:bg-gray-700 rounded-lg transition-colors flex items-center justify-between">
-          <span>حول التطبيق</span>
-          <i class="fas fa-chevron-left text-gray-400"></i>
-        </button>
-      </div>
+  <main id="pageProfile" class="hidden flex-1 p-6 text-center">
+    <div class="bg-gray-800 rounded-2xl p-6 shadow-lg space-y-2">
+      <h2 class="text-lg mb-4">👤 حسابك</h2>
+      <p id="userId">Telegram ID: -</p>
+      <p>Coins: <span id="coinsProfile">0</span></p>
+      <p>Tasks Today: <span id="tasksProfile">0</span>/100</p>
     </div>
   </main>
 
   <!-- Bottom Nav -->
-  <nav class="flex justify-around bg-gray-800/80 backdrop-blur-md py-4 border-t border-gray-700">
-    <button onclick="showPage('home')" class="nav-btn text-gray-400 flex flex-col items-center">
-      <i class="fas fa-home text-lg mb-1"></i>
-      <span class="text-xs">الرئيسية</span>
-    </button>
-    
-    <button onclick="showPage('tasks')" class="nav-btn text-gray-400 flex flex-col items-center">
-      <i class="fas fa-video text-lg mb-1"></i>
-      <span class="text-xs">المهام</span>
-    </button>
-    
-    <button onclick="showPage('profile')" class="nav-btn text-gray-400 flex flex-col items-center">
-      <i class="fas fa-user text-lg mb-1"></i>
-      <span class="text-xs">حسابي</span>
-    </button>
+  <nav class="flex justify-around bg-gray-800 py-3 border-t border-gray-700">
+    <button onclick="showPage('home')" class="text-blue-400">🏠</button>
+    <button onclick="showPage('tasks')" class="text-gray-400">🎥</button>
+    <button onclick="showPage('profile')" class="text-gray-400">👤</button>
   </nav>
 
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed top-4 right-1/2 transform translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg z-50 transition-opacity duration-500 opacity-0 hidden">
-    <div class="flex items-center">
-      <i id="toastIcon" class="fas fa-check-circle ml-2"></i>
-      <p id="toastMessage"></p>
-    </div>
-  </div>
-
 <script>
-  // ✅ Firebase Config
+  // ✅ Firebase Config (غير القيم دي ببيانات مشروعك)
   const firebaseConfig = {
   apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
   authDomain: "hhhhhh-d4fb8.firebaseapp.com",
@@ -402,33 +84,6 @@
   let tasksToday = 0;
   const DAILY_LIMIT = 100;
 
-  // Show toast notification
-  function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    const toastMessage = document.getElementById('toastMessage');
-    const toastIcon = document.getElementById('toastIcon');
-    
-    toastMessage.textContent = message;
-    
-    if (type === 'success') {
-      toast.className = toast.className.replace('bg-red-800', 'bg-green-800');
-      toastIcon.className = 'fas fa-check-circle ml-2';
-    } else {
-      toast.className = toast.className.replace('bg-green-800', 'bg-red-800');
-      toastIcon.className = 'fas fa-exclamation-circle ml-2';
-    }
-    
-    toast.classList.remove('hidden');
-    toast.classList.remove('opacity-0');
-    toast.classList.add('opacity-100');
-    
-    setTimeout(() => {
-      toast.classList.remove('opacity-100');
-      toast.classList.add('opacity-0');
-      setTimeout(() => toast.classList.add('hidden'), 500);
-    }, 3000);
-  }
-
   // Load User
   async function loadUser() {
     const today = new Date().toISOString().split("T")[0];
@@ -448,89 +103,67 @@
       }
     }
     updateUI();
-    
-    // Hide loading screen
-    setTimeout(() => {
-      document.getElementById('loadingScreen').classList.add('opacity-0');
-      setTimeout(() => {
-        document.getElementById('loadingScreen').classList.add('hidden');
-      }, 500);
-    }, 1000);
   }
 
   // Update UI
   function updateUI() {
     document.getElementById("coins").textContent = coins + " 🪙";
-    document.getElementById("coinsValue").textContent = coins;
+    document.getElementById("coinsBox").textContent = "🪙 " + coins;
     document.getElementById("coinsProfile").textContent = coins;
     document.getElementById("tasksProfile").textContent = tasksToday;
-    document.getElementById("taskInfo").textContent = tasksToday + "/" + DAILY_LIMIT;
+    document.getElementById("taskInfo").textContent = tasksToday + "/" + DAILY_LIMIT + " إعلان اليوم";
     document.getElementById("progressBar").style.width = (tasksToday/DAILY_LIMIT*100)+"%";
   }
 
   // Watch Ad
   document.getElementById("watchAdBtn").addEventListener("click", async () => {
     if (tasksToday >= DAILY_LIMIT) {
-      showToast("❌ وصلت الحد اليومي للإعلانات", "error");
-      return;
+      return alert("❌ وصلت الحد اليومي");
     }
-    
-    // Monetag Ad
+
+    const btn = document.getElementById("watchAdBtn");
+    btn.disabled = true;
+    btn.textContent = "⏳ الإعلان قيد العرض...";
+
+    // Monetag Ad (5 ثواني بين كل إعلان)
     window.show_9747739({
       type: 'inApp',
-      inAppSettings: { frequency: 1, capping: 0.1, interval: 30, timeout: 3, everyPage: false }
+      inAppSettings: { 
+        frequency: 1,
+        capping: 0.0014,   // 5 ثواني
+        interval: 5,       // 5 ثواني
+        timeout: 1,        // الإعلان يظهر بعد ثانية
+        everyPage: false 
+      }
     });
 
-    // Show loading state
-    const watchBtn = document.getElementById("watchAdBtn");
-    const originalText = watchBtn.innerHTML;
-    watchBtn.innerHTML = '<i class="fas fa-spinner fa-spin ml-2"></i> جاري التحميل...';
-    watchBtn.disabled = true;
-
+    // بعد 30 ثانية (مدة الإعلان)
     setTimeout(async () => {
       coins++;
       tasksToday++;
       await db.collection("users").doc(userId).set({
-        coins, tasksToday, lastTaskDate: new Date().toISOString().split("T")[0]
+        coins,
+        tasksToday,
+        lastTaskDate: new Date().toISOString().split("T")[0]
       }, { merge: true });
-      
       updateUI();
-      watchBtn.innerHTML = originalText;
-      watchBtn.disabled = false;
-      
-      // Add coin animation
-      const coinBox = document.getElementById("coinsBox");
-      coinBox.classList.add("animate__animated", "animate__tada");
-      setTimeout(() => {
-        coinBox.classList.remove("animate__animated", "animate__tada");
-      }, 1000);
-      
-      showToast("✅ مبروك! كسبت 1 عملة");
-    }, 10000); // 10 ثواني
+      alert("✅ مبروك! كسبت 1 كوين بعد مشاهدة الإعلان");
+      btn.disabled = false;
+      btn.textContent = "🎥 شاهد إعلان";
+    }, 30000);
   });
 
   // Pages
   function showPage(page) {
     document.querySelectorAll("main").forEach(m => m.classList.add("hidden"));
     document.getElementById("page"+page.charAt(0).toUpperCase()+page.slice(1)).classList.remove("hidden");
-    
-    // Update nav buttons
-    document.querySelectorAll("nav button").forEach(btn => {
-      btn.classList.remove("active", "text-blue-400");
-      btn.classList.add("text-gray-400");
-    });
-    
-    const activeBtn = document.querySelector(`nav button[onclick="showPage('${page}')"]`);
-    activeBtn.classList.add("active", "text-blue-400");
-    activeBtn.classList.remove("text-gray-400");
+    document.querySelectorAll("nav button").forEach(btn => btn.classList.replace("text-blue-400","text-gray-400"));
+    document.querySelector(`nav button[onclick=\"showPage('${page}')\"]`).classList.replace("text-gray-400","text-blue-400");
   }
 
-  // Initialize
-  document.addEventListener('DOMContentLoaded', function() {
-    loadUser();
-    showPage('home');
-  });
+  loadUser();
 </script>
 
 </body>
 </html>
+
