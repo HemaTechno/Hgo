@@ -1,68 +1,248 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>🚀 تطبيق مصغر مع إعلانات</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mini App Coins</title>
 
-  <!-- خط جميل -->
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500&display=swap" rel="stylesheet">
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- كود PropellerAds الرئيسي -->
-<script src='//libtl.com/sdk.js' data-zone='9747276' data-sdk='show_9747276'></script>
+  <!-- Firebase SDK (Compat لتبسيط الكود) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- Monetag Tag (استخدمت رقم المساحة الذي أرسلته) -->
+  <script src="https://js.monetag.com/9747739/tag.min.js"></script>
+
   <style>
+    :root { --bg:#0d1117; --card:#161b22; --txt:#fff; --muted:#9ca3af; --acc:#0088cc; }
+    * { box-sizing: border-box; }
     body {
-      font-family: 'Cairo', sans-serif;
-      background: linear-gradient(135deg, #4facfe, #00f2fe);
-      color: white;
-      text-align: center;
-      padding: 50px 20px;
+      margin: 0; padding: 0; font-family: system-ui, Arial, sans-serif;
+      background: var(--bg); color: var(--txt); display: flex; flex-direction: column; height: 100vh;
     }
-    h1 {
-      font-size: 26px;
-      margin-bottom: 10px;
+    header {
+      padding: 14px 18px; background: var(--card); border-bottom: 1px solid #222;
+      display: flex; align-items: center; justify-content: space-between;
     }
-    p {
-      font-size: 18px;
-      margin-bottom: 25px;
+    header h1 { margin: 0; font-size: 18px; }
+    .coins-pill {
+      background: #0b2530; border: 1px solid #103645; padding: 6px 10px; border-radius: 999px; font-weight: 700;
     }
-    button {
-      background: #fff;
-      color: #333;
-      padding: 14px 22px;
-      border: none;
-      border-radius: 12px;
-      font-size: 18px;
-      cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    main { flex: 1; padding: 16px; overflow-y: auto; }
+    .card {
+      background: var(--card); border: 1px solid #1f2937; border-radius: 14px; padding: 14px; margin-bottom: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.25);
     }
-    button:hover {
-      background: #ddd;
+    .card h3 { margin: 0 0 8px; font-size: 16px; }
+    .card p { margin: 0 0 10px; color: var(--muted); }
+    .btn {
+      display: inline-block; background: var(--acc); color: #fff; border: 0; border-radius: 12px;
+      padding: 10px 16px; font-weight: 700; cursor: pointer; font-size: 15px;
     }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+    nav {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 0;
+      background: var(--card); border-top: 1px solid #222;
+    }
+    nav button {
+      appearance: none; background: transparent; border: 0; color: var(--muted);
+      padding: 12px 6px; font-size: 15px; cursor: pointer; font-weight: 700;
+    }
+    nav button.active { color: #fff; border-top: 2px solid var(--acc); }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .task-line { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .small { font-size: 13px; color: var(--muted); }
   </style>
 </head>
 <body>
-  <h1>👋 أهلاً بيك في التطبيق</h1>
-  <p>هنا هتلاقي عروض وإعلانات تكسب منها 💰</p>
+  <header>
+    <h1>نظام الكوينات</h1>
+    <div class="coins-pill">🪙 <span id="coins">0</span></div>
+  </header>
 
-  <!-- زر رئيسي -->
-  <button onclick="alert('تم فتح التطبيق ✅')">🚀 جرب الآن</button>
+  <main id="content"></main>
 
-  <p style="margin-top: 40px; font-size:14px;">⚡ التطبيق يعمل داخل تليجرام Mini App</p>
+  <nav>
+    <button id="homeBtn" class="active">🏠 الرئيسية</button>
+    <button id="tasksBtn">🎯 المهام</button>
+    <button id="profileBtn">👤 حسابي</button>
+  </nav>
 
-  <!-- تفعيل إعلانات In-App Interstitial -->
   <script>
-    show_9747276({
-      type: 'inApp',
-      inAppSettings: {
-        frequency: 2,     // عدد الإعلانات
-        capping: 0.1,     // كل 6 دقائق
-        interval: 30,     // بين كل إعلان والتاني 30 ثانية
-        timeout: 5,       // أول إعلان بعد 5 ثواني
-        everyPage: false  // الإعلانات تستمر حتى لو غير الصفحة
+    // ---------- Telegram User ----------
+    const tg = window.Telegram?.WebApp;
+    tg?.expand();
+    const TELEGRAM_USER_ID = tg?.initDataUnsafe?.user?.id?.toString() || "guest"; // أثناء التطوير
+
+    // ---------- Firebase ----------
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const usersCol = db.collection("users");
+    const userRef = usersCol.doc(TELEGRAM_USER_ID);
+
+    // ---------- State ----------
+    const content = document.getElementById("content");
+    const coinsEl = document.getElementById("coins");
+    let coins = 0;
+    let adLock = false; // منع السبام على زر الإعلان
+
+    // تحميل الرصيد من Firestore
+    async function loadCoins() {
+      const snap = await userRef.get();
+      if (!snap.exists) {
+        await userRef.set({ coins: 0, lastUpdate: Date.now(), scriptsUnlocked: [] });
+        coins = 0;
+      } else {
+        coins = Number(snap.data().coins || 0);
       }
-    })
+      coinsEl.textContent = coins;
+    }
+
+    // تحديث الرصيد في Firestore
+    async function addCoins(amount) {
+      coins += amount;
+      coinsEl.textContent = coins;
+      await userRef.set({ coins, lastUpdate: Date.now() }, { merge: true });
+    }
+
+    // ---------- صفحات ----------
+    function setPage(page) {
+      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+      if (page === "home") {
+        document.getElementById("homeBtn").classList.add("active");
+        content.innerHTML = `
+          <div class="card">
+            <h3>👋 أهلاً بك!</h3>
+            <p class="small">ابدأ بجمع الكوينات من صفحة المهام، ثم اعرض رصيدك من "حسابي".</p>
+          </div>
+          <div class="card">
+            <h3>⚡ تلميح</h3>
+            <p class="small">يمكنك كسب كوين بمشاهدة إعلان داخل التطبيق. الرجاء الانتظار حتى نهاية الإعلان ليُضاف الرصيد.</p>
+          </div>
+        `;
+      }
+      if (page === "tasks") {
+        document.getElementById("tasksBtn").classList.add("active");
+        content.innerHTML = `
+          <div class="card">
+            <div class="task-line">
+              <div>
+                <h3>🎥 شاهد إعلان داخل التطبيق</h3>
+                <div class="small">تكافؤ: +1 كوين — يُضاف بعد إتمام العرض.</div>
+              </div>
+              <button class="btn" id="watchAdBtn">شاهد الآن</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="task-line">
+              <div>
+                <h3>🌐 زيارة رابط</h3>
+                <div class="small">ادخل للرابط لمدة 10 ثواني ثم ارجع لتحصل على +2 كوين.</div>
+              </div>
+              <button class="btn" id="visitBtn">اذهب</button>
+            </div>
+          </div>
+        `;
+
+        // ربط أزرار المهام
+        document.getElementById("watchAdBtn").addEventListener("click", watchAdTask);
+        document.getElementById("visitBtn").addEventListener("click", visitLinkTask);
+      }
+      if (page === "profile") {
+        document.getElementById("profileBtn").classList.add("active");
+        content.innerHTML = `
+          <div class="card">
+            <h3>👤 حسابي</h3>
+            <p>🪙 رصيدك الحالي: <b>${coins}</b></p>
+            <p class="small">المعرّف: ${TELEGRAM_USER_ID}</p>
+            <div class="row">
+              <button class="btn" id="refreshBtn">تحديث الرصيد</button>
+              <button class="btn" id="sendToBot">إرسال إشعار للبوت</button>
+            </div>
+          </div>
+        `;
+        document.getElementById("refreshBtn").addEventListener("click", loadCoins);
+        document.getElementById("sendToBot").addEventListener("click", () => {
+          tg?.sendData?.(JSON.stringify({ type: "balance", coins }));
+          tg?.showPopup?.({ title: "تم", message: "تم إرسال رصيدك للبوت.", buttons: [{type:"ok"}] });
+        });
+      }
+    }
+
+    // ---------- مهمة الإعلان (Monetag) ----------
+    async function watchAdTask() {
+      if (adLock) return;
+      adLock = true;
+      const btn = document.getElementById("watchAdBtn");
+      btn.disabled = true;
+
+      // تشغيل الإعلان كما أرسلت الإعدادات
+      try {
+        show_9747739({
+          type: 'inApp',
+          inAppSettings: {
+            frequency: 1,   // إعلان واحد كل مرة
+            capping: 0.1,   // كل 6 دقائق كحد أقصى
+            interval: 30,   // فاصلة 30 ثانية بين عروض الجلسة
+            timeout: 5,     // يبدأ بعد 5 ثواني
+            everyPage: false
+          }
+        });
+      } catch(e){ /* تجاهل أي خطأ في سكربت Monetag */ }
+
+      // من غير Callback رسمي من Monetag، نعتمد مؤقت أمان
+      // زوّده/قلّله حسب طول الإعلان الفعلي
+      const ASSUMED_DURATION_MS = 12000; // 12 ثانية
+      setTimeout(async () => {
+        await addCoins(1);
+        tg?.showPopup?.({
+          title: "ممتاز!",
+          message: "✅ تم إضافة 1 كوين بعد مشاهدة الإعلان.",
+          buttons: [{ type: "ok" }]
+        });
+        btn.disabled = false;
+        adLock = false;
+      }, ASSUMED_DURATION_MS);
+    }
+
+    // ---------- مهمة زيارة رابط ----------
+    function visitLinkTask() {
+      const url = "https://example.com/"; // غيّر الرابط لمهمة حقيقية
+      const WAIT_MS = 10000; // 10 ثواني
+      tg?.openLink?.(url, { try_instant_view: false });
+
+      const btn = document.getElementById("visitBtn");
+      btn.disabled = true;
+      setTimeout(async () => {
+        await addCoins(2);
+        tg?.showPopup?.({
+          title: "تمت المهمة",
+          message: "✅ حصلت على +2 كوين بعد زيارة الرابط.",
+          buttons: [{ type: "ok" }]
+        });
+        btn.disabled = false;
+      }, WAIT_MS);
+    }
+
+    // ---------- تنقّل ----------
+    document.getElementById("homeBtn").addEventListener("click", () => setPage("home"));
+    document.getElementById("tasksBtn").addEventListener("click", () => setPage("tasks"));
+    document.getElementById("profileBtn").addEventListener("click", () => setPage("profile"));
+
+    // تحميل أولي
+    loadCoins().then(() => setPage("home"));
   </script>
 </body>
 </html>
+
