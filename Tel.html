@@ -15,9 +15,6 @@
   <!-- Font Awesome للايقونات -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Monetag SDK -->
-  <script src='//libtl.com/sdk.js' data-zone='9747739' data-sdk='show_9747739'></script>
-  
   <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
@@ -132,6 +129,18 @@
     .header-glow {
       box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
     }
+    
+    .ad-container {
+      display: none;
+      margin: 20px 0;
+      min-height: 250px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #666;
+    }
   </style>
 </head>
 <body class="text-white flex flex-col min-h-screen">
@@ -194,7 +203,13 @@
       <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
         <h3 class="text-lg mb-2">شاهد الإعلان واحصل على مكافأة</h3>
         <p class="text-gray-400 text-sm mb-4">اضغط على الزر بالأسفل وشاهد الإعلان لمدة 15 ثانية</p>
-        <button id="watchAdBtn" class="diamond-btn px-6 py-3 rounded-xl text-white font-bold text-lg pulse w-full">
+        
+        <!-- حاوية الإعلان -->
+        <div id="adContainer" class="ad-container">
+          <p>سوف يظهر الإعلان هنا بعد النقر على الزر</p>
+        </div>
+        
+        <button id="watchAdBtn" class="diamond-btn px-6 py-3 rounded-xl text-white font-bold text-lg pulse w-full mt-4">
           <i class="fas fa-play-circle mr-2"></i>شاهد إعلان
         </button>
       </div>
@@ -301,7 +316,7 @@
   let coins = 0;
   let tasksToday = 0;
   const DAILY_LIMIT = 100;
-  const AD_DURATION = 15; // 15 ثانية بدلاً من 30
+  const AD_DURATION = 15; // 15 ثانية
 
   // Load User
   async function loadUser() {
@@ -370,18 +385,30 @@
       }
     }, 1000);
     
-    // تشغيل الإعلان بعد نصف ثانية
+    // تحميل وتشغيل الإعلان بعد تأخير بسيط
     setTimeout(() => {
-      window.show_9747739({
-        type: 'inApp',
-        inAppSettings: { 
-          frequency: 1,
-          capping: 0.0014,
-          interval: 5,
-          timeout: 0.5, // وقت أقل لظهور الإعلان
-          everyPage: false 
+      // إنشاء عنصر الإعلان ديناميكياً فقط عند النقر
+      const adScript = document.createElement('script');
+      adScript.src = '//libtl.com/sdk.js';
+      adScript.setAttribute('data-zone', '9747739');
+      adScript.setAttribute('data-sdk', 'show_9747739');
+      document.head.appendChild(adScript);
+      
+      // تشغيل الإعلان بعد تحميل السكريبت
+      setTimeout(() => {
+        if (typeof window.show_9747739 === 'function') {
+          window.show_9747739({
+            type: 'inApp',
+            inAppSettings: { 
+              frequency: 1,
+              capping: 0.0014,
+              interval: 5,
+              timeout: 0.5,
+              everyPage: false 
+            }
+          });
         }
-      });
+      }, 1000);
     }, 500);
   });
 
