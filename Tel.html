@@ -15,9 +15,6 @@
   <!-- Font Awesome للايقونات -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Animate.css للحركات -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-
   <!-- Monetag SDK -->
   <script src='//libtl.com/sdk.js' data-zone='9747739' data-sdk='show_9747739'></script>
   
@@ -29,15 +26,28 @@
     
     body {
       font-family: 'Tajawal', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     }
     
     .gold-gradient {
       background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
     }
     
+    .gold-text {
+      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
     .diamond-btn {
       background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
       box-shadow: 0 4px 15px 0 rgba(0, 210, 255, 0.5);
+      transition: all 0.3s ease;
+    }
+    
+    .diamond-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px 0 rgba(0, 210, 255, 0.7);
     }
     
     .ad-modal {
@@ -47,7 +57,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.95);
       z-index: 1000;
       backdrop-filter: blur(10px);
     }
@@ -111,13 +121,24 @@
       background: #3b82f6;
       border-radius: 50%;
     }
+    
+    .card {
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .header-glow {
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    }
   </style>
 </head>
-<body class="bg-gray-900 text-white flex flex-col min-h-screen">
+<body class="text-white flex flex-col min-h-screen">
 
   <!-- Header -->
-  <header class="bg-gray-800 p-4 flex justify-between items-center shadow-lg">
-    <h1 class="text-xl font-bold gold-gradient bg-clip-text text-transparent">🚀 Mini App</h1>
+  <header class="bg-gray-800 p-4 flex justify-between items-center header-glow">
+    <h1 class="text-xl font-bold gold-text">🚀 Mini App</h1>
     <div id="coinsBox" class="bg-blue-600 px-4 py-1 rounded-full flex items-center gap-1 shadow-md">
       <i class="fas fa-coins animate-pulse"></i> 
       <span id="coinsValue">0</span>
@@ -126,28 +147,28 @@
 
   <!-- Pages -->
   <main id="pageHome" class="flex-1 p-6 text-center">
-    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 shadow-xl border border-gray-700">
+    <div class="card p-6 mb-6">
       <h2 class="text-lg mb-2 text-gray-300">رصيدك الحالي</h2>
-      <p id="coins" class="text-5xl font-bold gold-gradient bg-clip-text text-transparent my-4">0 <i class="fas fa-coins"></i></p>
+      <p id="coins" class="text-5xl font-bold gold-text my-4">0 <i class="fas fa-coins"></i></p>
       <button onclick="showPage('tasks')" class="diamond-btn px-6 py-3 rounded-xl text-white font-bold mt-4">
         ابدأ كسب النقود <i class="fas fa-arrow-left ml-2"></i>
       </button>
     </div>
     
-    <div class="mt-8 bg-gradient-to-br from-blue-900 to-blue-700 rounded-2xl p-5 shadow-xl border border-blue-600">
-      <h3 class="text-lg mb-3"><i class="fas fa-trophy mr-2"></i>المتصدرون</h3>
+    <div class="card p-5">
+      <h3 class="text-lg mb-3"><i class="fas fa-trophy mr-2 gold-text"></i>المتصدرون</h3>
       <div id="leaderboard" class="text-right space-y-2">
-        <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-50 rounded-lg">
+        <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-30 rounded-lg">
           <span class="text-yellow-400">#1</span>
           <span>مستخدم 1</span>
           <span>1500 <i class="fas fa-coins text-yellow-400"></i></span>
         </div>
-        <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-50 rounded-lg">
+        <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-30 rounded-lg">
           <span class="text-gray-300">#2</span>
           <span>مستخدم 2</span>
           <span>1200 <i class="fas fa-coins text-yellow-400"></i></span>
         </div>
-        <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-50 rounded-lg">
+        <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-30 rounded-lg">
           <span class="text-yellow-600">#3</span>
           <span>مستخدم 3</span>
           <span>900 <i class="fas fa-coins text-yellow-400"></i></span>
@@ -157,8 +178,8 @@
   </main>
 
   <main id="pageTasks" class="hidden flex-1 p-6 text-center">
-    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 shadow-xl border border-gray-700 space-y-6">
-      <h2 class="text-xl font-bold"><i class="fas fa-film mr-2"></i>المهام اليومية</h2>
+    <div class="card p-6 space-y-6">
+      <h2 class="text-xl font-bold gold-text"><i class="fas fa-film mr-2"></i>المهام اليومية</h2>
       
       <div class="space-y-2">
         <div class="flex justify-between text-sm text-gray-300">
@@ -172,7 +193,7 @@
       
       <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
         <h3 class="text-lg mb-2">شاهد الإعلان واحصل على مكافأة</h3>
-        <p class="text-gray-400 text-sm mb-4">اضغط على الزر بالأسفل وشاهد الإعلان لمدة 30 ثانية</p>
+        <p class="text-gray-400 text-sm mb-4">اضغط على الزر بالأسفل وشاهد الإعلان لمدة 15 ثانية</p>
         <button id="watchAdBtn" class="diamond-btn px-6 py-3 rounded-xl text-white font-bold text-lg pulse w-full">
           <i class="fas fa-play-circle mr-2"></i>شاهد إعلان
         </button>
@@ -181,7 +202,7 @@
       <div class="grid grid-cols-3 gap-3 text-center">
         <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
           <div class="text-blue-400 text-2xl"><i class="fas fa-bolt"></i></div>
-          <div class="text-sm">سريع</div>
+          <div class="text-sm">15 ثانية</div>
         </div>
         <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
           <div class="text-green-400 text-2xl"><i class="fas fa-lock-open"></i></div>
@@ -189,18 +210,18 @@
         </div>
         <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
           <div class="text-yellow-400 text-2xl"><i class="fas fa-gift"></i></div>
-          <div class="text-sm">مكافآت</div>
+          <div class="text-sm">1 عملة</div>
         </div>
       </div>
     </div>
   </main>
 
   <main id="pageProfile" class="hidden flex-1 p-6 text-center">
-    <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 shadow-xl border border-gray-700 space-y-4">
+    <div class="card p-6 space-y-4">
       <div class="w-20 h-20 mx-auto rounded-full gold-gradient flex items-center justify-center">
         <i class="fas fa-user text-white text-3xl"></i>
       </div>
-      <h2 class="text-xl font-bold">👤 حسابك</h2>
+      <h2 class="text-xl font-bold gold-text">👤 حسابك</h2>
       
       <div class="space-y-3 text-right">
         <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
@@ -240,15 +261,15 @@
       </div>
       
       <div class="p-6 text-center">
-        <div class="countdown mb-4" id="countdown">30</div>
+        <div class="countdown mb-4" id="countdown">15</div>
         <p class="text-gray-300 mb-6">جاري تحميل الإعلان، يرجى الانتظار...</p>
         
         <div class="w-full bg-gray-700 rounded-full h-2 mb-6">
           <div id="adProgress" class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"></div>
         </div>
         
-        <div class="animate__animated animate__pulse animate__infinite infinite animate__slower text-yellow-400 text-4xl mb-4">
-          <i class="fas fa-coins"></i>
+        <div class="text-yellow-400 text-4xl mb-4 animate-pulse">
+          <i class="fas fa-ad"></i>
         </div>
         
         <p class="text-gray-400 text-sm">ستحصل على <span class="text-yellow-400">1</span> عملة بعد انتهاء الإعلان</p>
@@ -280,6 +301,7 @@
   let coins = 0;
   let tasksToday = 0;
   const DAILY_LIMIT = 100;
+  const AD_DURATION = 15; // 15 ثانية بدلاً من 30
 
   // Load User
   async function loadUser() {
@@ -306,9 +328,9 @@
   function updateUI() {
     document.getElementById("coins").innerHTML = coins + ' <i class="fas fa-coins"></i>';
     document.getElementById("coinsValue").textContent = coins;
-    document.getElementById("coinsBox").classList.add('animate__pulse');
+    document.getElementById("coinsBox").classList.add('animate-pulse');
     setTimeout(() => {
-      document.getElementById("coinsBox").classList.remove('animate__pulse');
+      document.getElementById("coinsBox").classList.remove('animate-pulse');
     }, 1000);
     
     document.getElementById("coinsProfile").textContent = coins;
@@ -332,15 +354,15 @@
     const btn = document.getElementById("watchAdBtn");
     btn.disabled = true;
     
-    // بدء العد التنازلي
-    let countdown = 30;
+    // بدء العد التنازلي (15 ثانية)
+    let countdown = AD_DURATION;
     const countdownElement = document.getElementById("countdown");
     const adProgress = document.getElementById("adProgress");
     
     const countdownInterval = setInterval(() => {
       countdown--;
       countdownElement.textContent = countdown;
-      adProgress.style.width = ((30 - countdown) / 30 * 100) + "%";
+      adProgress.style.width = ((AD_DURATION - countdown) / AD_DURATION * 100) + "%";
       
       if (countdown <= 0) {
         clearInterval(countdownInterval);
@@ -348,7 +370,7 @@
       }
     }, 1000);
     
-    // تشغيل الإعلان بعد ثانية واحدة
+    // تشغيل الإعلان بعد نصف ثانية
     setTimeout(() => {
       window.show_9747739({
         type: 'inApp',
@@ -356,11 +378,11 @@
           frequency: 1,
           capping: 0.0014,
           interval: 5,
-          timeout: 1,
+          timeout: 0.5, // وقت أقل لظهور الإعلان
           everyPage: false 
         }
       });
-    }, 1000);
+    }, 500);
   });
 
   // إنهاء عرض الإعلان
@@ -398,7 +420,7 @@
   // عرض الإشعارات
   function showNotification(message, type) {
     const notification = document.createElement("div");
-    notification.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg shadow-lg z-50 animate__animated animate__fadeInDown ${
+    notification.className = `fixed top-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-lg shadow-lg z-50 ${
       type === "error" ? "bg-red-600" : "bg-green-600"
     }`;
     notification.textContent = message;
@@ -406,10 +428,7 @@
     document.body.appendChild(notification);
     
     setTimeout(() => {
-      notification.classList.add("animate__fadeOutUp");
-      setTimeout(() => {
-        document.body.removeChild(notification);
-      }, 1000);
+      notification.remove();
     }, 3000);
   }
 
