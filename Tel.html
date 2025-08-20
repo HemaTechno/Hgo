@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>🚀 تطبيق مصغر مع إعلانات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- خط جميل -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500&display=swap" rel="stylesheet">
+
+  <!-- كود PropellerAds الرئيسي -->
+  <script async src="https://updsrv.com/propellerads-tag.js"></script>
+
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: white;
+      text-align: center;
+      padding: 50px 20px;
+    }
+    h1 {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+    p {
+      font-size: 18px;
+      margin-bottom: 25px;
+    }
+    button {
+      background: #fff;
+      color: #333;
+      padding: 14px 22px;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      background: #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>👋 أهلاً بيك في التطبيق</h1>
+  <p>هنا هتلاقي عروض وإعلانات تكسب منها 💰</p>
+
+  <!-- زر رئيسي -->
+  <button onclick="alert('تم فتح التطبيق ✅')">🚀 جرب الآن</button>
+
+  <p style="margin-top: 40px; font-size:14px;">⚡ التطبيق يعمل داخل تليجرام Mini App</p>
+
+  <!-- تفعيل إعلانات In-App Interstitial -->
+  <script>
+    show_9747276({
+      type: 'inApp',
+      inAppSettings: {
+        frequency: 2,     // عدد الإعلانات
+        capping: 0.1,     // كل 6 دقائق
+        interval: 30,     // بين كل إعلان والتاني 30 ثانية
+        timeout: 5,       // أول إعلان بعد 5 ثواني
+        everyPage: false  // الإعلانات تستمر حتى لو غير الصفحة
+      }
+    })
+  </script>
+</body>
+</html>
