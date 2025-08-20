@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -126,30 +125,36 @@
 
     const btn = document.getElementById("watchAdBtn");
     btn.disabled = true;
-    btn.textContent = "⏳ الإعلان قيد العرض...";
+    btn.textContent = "⏳ جاري تحميل الإعلان...";
 
-    // 📌 الإعلان مش هيظهر غير هنا عند الضغط على الزر
+    // 📌 تحقق إن SDK متاح
     if (typeof window.show_9747739 === "function") {
+      // شغل الإعلان
       window.show_9747739({
         type: 'inApp',
         inAppSettings: { interval: 5 }
       });
-    }
 
-    // بعد 30 ثانية (مدة المشاهدة)
-    setTimeout(async () => {
-      coins++;
-      tasksToday++;
-      await db.collection("users").doc(userId).set({
-        coins,
-        tasksToday,
-        lastTaskDate: new Date().toISOString().split("T")[0]
-      }, { merge: true });
-      updateUI();
-      alert("✅ مبروك! كسبت 1 كوين بعد مشاهدة الإعلان");
+      // مدة الإعلان (30 ثانية)
+      setTimeout(async () => {
+        coins++;
+        tasksToday++;
+        await db.collection("users").doc(userId).set({
+          coins,
+          tasksToday,
+          lastTaskDate: new Date().toISOString().split("T")[0]
+        }, { merge: true });
+        updateUI();
+        alert("✅ مبروك! كسبت 1 كوين بعد مشاهدة الإعلان");
+        btn.disabled = false;
+        btn.textContent = "🎥 شاهد إعلان";
+      }, 30000);
+
+    } else {
+      alert("⚠️ الإعلان لسه ما اتحملش.. جرّب تاني بعد ثواني");
       btn.disabled = false;
       btn.textContent = "🎥 شاهد إعلان";
-    }, 30000);
+    }
   });
 
   // Pages
@@ -165,4 +170,5 @@
 
 </body>
 </html>
+
 
