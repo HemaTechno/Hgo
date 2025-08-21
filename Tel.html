@@ -14,9 +14,6 @@
 
   <!-- Font Awesome للايقونات -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Telegram SDK -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
@@ -24,6 +21,7 @@
     body {
       font-family: 'Tajawal', sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      min-height: 100vh;
     }
     
     .gold-gradient {
@@ -54,78 +52,6 @@
       box-shadow: none;
     }
     
-    .ad-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.95);
-      z-index: 1000;
-      backdrop-filter: blur(10px);
-    }
-    
-    .ad-content {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 90%;
-      max-width: 400px;
-      background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      border: 2px solid rgba(255, 215, 0, 0.3);
-    }
-    
-    .countdown {
-      font-size: 2.5rem;
-      font-weight: 800;
-      color: #f6d365;
-      text-shadow: 0 0 10px rgba(246, 211, 101, 0.5);
-    }
-    
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    
-    .coin-animation {
-      animation: coinSpin 1s ease-out;
-    }
-    
-    @keyframes coinSpin {
-      0% { transform: scale(0) rotate(0deg); }
-      100% { transform: scale(1) rotate(360deg); }
-    }
-    
-    .progress-bar {
-      transition: width 0.5s ease-in-out;
-    }
-    
-    .nav-btn.active {
-      position: relative;
-    }
-    
-    .nav-btn.active::after {
-      content: '';
-      position: absolute;
-      bottom: -5px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 6px;
-      height: 6px;
-      background: #3b82f6;
-      border-radius: 50%;
-    }
-    
     .card {
       background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
       border-radius: 16px;
@@ -137,15 +63,24 @@
       box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
     }
     
-    .ad-container {
-      margin: 20px 0;
-      min-height: 250px;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #666;
+    .task-card {
+      transition: all 0.3s ease;
+      border: 2px solid;
+    }
+    
+    .task-card.locked {
+      border-color: #6b7280;
+      background: linear-gradient(135deg, #2d3748 0%, #4b5563 100%);
+    }
+    
+    .task-card.unlocked {
+      border-color: #3b82f6;
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+    }
+    
+    .task-card.completed {
+      border-color: #10b981;
+      background: linear-gradient(135deg, #065f46 0%, #10b981 100%);
     }
     
     .notification {
@@ -177,7 +112,7 @@
   <header class="bg-gray-800 p-4 flex justify-between items-center header-glow">
     <h1 class="text-xl font-bold gold-text">🚀 Mini App</h1>
     <div id="coinsBox" class="bg-blue-600 px-4 py-1 rounded-full flex items-center gap-1 shadow-md">
-      <i class="fas fa-coins animate-pulse"></i> 
+      <i class="fas fa-coins"></i> 
       <span id="coinsValue">0</span>
     </div>
   </header>
@@ -197,64 +132,39 @@
       <div id="leaderboard" class="text-right space-y-2">
         <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-30 rounded-lg">
           <span class="text-yellow-400">#1</span>
-          <span>مستخدم 1</span>
+          <span>المستخدم 1</span>
           <span>1500 <i class="fas fa-coins text-yellow-400"></i></span>
         </div>
         <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-30 rounded-lg">
           <span class="text-gray-300">#2</span>
-          <span>مستخدم 2</span>
+          <span>المستخدم 2</span>
           <span>1200 <i class="fas fa-coins text-yellow-400"></i></span>
         </div>
         <div class="flex justify-between items-center p-2 bg-blue-800 bg-opacity-30 rounded-lg">
           <span class="text-yellow-600">#3</span>
-          <span>مستخدم 3</span>
+          <span>المستخدم 3</span>
           <span>900 <i class="fas fa-coins text-yellow-400"></i></span>
         </div>
       </div>
     </div>
   </main>
 
-  <main id="pageTasks" class="hidden flex-1 p-6 text-center">
+  <main id="pageTasks" class="hidden flex-1 p-6">
     <div class="card p-6 space-y-6">
-      <h2 class="text-xl font-bold gold-text"><i class="fas fa-film mr-2"></i>المهام اليومية</h2>
+      <h2 class="text-xl font-bold gold-text text-center"><i class="fas fa-tasks mr-2"></i>المهام اليومية</h2>
       
       <div class="space-y-2">
         <div class="flex justify-between text-sm text-gray-300">
           <span>تقدمك اليوم</span>
-          <span id="taskInfo">0 / 100 إعلان</span>
+          <span id="taskInfo">0 / 20 مهمة</span>
         </div>
         <div class="w-full bg-gray-700 rounded-full h-3">
-          <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full progress-bar"></div>
+          <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full" style="width: 0%"></div>
         </div>
       </div>
       
-      <div class="bg-gray-800 p-4 rounded-xl border border-gray-700">
-        <h3 class="text-lg mb-2">شاهد الإعلان واحصل على مكافأة</h3>
-        <p class="text-gray-400 text-sm mb-4">اضغط على الزر بالأسفل وشاهد الإعلان لمدة 15 ثانية</p>
-        
-        <!-- حاوية الإعلان -->
-        <div id="adContainer" class="ad-container">
-          <p>سوف يظهر الإعلان هنا بعد النقر على الزر</p>
-        </div>
-        
-        <button id="watchAdBtn" class="diamond-btn px-6 py-3 rounded-xl text-white font-bold text-lg pulse w-full mt-4">
-          <i class="fas fa-play-circle mr-2"></i>شاهد إعلان
-        </button>
-      </div>
-      
-      <div class="grid grid-cols-3 gap-3 text-center">
-        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
-          <div class="text-blue-400 text-2xl"><i class="fas fa-bolt"></i></div>
-          <div class="text-sm">15 ثانية</div>
-        </div>
-        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
-          <div class="text-green-400 text-2xl"><i class="fas fa-lock-open"></i></div>
-          <div class="text-sm">مجاني</div>
-        </div>
-        <div class="bg-gray-800 p-3 rounded-lg border border-gray-700">
-          <div class="text-yellow-400 text-2xl"><i class="fas fa-gift"></i></div>
-          <div class="text-sm">1 عملة</div>
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4" id="tasksContainer">
+        <!-- سيتم ملء المهام هنا بواسطة JavaScript -->
       </div>
     </div>
   </main>
@@ -276,15 +186,9 @@
           <span id="coinsProfile" class="text-yellow-400">0 <i class="fas fa-coins"></i></span>
         </div>
         <div class="flex justify-between items-center p-3 bg-gray-800 rounded-lg">
-          <span class="text-gray-400">الإعلانات اليوم:</span>
-          <span id="tasksProfile">0</span>/100
+          <span class="text-gray-400">المهام اليوم:</span>
+          <span id="tasksProfile">0</span>/20
         </div>
-      </div>
-      
-      <div class="pt-4 border-t border-gray-700">
-        <button class="px-4 py-2 bg-red-600 bg-opacity-20 text-red-400 rounded-lg text-sm">
-          <i class="fas fa-sign-out-alt mr-1"></i> تسجيل الخروج
-        </button>
       </div>
     </div>
   </main>
@@ -292,27 +196,27 @@
   <!-- Bottom Nav -->
   <nav class="flex justify-around bg-gray-800 py-3 border-t border-gray-700 shadow-lg">
     <button onclick="showPage('home')" class="nav-btn text-blue-400 active"><i class="fas fa-home text-lg"></i></button>
-    <button onclick="showPage('tasks')" class="nav-btn text-gray-400"><i class="fas fa-film text-lg"></i></button>
+    <button onclick="showPage('tasks')" class="nav-btn text-gray-400"><i class="fas fa-tasks text-lg"></i></button>
     <button onclick="showPage('profile')" class="nav-btn text-gray-400"><i class="fas fa-user text-lg"></i></button>
   </nav>
 
   <!-- Ad Modal -->
-  <div id="adModal" class="ad-modal">
-    <div class="ad-content">
-      <div class="gold-gradient p-4 text-center">
+  <div id="adModal" class="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 hidden">
+    <div class="bg-gray-800 rounded-xl p-6 max-w-md w-11/12">
+      <div class="gold-gradient p-4 text-center rounded-t-xl -mt-6 -mx-6 mb-4">
         <h2 class="text-xl font-bold"><i class="fas fa-ad mr-2"></i>إعلان</h2>
       </div>
       
-      <div class="p-6 text-center">
-        <div class="countdown mb-4" id="countdown">15</div>
+      <div class="text-center">
+        <div class="text-3xl font-bold mb-4 text-yellow-400" id="countdown">20</div>
         <p class="text-gray-300 mb-6">جاري تحميل الإعلان، يرجى الانتظار...</p>
         
         <div class="w-full bg-gray-700 rounded-full h-2 mb-6">
-          <div id="adProgress" class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full"></div>
+          <div id="adProgress" class="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full" style="width: 0%"></div>
         </div>
         
-        <div class="text-yellow-400 text-4xl mb-4 animate-pulse">
-          <i class="fas fa-ad"></i>
+        <div class="text-yellow-400 text-4xl mb-4">
+          <i class="fas fa-ad animate-pulse"></i>
         </div>
         
         <p class="text-gray-400 text-sm">ستحصل على <span class="text-yellow-400">1</span> عملة بعد انتهاء الإعلان</p>
@@ -332,177 +236,218 @@
     appId: "1:24512338206:web:dfe045db59bd3434a2110f",
     measurementId: "G-HD4R7GNQ5H"
   };
+  
+  // تهيئة Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // Telegram User
-  const tg = window.Telegram.WebApp;
-  const userId = tg?.initDataUnsafe?.user?.id?.toString() || "guest";
-  document.getElementById("userId").textContent = userId;
-
-  // User Data
+  // بيانات التطبيق
+  const TOTAL_TASKS = 20;
+  const AD_DURATION = 20; // 20 ثانية لكل إعلان
+  
+  // بيانات المستخدم
+  let userId = "user_" + Math.floor(Math.random() * 1000000);
   let coins = 0;
-  let tasksToday = 0;
-  const DAILY_LIMIT = 100;
-  const AD_DURATION = 15; // 15 ثانية
-
-  // متغيرات التحكم بالإعلان
+  let completedTasks = 0;
+  let currentTask = 0;
+  let lastTaskDate = "";
   let isAdPlaying = false;
-  let adScriptLoaded = false;
+  let countdownInterval = null;
 
-  // Load User
-  async function loadUser() {
-    const today = new Date().toISOString().split("T")[0];
-    const ref = db.collection("users").doc(userId);
-    const docSnap = await ref.get();
-    if (!docSnap.exists) {
-      await ref.set({ coins: 0, tasksToday: 0, lastTaskDate: today });
-      coins = 0; tasksToday = 0;
-    } else {
-      const data = docSnap.data();
-      coins = data.coins;
-      if (data.lastTaskDate !== today) {
-        tasksToday = 0;
-        await ref.update({ tasksToday: 0, lastTaskDate: today });
+  // عناصر DOM
+  const tasksContainer = document.getElementById('tasksContainer');
+  const adModal = document.getElementById('adModal');
+  const countdownElement = document.getElementById('countdown');
+  const adProgress = document.getElementById('adProgress');
+
+  // تهيئة التطبيق
+  function initApp() {
+    document.getElementById('userId').textContent = userId;
+    loadUserData();
+  }
+
+  // تحميل بيانات المستخدم من Firebase
+  async function loadUserData() {
+    try {
+      const userDoc = await db.collection('users').doc(userId).get();
+      
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        coins = userData.coins || 0;
+        completedTasks = userData.completedTasks || 0;
+        currentTask = userData.currentTask || 0;
+        lastTaskDate = userData.lastTaskDate || "";
+        
+        // التحقق إذا كان اليوم قد تغير
+        const today = new Date().toISOString().split('T')[0];
+        if (lastTaskDate !== today) {
+          resetDailyTasks();
+        } else {
+          updateUI();
+          renderTasks();
+        }
       } else {
-        tasksToday = data.tasksToday;
+        // إنشاء مستخدم جديد
+        await saveUserData();
+        updateUI();
+        renderTasks();
       }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+      showNotification("❌ حدث خطأ في تحميل البيانات", "error");
     }
+  }
+
+  // إعادة تعيين المهام اليومية
+  async function resetDailyTasks() {
+    completedTasks = 0;
+    currentTask = 0;
+    lastTaskDate = new Date().toISOString().split('T')[0];
+    await saveUserData();
     updateUI();
+    renderTasks();
   }
 
-  // Update UI
-  function updateUI() {
-    document.getElementById("coins").innerHTML = coins + ' <i class="fas fa-coins"></i>';
-    document.getElementById("coinsValue").textContent = coins;
-    document.getElementById("coinsBox").classList.add('animate-pulse');
-    setTimeout(() => {
-      document.getElementById("coinsBox").classList.remove('animate-pulse');
-    }, 1000);
-    
-    document.getElementById("coinsProfile").textContent = coins;
-    document.getElementById("tasksProfile").textContent = tasksToday;
-    document.getElementById("taskInfo").textContent = tasksToday + "/" + DAILY_LIMIT + " إعلان";
-    document.getElementById("progressBar").style.width = (tasksToday/DAILY_LIMIT*100)+"%";
+  // حفظ بيانات المستخدم في Firebase
+  async function saveUserData() {
+    try {
+      await db.collection('users').doc(userId).set({
+        coins,
+        completedTasks,
+        currentTask,
+        lastTaskDate: new Date().toISOString().split('T')[0],
+        lastUpdated: new Date()
+      });
+    } catch (error) {
+      console.error("Error saving user data:", error);
+      showNotification("❌ حدث خطأ في حفظ البيانات", "error");
+    }
   }
 
-  // Watch Ad
-  document.getElementById("watchAdBtn").addEventListener("click", () => {
-    if (isAdPlaying) {
-      showNotification("⏳ الإعلان قيد التشغيل بالفعل", "info");
-      return;
-    }
+  // عرض المهام
+  function renderTasks() {
+    tasksContainer.innerHTML = '';
     
-    if (tasksToday >= DAILY_LIMIT) {
-      showNotification("❌ وصلت الحد اليومي للإعلانات", "error");
-      return;
+    for (let i = 1; i <= TOTAL_TASKS; i++) {
+      const taskCard = document.createElement('div');
+      taskCard.className = 'task-card p-4 rounded-lg';
+      
+      if (i <= completedTasks) {
+        // المهمة مكتملة
+        taskCard.classList.add('completed');
+        taskCard.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-bold">المهمة ${i}</h3>
+              <p class="text-sm text-gray-300">مكتملة</p>
+            </div>
+            <div class="text-green-400 text-2xl">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        `;
+      } else if (i === currentTask + 1) {
+        // المهمة متاحة
+        taskCard.classList.add('unlocked');
+        taskCard.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-bold">المهمة ${i}</h3>
+              <p class="text-sm text-gray-300">جاهزة للإكمال</p>
+            </div>
+            <button onclick="startTask(${i})" class="diamond-btn px-4 py-2 rounded-lg text-white">
+              ابدأ <i class="fas fa-play ml-1"></i>
+            </button>
+          </div>
+        `;
+      } else {
+        // المهمة مقفلة
+        taskCard.classList.add('locked');
+        taskCard.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-bold">المهمة ${i}</h3>
+              <p class="text-sm text-gray-300">غير متاحة بعد</p>
+            </div>
+            <div class="text-gray-400 text-2xl">
+              <i class="fas fa-lock"></i>
+            </div>
+          </div>
+        `;
+      }
+      
+      tasksContainer.appendChild(taskCard);
     }
+  }
+
+  // بدء المهمة
+  function startTask(taskNumber) {
+    if (isAdPlaying) return;
     
-    // عرض نافذة الإعلان
-    const adModal = document.getElementById("adModal");
-    adModal.style.display = "block";
+    currentTask = taskNumber;
+    showAd();
+  }
+
+  // عرض الإعلان
+  function showAd() {
     isAdPlaying = true;
+    adModal.classList.remove('hidden');
     
-    // تعطيل الزر أثناء عرض الإعلان
-    const btn = document.getElementById("watchAdBtn");
-    btn.disabled = true;
-    btn.classList.remove("pulse");
-    
-    // بدء العد التنازلي (15 ثانية)
     let countdown = AD_DURATION;
-    const countdownElement = document.getElementById("countdown");
-    const adProgress = document.getElementById("adProgress");
+    countdownElement.textContent = countdown;
+    adProgress.style.width = '0%';
     
-    const countdownInterval = setInterval(() => {
+    // بدء العد التنازلي
+    clearInterval(countdownInterval);
+    countdownInterval = setInterval(() => {
       countdown--;
       countdownElement.textContent = countdown;
       adProgress.style.width = ((AD_DURATION - countdown) / AD_DURATION * 100) + "%";
       
       if (countdown <= 0) {
         clearInterval(countdownInterval);
-        finishAdViewing();
+        finishAd();
       }
     }, 1000);
-    
-    // تحميل وتشغيل الإعلان بعد تأخير بسيط
-    if (!adScriptLoaded) {
-      const adScript = document.createElement('script');
-      adScript.src = '//libtl.com/sdk.js';
-      adScript.setAttribute('data-zone', '9747739');
-      adScript.setAttribute('data-sdk', 'show_9747739');
-      adScript.onload = () => {
-        adScriptLoaded = true;
-        playAd();
-      };
-      document.head.appendChild(adScript);
-    } else {
-      playAd();
-    }
-  });
-
-  // تشغيل الإعلان
-  function playAd() {
-    if (typeof window.show_9747739 === 'function') {
-      window.show_9747739({
-        type: 'inApp',
-        inAppSettings: { 
-          frequency: 1,
-          capping: 0.0014,
-          interval: 5,
-          timeout: 0.5,
-          everyPage: false 
-        }
-      });
-    }
   }
 
-  // إنهاء عرض الإعلان
-  async function finishAdViewing() {
-    // إخفاء نافذة الإعلان
-    const adModal = document.getElementById("adModal");
-    adModal.style.display = "none";
+  // إنهاء الإعلان ومنح المكافأة بعد 20 ثانية
+  async function finishAd() {
+    adModal.classList.add('hidden');
     isAdPlaying = false;
     
-    // زيادة الرصيد
+    // إكمال المهمة الحالية
+    completedTasks++;
+    currentTask = completedTasks;
+    
+    // منح المكافأة
     coins++;
-    tasksToday++;
     
     // حفظ البيانات في Firebase
-    await db.collection("users").doc(userId).set({
-      coins,
-      tasksToday,
-      lastTaskDate: new Date().toISOString().split("T")[0]
-    }, { merge: true });
+    await saveUserData();
     
     // تحديث الواجهة
     updateUI();
+    renderTasks();
     
-    // إعادة تمكين زر مشاهدة الإعلان
-    const btn = document.getElementById("watchAdBtn");
-    btn.disabled = false;
-    btn.classList.add("pulse");
-    
-    // عرض رسالة النجاح
-    showNotification("✅ مبروك! لقد ربحت 1 عملة", "success");
-    
-    // تأثير العملة
-    document.getElementById("coins").classList.add("coin-animation");
-    setTimeout(() => {
-      document.getElementById("coins").classList.remove("coin-animation");
-    }, 1000);
+    // إظهار رسالة النجاح
+    showNotification(`✅ مبروك! أكملت المهمة ${completedTasks} وربحت 1 عملة`, 'success');
+  }
+
+  // تحديث واجهة المستخدم
+  function updateUI() {
+    document.getElementById('coins').innerHTML = `${coins} <i class="fas fa-coins"></i>`;
+    document.getElementById('coinsValue').textContent = coins;
+    document.getElementById('coinsProfile').textContent = coins;
+    document.getElementById('tasksProfile').textContent = `${completedTasks}/20`;
+    document.getElementById('taskInfo').textContent = `${completedTasks} / 20 مهمة`;
+    document.getElementById('progressBar').style.width = `${(completedTasks / TOTAL_TASKS) * 100}%`;
   }
 
   // عرض الإشعارات
   function showNotification(message, type) {
-    // إزالة أي إشعارات سابقة
-    const existingNotifications = document.querySelectorAll('.notification');
-    existingNotifications.forEach(notification => notification.remove());
-    
-    const notification = document.createElement("div");
-    notification.className = `notification ${
-      type === "error" ? "bg-red-600" : 
-      type === "info" ? "bg-blue-600" : "bg-green-600"
-    }`;
+    const notification = document.createElement('div');
+    notification.className = `notification ${type === 'error' ? 'bg-red-600' : 'bg-green-600'}`;
     notification.textContent = message;
     
     document.body.appendChild(notification);
@@ -514,25 +459,23 @@
     }, 3000);
   }
 
-  // Pages
+  // تغيير الصفحات
   function showPage(page) {
-    document.querySelectorAll("main").forEach(m => m.classList.add("hidden"));
-    document.getElementById("page"+page.charAt(0).toUpperCase()+page.slice(1)).classList.remove("hidden");
+    document.querySelectorAll('main').forEach(m => m.classList.add('hidden'));
+    document.getElementById(`page${page.charAt(0).toUpperCase() + page.slice(1)}`).classList.remove('hidden');
     
-    // تحديث أزرار التنقل
-    document.querySelectorAll("nav button").forEach(btn => {
-      btn.classList.remove("text-blue-400");
-      btn.classList.add("text-gray-400");
-      btn.classList.remove("active");
+    document.querySelectorAll('nav button').forEach(btn => {
+      btn.classList.remove('text-blue-400', 'active');
+      btn.classList.add('text-gray-400');
     });
     
     const activeBtn = document.querySelector(`nav button[onclick="showPage('${page}')"]`);
-    activeBtn.classList.add("text-blue-400", "active");
-    activeBtn.classList.remove("text-gray-400");
+    activeBtn.classList.add('text-blue-400', 'active');
+    activeBtn.classList.remove('text-gray-400');
   }
 
-  // تهيئة التطبيق
-  loadUser();
+  // تهيئة التطبيق عند تحميل الصفحة
+  document.addEventListener('DOMContentLoaded', initApp);
 </script>
 
 </body>
