@@ -1,201 +1,80 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎮 Mini App Premium</title>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
-<!-- Adsgram SDK -->
-<script src="https://cdn.adsgram.ai/sdk/adsgram.publisher.min.js"></script>
-
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
-
-  body {
-    font-family: 'Montserrat', sans-serif;
-    background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    margin: 0;
-  }
-
-  h1 {
-    font-size: 2.2rem;
-    color: #ffd700;
-    margin-bottom: 10px;
-  }
-
-  #coins {
-    font-size: 2rem;
-    color: #00f0ff;
-    font-weight: bold;
-    transition: all 0.5s ease;
-  }
-
-  button {
-    margin-top: 30px;
-    background: linear-gradient(90deg, #ff7f50, #ff4500);
-    border: none;
-    border-radius: 12px;
-    padding: 15px 30px;
-    color: #fff;
-    font-size: 1.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 5px 15px rgba(255, 69, 0, 0.5);
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-
-  button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 25px rgba(255, 69, 0, 0.7);
-  }
-
-  .notification {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: #00f0ff;
-    color: #000;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-    display: none;
-  }
-
-  .history {
-    margin-top: 30px;
-    width: 90%;
-    max-width: 400px;
-    background: #111;
-    padding: 15px;
-    border-radius: 12px;
-    overflow-y: auto;
-    max-height: 200px;
-  }
-
-  .history-item {
-    border-bottom: 1px solid #333;
-    padding: 8px 0;
-    font-size: 0.95rem;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Mini App with Ad Button</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- استيراد Telegram وAdsGram -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      max-width: 400px;
+      margin: 40px auto;
+    }
+    button {
+      padding: 10px 20px;
+      background: #0088cc;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #006699;
+    }
+  </style>
 </head>
 <body>
+  <div class="card">
+    <h2>مرحبًا 👋</h2>
+    <p>اضغط الزر لتشغيل إعلان كثمن مكافأة 🎁</p>
+    <button id="watchAdBtn">اسمع / شاهد إعلان</button>
+  </div>
 
-<h1>🎮 Mini App Premium</h1>
-<p>عدد الكوينات: <span id="coins">0</span></p>
-<button id="watchAd">مشاهدة إعلان</button>
+  <script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
 
-<div class="history" id="history">
-  <strong>سجل المشاهدات:</strong>
-</div>
-
-<div class="notification" id="notification"></div>
-
-<script>
-  // ===== Firebase Config =====
-  const firebaseConfig = {
-  apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
-  authDomain: "hhhhhh-d4fb8.firebaseapp.com",
-  databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
-  projectId: "hhhhhh-d4fb8",
-  storageBucket: "hhhhhh-d4fb8.appspot.com",
-  messagingSenderId: "24512338206",
-  appId: "1:24512338206:web:dfe045db59bd3434a2110f",
-  measurementId: "G-HD4R7GNQ5H"
-};
-
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const auth = firebase.auth();
-
-  let userId;
-
-  auth.signInAnonymously().then(user => {
-    userId = user.user.uid;
-    loadCoins();
-    loadHistory();
-  }).catch(err => console.error("Firebase Auth Error:", err));
-
-  function loadCoins() {
-    db.collection('users').doc(userId).get().then(doc => {
-      if(doc.exists){
-        document.getElementById('coins').innerText = doc.data().coins;
-      } else {
-        db.collection('users').doc(userId).set({ coins: 0 });
-        document.getElementById('coins').innerText = 0;
-      }
+    // تهيئة AdsGram
+    const AdController = window.Adsgram.init({
+      blockId: "int-14053"
     });
-  }
 
-  function showNotification(msg) {
-    const notif = document.getElementById('notification');
-    notif.innerText = msg;
-    notif.style.display = 'block';
-    setTimeout(() => { notif.style.display = 'none'; }, 2500);
-  }
-
-  // سجل المشاهدات
-  function loadHistory() {
-    db.collection('users').doc(userId).collection('history').orderBy('time', 'desc').get()
-      .then(snapshot => {
-        const historyDiv = document.getElementById('history');
-        snapshot.forEach(doc => {
-          const div = document.createElement('div');
-          div.classList.add('history-item');
-          div.innerText = `+1 كوين - ${new Date(doc.data().time.seconds*1000).toLocaleString()}`;
-          historyDiv.appendChild(div);
+    document.getElementById("watchAdBtn").addEventListener("click", () => {
+      AdController.show()
+        .then((result) => {
+          if (result.done) {
+            alert("شكرًا لمشاهدتك الإعلان!");
+            // مكان مكافأة المستخدم
+          } else {
+            console.log("الإعلان لم يكتمل:", result.description);
+          }
+        })
+        .catch((result) => {
+          console.error("حدث خطأ أثناء عرض الإعلان:", result.description);
+        })
+        .finally(() => {
+          console.log("انتهت محاولة عرض الإعلان");
         });
-      });
-  }
-
-  // ===== Adsgram Rewarded Interstitial =====
-  const ad = new AdsgramPublisher.RewardedInterstitial({
-    blockId: 'int-14053',
-    onRewarded: () => {
-      db.collection('users').doc(userId).get().then(doc => {
-        let coins = doc.data().coins || 0;
-        coins += 1;
-        db.collection('users').doc(userId).update({ coins: coins });
-        document.getElementById('coins').innerText = coins;
-
-        // سجل الإعلان
-        db.collection('users').doc(userId).collection('history').add({ time: firebase.firestore.Timestamp.now() });
-
-        showNotification("🎉 تم إضافة 1 كوين!");
-        // تحديث السجل فوراً
-        const historyDiv = document.getElementById('history');
-        const div = document.createElement('div');
-        div.classList.add('history-item');
-        div.innerText = `+1 كوين - ${new Date().toLocaleString()}`;
-        historyDiv.prepend(div);
-      });
-    },
-    onError: (err) => {
-      console.error("Adsgram Error:", err);
-      showNotification("⚠️ حدث خطأ في تحميل الإعلان");
-    }
-  });
-
-  ad.load();
-
-  document.getElementById('watchAd').addEventListener('click', () => {
-    ad.show();
-  });
-</script>
-
+    });
+  </script>
 </body>
 </html>
+
 
 
 
