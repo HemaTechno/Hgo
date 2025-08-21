@@ -2,15 +2,27 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Mini App AdsGram + Firebase</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini App Telegram</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<!-- Adsgram SDK -->
+<script src="https://cdn.adsgram.ai/sdk/adsgram.publisher.min.js"></script>
+<style>
+  body { font-family: Arial; text-align: center; padding: 20px; background: #f0f0f0; }
+  button { padding: 10px 20px; font-size: 18px; margin-top: 20px; cursor: pointer; }
+</style>
+</head>
+<body>
 
-<!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore.js";
+<h1>🎮 Mini App Telegram</h1>
+<p>عدد الكوينات: <span id="coins">0</span></p>
+<button id="watchAd">مشاهدة إعلان</button>
 
-// Firebase config
-const firebaseConfig = {
+<script>
+  // ===== Firebase =====
+  const firebaseConfig = {
   apiKey: "AIzaSyDoK427q44Fj87JhgZh2vKeUnACkjl8HDc",
   authDomain: "treng-c6027.firebaseapp.com",
   projectId: "treng-c6027",
@@ -19,114 +31,51 @@ const firebaseConfig = {
   appId: "1:305527546716:web:fd072a58200f31bb42d799",
   measurementId: "G-3JFKFT2LT0"
 };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+  // ===== تسجيل دخول تلقائي للمستخدم (Anonymous) =====
+  let userId;
+  auth.signInAnonymously().then(user => {
+    userId = user.user.uid;
+    loadCoins();
+  });
 
-let telegramUserId;
-let userData;
-
-// جلب Telegram ID
-function initTelegram() {
-  const tg = window.Telegram.WebApp;
-  telegramUserId = tg.initDataUnsafe.user.id.toString(); // ID المستخدم
-}
-
-// تهيئة المستخدم في Firebase
-async function initUser() {
-  const userRef = doc(db, "users", telegramUserId);
-  const userSnap = await getDoc(userRef);
-
-  if (!userSnap.exists()) {
-    await setDoc(userRef, {
-      coins: 0,
-      tasksCompleted: 0,
-      lastTaskTimestamp: serverTimestamp(),
-      taskHistory: []
-    });
-    userData = { coins: 0, tasksCompleted: 0, lastTaskTimestamp: new Date(), taskHistory: [] };
-  } else {
-    userData = userSnap.data();
-  }
-
-  updateUI();
-}
-
-// تحديث واجهة المستخدم
-function updateUI() {
-  document.getElementById('coins').innerText = `النقاط: ${userData.coins}`;
-  let tasksDiv = document.getElementById('tasksCompleted');
-  if (!tasksDiv) {
-    tasksDiv = document.createElement('div');
-    tasksDiv.id = 'tasksCompleted';
-    document.body.appendChild(tasksDiv);
-  }
-  tasksDiv.innerText = `المهام المنجزة: ${userData.tasksCompleted}/6`;
-}
-</script>
-
-<!-- AdsGram SDK -->
-<script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-
-<style>
-body { font-family: Arial, sans-serif; text-align:center; margin-top:50px; background:#f4f4f4; }
-button { padding: 15px 30px; font-size:18px; cursor:pointer; margin-top:20px; }
-#coins, #tasksCompleted { font-size:20px; margin-top:20px; }
-</style>
-</head>
-<body>
-
-<h1>مرحباً بك في Mini App</h1>
-<p>اضغط على الإعلان لكسب النقاط!</p>
-<button id="showAd">عرض الإعلان</button>
-<div id="coins">النقاط: 0</div>
-
-<script type="module">
-// تهيئة Telegram و Firebase
-initTelegram();
-await initUser();
-
-const AdController = window.Adsgram.init({ blockId: "int-14053" });
-
-document.getElementById('showAd').addEventListener('click', async () => {
-  const now = new Date();
-  const lastTaskTime = new Date(userData.lastTaskTimestamp.seconds * 1000 || 0);
-  const oneHourLater = new Date(lastTaskTime.getTime() + 60*60*1000);
-
-  if (userData.tasksCompleted >= 6 && now < oneHourLater) {
-    alert("🚫 لقد أكملت كل المهام لهذه الساعة، انتظر الساعة القادمة!");
-    return;
-  }
-
-  AdController.show()
-    .then(async () => {
-      userData.coins += 10;
-
-      if (now > oneHourLater) {
-        userData.tasksCompleted = 1;
+  // ===== تحميل عدد الكوينات =====
+  function loadCoins() {
+    db.collection('users').doc(userId).get().then(doc => {
+      if(doc.exists){
+        document.getElementById('coins').innerText = doc.data().coins;
       } else {
-        userData.tasksCompleted += 1;
+        db.collection('users').doc(userId).set({ coins: 0 });
+        document.getElementById('coins').innerText = 0;
       }
+    });
+  }
 
-      userData.lastTaskTimestamp = now;
-
-      const userRef = doc(db, "users", telegramUserId);
-      await updateDoc(userRef, {
-        coins: userData.coins,
-        tasksCompleted: userData.tasksCompleted,
-        lastTaskTimestamp: serverTimestamp(),
-        taskHistory: [...userData.taskHistory, now.toISOString()]
+  // ===== Adsgram Rewarded Interstitial =====
+  const ad = new AdsgramPublisher.RewardedInterstitial({
+    blockId: 'int-14053',
+    onRewarded: () => {
+      // إضافة 1 كوين عند مشاهدة الإعلان
+      db.collection('users').doc(userId).get().then(doc => {
+        let coins = doc.data().coins || 0;
+        coins += 1; // 1 كوين لكل إعلان
+        db.collection('users').doc(userId).update({ coins: coins });
+        document.getElementById('coins').innerText = coins;
       });
+    }
+  });
 
-      updateUI();
-      alert(`🎉 حصلت على 10 نقاط! المهام المنجزة: ${userData.tasksCompleted}/6`);
-    })
-    .catch(err => console.error("خطأ في عرض الإعلان:", err));
-});
+  document.getElementById('watchAd').addEventListener('click', () => {
+    ad.show();
+  });
 </script>
 
 </body>
 </html>
+
 
 
 
