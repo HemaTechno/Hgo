@@ -10,7 +10,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.0/firebas
 import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-auth.js";
 
-// معلومات Firebase الخاصة بك
+// إعدادات Firebase الخاصة بك
 const firebaseConfig = {
   apiKey: "AIzaSyDoK427q44Fj87JhgZh2vKeUnACkjl8HDc",
   authDomain: "treng-c6027.firebaseapp.com",
@@ -28,7 +28,6 @@ const auth = getAuth();
 let currentUserId;
 let userData;
 
-// تهيئة المستخدم
 async function initUser() {
   const userCredential = await signInAnonymously(auth);
   currentUserId = userCredential.user.uid;
@@ -51,10 +50,13 @@ async function initUser() {
   updateUI();
 }
 
-// تحديث واجهة المستخدم
 function updateUI() {
   document.getElementById('coins').innerText = `النقاط: ${userData.coins}`;
-  document.getElementById('tasksCompleted').innerText = `المهام المنجزة: ${userData.tasksCompleted}/6`;
+  document.getElementById('tasksCompleted')?.remove();
+  const tasksDiv = document.createElement('div');
+  tasksDiv.id = 'tasksCompleted';
+  tasksDiv.innerText = `المهام المنجزة: ${userData.tasksCompleted}/6`;
+  document.body.appendChild(tasksDiv);
 }
 
 initUser();
@@ -73,22 +75,15 @@ button { padding: 15px 30px; font-size:18px; cursor:pointer; margin-top:20px; }
 
 <h1>مرحباً بك في Mini App</h1>
 <p>اضغط على الإعلان لكسب النقاط!</p>
-
 <button id="showAd">عرض الإعلان</button>
-
 <div id="coins">النقاط: 0</div>
-<div id="tasksCompleted">المهام المنجزة: 0/6</div>
 
 <script type="module">
-// متغير النقاط ومهام المستخدم
 let AdController = window.Adsgram.init({ blockId: "int-14053" });
 
-// التعامل مع زر عرض الإعلان
 document.getElementById('showAd').addEventListener('click', async () => {
-
-  // تحقق من حد المهام لكل ساعة
   const now = new Date();
-  const lastTaskTime = new Date(userData.lastTaskTimestamp.seconds * 1000);
+  const lastTaskTime = new Date(userData.lastTaskTimestamp.seconds * 1000 || 0);
   const oneHourLater = new Date(lastTaskTime.getTime() + 60*60*1000);
 
   if (userData.tasksCompleted >= 6 && now < oneHourLater) {
@@ -96,10 +91,9 @@ document.getElementById('showAd').addEventListener('click', async () => {
     return;
   }
 
-  // عرض الإعلان
   AdController.show()
     .then(async () => {
-      // إضافة نقاط
+      // إضافة النقاط
       userData.coins += 10;
 
       // تحديث عدد المهام
@@ -111,7 +105,7 @@ document.getElementById('showAd').addEventListener('click', async () => {
 
       userData.lastTaskTimestamp = now;
 
-      // حفظ البيانات في Firebase
+      // تحديث Firebase
       const userRef = doc(db, "users", currentUserId);
       await updateDoc(userRef, {
         coins: userData.coins,
@@ -120,19 +114,16 @@ document.getElementById('showAd').addEventListener('click', async () => {
         taskHistory: [...userData.taskHistory, now.toISOString()]
       });
 
-      // تحديث واجهة المستخدم
       updateUI();
-
       alert(`🎉 حصلت على 10 نقاط! المهام المنجزة: ${userData.tasksCompleted}/6`);
     })
-    .catch((err) => {
-      console.error("خطأ في عرض الإعلان:", err);
-    });
+    .catch(err => console.error("خطأ في عرض الإعلان:", err));
 });
 </script>
 
 </body>
 </html>
+
 
 
 
