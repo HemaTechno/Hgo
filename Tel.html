@@ -2,18 +2,22 @@
 <html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>Mini App with Ad Button</title>
+  <title>Mini App - Tasks & Coins</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- استيراد Telegram وAdsGram -->
+  <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Adsgram -->
   <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 20px;
       text-align: center;
       background: #f5f5f5;
+      padding: 20px;
+      direction: rtl;
     }
     .card {
       background: white;
@@ -21,7 +25,7 @@
       border-radius: 12px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
       max-width: 400px;
-      margin: 40px auto;
+      margin: 20px auto;
     }
     button {
       padding: 10px 20px;
@@ -30,50 +34,231 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      margin-top: 10px;
       font-size: 16px;
     }
-    button:hover {
-      background: #006699;
+    button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+    .user {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #fff;
+      padding: 8px;
+      margin: 5px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .user img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    #leaderboard button {
+      margin: 5px;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>مرحبًا 👋</h2>
-    <p>اضغط الزر لتشغيل إعلان كثمن مكافأة 🎁</p>
-    <button id="watchAdBtn">اسمع / شاهد إعلان</button>
+    <h2>👤 حسابك</h2>
+    <img id="userPhoto" src="https://via.placeholder.com/80" style="border-radius:50%; width:80px; height:80px;">
+    <h3 id="userName">...</h3>
+    <p>رصيدك: <b id="coins">0</b> 🪙</p>
+    <p>المهام المنجزة اليوم: <span id="tasks">0</span>/20</p>
+    <p id="countdown"></p>
+    <button id="taskBtn">شاهد إعلان (1 🪙)</button>
+  </div>
+
+  <div class="card">
+    <h2>🏆 لوحة الصدارة</h2>
+    <div>
+      <button onclick="loadLeaderboard('daily')">🔥 الأعلى اليوم</button>
+      <button onclick="loadLeaderboard('all')">🌍 الأعلى في الكل</button>
+    </div>
+    <div id="leaderboard"></div>
   </div>
 
   <script>
+    // ------- إعداد Firebase -------
+    const firebaseConfig = {
+      apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
+      authDomain: "t-shirt-94ff7.firebaseapp.com",
+      projectId: "t-shirt-94ff7",
+      storageBucket: "t-shirt-94ff7.appspot.com",
+      messagingSenderId: "557401753261",
+      appId: "1:557401753261:web:4d877cf5410a9f063ee8f7"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // ------- Telegram -------
     let tg = window.Telegram.WebApp;
     tg.expand();
+    const userId = tg.initDataUnsafe?.user?.id?.toString() || "testUser";
+    const userName = tg.initDataUnsafe?.user?.first_name || "مجهول";
+    const userPhoto = tg.initDataUnsafe?.user?.photo_url || "https://via.placeholder.com/80";
 
-    // تهيئة AdsGram
-    const AdController = window.Adsgram.init({
-      blockId: "int-14053"
-    });
+    // ------- Adsgram -------
+    const AdController = window.Adsgram.init({ blockId: "int-14053" });
 
-    document.getElementById("watchAdBtn").addEventListener("click", () => {
+    // ------- بيانات المستخدم -------
+    const COINS_PER_TASK = 1;
+    const MAX_TASKS_PER_DAY = 20;
+    const WAIT_TIME = 60 * 1000; // دقيقة واحدة
+
+    let userData = {
+      name: userName,
+      photo: userPhoto,
+      coins: 0,
+      tasksCompleted: 0,
+      lastTaskTime: null,
+      date: new Date().toISOString().split("T")[0]
+    };
+
+    const coinsEl = document.getElementById("coins");
+    const tasksEl = document.getElementById("tasks");
+    const taskBtn = document.getElementById("taskBtn");
+    const countdownEl = document.getElementById("countdown");
+
+    // ------- تحميل بيانات المستخدم -------
+    async function loadUser() {
+      const doc = await db.collection("users").doc(userId).get();
+      if (doc.exists) {
+        userData = doc.data();
+        // لو يوم جديد، نصفر المهام اليومية
+        const today = new Date().toISOString().split("T")[0];
+        if (userData.date !== today) {
+          userData.date = today;
+          userData.tasksCompleted = 0;
+          userData.lastTaskTime = null;
+        }
+      } else {
+        await db.collection("users").doc(userId).set(userData);
+      }
+      updateUI();
+    }
+
+    // ------- تحديث الواجهة -------
+    function updateUI() {
+      document.getElementById("userName").innerText = userData.name;
+      document.getElementById("userPhoto").src = userData.photo;
+      coinsEl.innerText = userData.coins;
+      tasksEl.innerText = userData.tasksCompleted;
+
+      // تحقق من حالة الزر
+      if (userData.tasksCompleted >= MAX_TASKS_PER_DAY) {
+        taskBtn.disabled = true;
+        taskBtn.innerText = "🚫 انتهت مهام اليوم";
+        countdownEl.innerText = "";
+      } else if (userData.lastTaskTime) {
+        const last = new Date(userData.lastTaskTime).getTime();
+        const now = Date.now();
+        const diff = now - last;
+        if (diff < WAIT_TIME) {
+          taskBtn.disabled = true;
+          startCountdown(WAIT_TIME - diff);
+        } else {
+          taskBtn.disabled = false;
+          taskBtn.innerText = "شاهد إعلان (1 🪙)";
+          countdownEl.innerText = "";
+        }
+      } else {
+        taskBtn.disabled = false;
+        taskBtn.innerText = "شاهد إعلان (1 🪙)";
+        countdownEl.innerText = "";
+      }
+    }
+
+    // ------- عداد زمني -------
+    function startCountdown(timeLeft) {
+      taskBtn.innerText = "⏳ انتظر...";
+      const interval = setInterval(() => {
+        timeLeft -= 1000;
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+          updateUI();
+        } else {
+          countdownEl.innerText = `المهمة التالية بعد ${Math.ceil(timeLeft/1000)} ثانية`;
+        }
+      }, 1000);
+    }
+
+    // ------- زر المهمة -------
+    taskBtn.addEventListener("click", async () => {
       AdController.show()
-        .then((result) => {
+        .then(async (result) => {
           if (result.done) {
-            alert("شكرًا لمشاهدتك الإعلان!");
-            // مكان مكافأة المستخدم
+            userData.tasksCompleted += 1;
+            userData.coins += COINS_PER_TASK;
+            userData.lastTaskTime = new Date().toISOString();
+            await db.collection("users").doc(userId).set(userData);
+            updateUI();
+            alert("✅ حصلت على 1 كوين!");
           } else {
-            console.log("الإعلان لم يكتمل:", result.description);
+            alert("⚠️ لازم تكمل مشاهدة الإعلان!");
           }
         })
-        .catch((result) => {
-          console.error("حدث خطأ أثناء عرض الإعلان:", result.description);
-        })
-        .finally(() => {
-          console.log("انتهت محاولة عرض الإعلان");
+        .catch((err) => {
+          console.error("خطأ:", err);
+          alert("❌ لم يتم عرض الإعلان");
         });
     });
+
+    // ------- تحميل لوحة الصدارة -------
+    async function loadLeaderboard(mode = "all") {
+      const leaderboardEl = document.getElementById("leaderboard");
+      leaderboardEl.innerHTML = "";
+
+      if (mode === "daily") {
+        const today = new Date().toISOString().split("T")[0];
+        const snapshot = await db.collection("users")
+          .where("date", "==", today)
+          .orderBy("tasksCompleted", "desc")
+          .limit(10)
+          .get();
+
+        snapshot.forEach((doc) => {
+          const u = doc.data();
+          const div = document.createElement("div");
+          div.className = "user";
+          div.innerHTML = `
+            <img src="${u.photo}" alt="user">
+            <span>${u.name}</span>
+            <b>${u.tasksCompleted} 🪙 اليوم</b>
+          `;
+          leaderboardEl.appendChild(div);
+        });
+
+      } else {
+        const snapshot = await db.collection("users")
+          .orderBy("coins", "desc")
+          .limit(10)
+          .get();
+
+        snapshot.forEach((doc) => {
+          const u = doc.data();
+          const div = document.createElement("div");
+          div.className = "user";
+          div.innerHTML = `
+            <img src="${u.photo}" alt="user">
+            <span>${u.name}</span>
+            <b>${u.coins} 🪙 إجمالي</b>
+          `;
+          leaderboardEl.appendChild(div);
+        });
+      }
+    }
+
+    // ------- بداية التشغيل -------
+    loadUser();
+    loadLeaderboard("all");
   </script>
 </body>
 </html>
+
 
 
 
