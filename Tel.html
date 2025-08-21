@@ -451,6 +451,14 @@
       margin-bottom: 15px;
     }
     
+    .ad-status {
+      margin-top: 15px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+    
     @media (max-width: 400px) {
       .card {
         padding: 20px 15px;
@@ -495,37 +503,6 @@
         </div>
       </div>
       
-      <div class="ad-container">
-        <div class="ad-title">
-          <i class="fas fa-ad"></i> مشاهدة الإعلانات
-        </div>
-        <div class="ad-description">
-          شاهد الإعلان بالكامل لتحصل على مكافآت فورية
-        </div>
-        
-        <div class="ad-rewards">
-          <div class="reward-item">
-            <div class="reward-icon"><i class="fas fa-coins"></i></div>
-            <div class="reward-value">+1</div>
-            <div class="reward-label">عملات</div>
-          </div>
-          <div class="reward-item">
-            <div class="reward-icon"><i class="fas fa-star"></i></div>
-            <div class="reward-value">+1</div>
-            <div class="reward-label">نقاط</div>
-          </div>
-          <div class="reward-item">
-            <div class="reward-icon"><i class="fas fa-bolt"></i></div>
-            <div class="reward-value">+5</div>
-            <div class="reward-label">خبرة</div>
-          </div>
-        </div>
-        
-        <div class="progress-bar">
-          <div class="progress" id="adProgress"></div>
-        </div>
-      </div>
-      
       <div class="action-buttons">
         <button id="taskBtn" class="pulse">
           <i class="fas fa-play-circle"></i> بدء مشاهدة الإعلان
@@ -549,6 +526,7 @@
           <button id="showAdsgramAd" class="btn-accent">
             <i class="fas fa-eye"></i> عرض إعلان
           </button>
+          <div class="ad-status" id="adStatus">جاهز لعرض الإعلانات</div>
         </div>
       </div>
     </div>
@@ -599,52 +577,95 @@
     // ------- إعداد Adsgram -------
     const adsgramBlockId = "int-14053";
     let adsgramInitialized = false;
+    let adsgramAvailable = false;
 
     function initializeAdsgram() {
-      if (typeof AdsGram !== 'undefined' && !adsgramInitialized) {
+      if (typeof AdsGram !== 'undefined') {
         try {
+          console.log("جاري تهيئة Adsgram...");
           AdsGram.init({
             blockId: adsgramBlockId,
             onInit: () => {
               console.log("تم تهيئة Adsgram بنجاح");
               adsgramInitialized = true;
+              adsgramAvailable = true;
+              document.getElementById('adStatus').textContent = "جاهز لعرض الإعلانات";
+              document.getElementById('adStatus').style.color = "green";
             },
             onError: (error) => {
               console.error("خطأ في تهيئة Adsgram:", error);
+              document.getElementById('adStatus').textContent = "خطأ في تهيئة الإعلانات";
+              document.getElementById('adStatus').style.color = "red";
             }
           });
         } catch (error) {
           console.error("خطأ في تهيئة Adsgram:", error);
+          document.getElementById('adStatus').textContent = "خطأ في تحميل الإعلانات";
+          document.getElementById('adStatus').style.color = "red";
         }
+      } else {
+        console.error("لم يتم العثور على SDK Adsgram");
+        document.getElementById('adStatus').textContent = "لم يتم تحميل مكتبة الإعلانات";
+        document.getElementById('adStatus').style.color = "red";
       }
     }
 
     function showAdsgramAd() {
-      if (typeof AdsGram === 'undefined' || !adsgramInitialized) {
+      if (typeof AdsGram === 'undefined') {
         showNotification("❌ نظام الإعلانات غير متاح حالياً");
         return;
       }
 
+      if (!adsgramInitialized) {
+        showNotification("⏳ جاري تحميل الإعلانات، انتظر قليلاً...");
+        return;
+      }
+
       try {
+        document.getElementById('adStatus').textContent = "جاري تحميل الإعلان...";
+        document.getElementById('adStatus').style.color = "orange";
+        
         AdsGram.showAd({
           onReward: () => {
             // منح المكافأة عند اكتمال مشاهدة الإعلان
             userData.coins += 2; // مكافأة مضاعفة للإعلانات الخارجية
             userData.tasksCompleted += 1;
             updateUserData();
+            document.getElementById('adStatus').textContent = "تمت مكافأتك بنجاح!";
+            document.getElementById('adStatus').style.color = "green";
             showNotification("🎉 لقد ربحت 2 عملات من مشاهدة الإعلان!");
           },
           onClose: () => {
             console.log("تم إغلاق الإعلان");
+            document.getElementById('adStatus').textContent = "جاهز لعرض الإعلانات";
+            document.getElementById('adStatus').style.color = "green";
           },
           onError: (error) => {
             console.error("خطأ في عرض الإعلان:", error);
+            document.getElementById('adStatus').textContent = "خطأ في عرض الإعلان";
+            document.getElementById('adStatus').style.color = "red";
             showNotification("❌ حدث خطأ أثناء عرض الإعلان");
+            
+            // محاكاة الإعلان في حالة الخطأ لأغراض الاختبار
+            simulateAdView().then(() => {
+              userData.coins += 1;
+              userData.tasksCompleted += 1;
+              updateUserData();
+              showNotification("🎉 لقد ربحت 1 عملة من مشاهدة الإعلان (وضع الاختبار)");
+            });
           }
         });
       } catch (error) {
         console.error("خطأ في عرض إعلان Adsgram:", error);
         showNotification("❌ نظام الإعلانات غير متاح حالياً");
+        
+        // محاكاة الإعلان في حالة الخطأ لأغراض الاختبار
+        simulateAdView().then(() => {
+          userData.coins += 1;
+          userData.tasksCompleted += 1;
+          updateUserData();
+          showNotification("🎉 لقد ربحت 1 عملة من مشاهدة الإعلان (وضع الاختبار)");
+        });
       }
     }
 
@@ -684,7 +705,6 @@
     const userIdEl = document.getElementById("userId");
     const notificationEl = document.getElementById("notification");
     const notificationTextEl = document.getElementById("notificationText");
-    const adProgressEl = document.getElementById("adProgress");
     const showAdsgramAdBtn = document.getElementById("showAdsgramAd");
 
     // ------- عرض بيانات المستخدم فوراً -------
@@ -805,8 +825,6 @@
         let progress = 0;
         const interval = setInterval(() => {
           progress += 2;
-          adProgressEl.style.width = `${progress}%`;
-          
           if (progress >= 100) {
             clearInterval(interval);
             resolve({ done: true });
@@ -817,35 +835,7 @@
 
     // ------- زر المهمة -------
     taskBtn.addEventListener("click", async () => {
-      try {
-        taskBtn.disabled = true;
-        taskBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...';
-        
-        // محاكاة عرض الإعلان
-        const result = await simulateAdView();
-        
-        if (result.done) {
-          userData.tasksCompleted += 1;
-          userData.coins += COINS_PER_TASK;
-          userData.lastTaskTime = new Date().toISOString();
-          
-          await updateUserData();
-          
-          // إعادة تعيين شريط التقدم
-          adProgressEl.style.width = '0%';
-          
-          // تأثير مرئي عند الحصول على العملات
-          coinsEl.classList.add('pulse');
-          setTimeout(() => coinsEl.classList.remove('pulse'), 1000);
-          
-          // رسالة نجاح
-          showNotification("تهانينا! لقد ربحت 1 عملة ذهبية 🪙");
-        }
-      } catch (err) {
-        console.error("خطأ:", err);
-        showNotification("❌ حدث خطأ أثناء عرض الإعلان");
-        updateUI();
-      }
+      showAdsgramAd();
     });
 
     // ------- زر المكافأة اليومية -------
