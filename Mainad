@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AdsGram — Interstitial</title>
+
+  <!-- مهم: افتح الصفحة داخل Telegram Mini App -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- سكربت AdsGram الصحيح -->
+  <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
+  <style>
+    body{font-family:system-ui,Arial;display:flex;min-height:100dvh;align-items:center;justify-content:center;background:#f7f7f8;margin:0}
+    .card{background:#fff;padding:22px 20px;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.08);max-width:520px;width:92%}
+    h2{margin:0 0 8px;font-size:22px}
+    p{margin:0 0 14px;color:#555}
+    button{padding:12px 18px;border:0;border-radius:12px;cursor:pointer;font-size:16px}
+    .primary{background:#0ea5e9;color:#fff}
+    .muted{margin-top:10px;font-size:13px;color:#666}
+    #status{margin-top:12px;font-weight:600}
+    pre{background:#0f172a;color:#e2e8f0;padding:10px;border-radius:10px;overflow:auto;max-height:160px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>عرض إعلان AdsGram (Interstitial)</h2>
+    <p>اضغط لعرض الإعلان. (لازم تكون فاتح داخل Telegram)</p>
+    <button id="showAd" class="primary">🎬 عرض الإعلان</button>
+    <div id="status"></div>
+    <details style="margin-top:10px">
+      <summary>تفاصيل للديبج</summary>
+      <pre id="log">جاهز…</pre>
+    </details>
+    <div class="muted">Block ID: <b>int-14053</b></div>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const logEl = document.getElementById('log');
+
+    // تحذير لو الصفحة اتفتحت خارج Telegram
+    const inTelegram = !!(window.Telegram && window.Telegram.WebApp);
+    if (!inTelegram) {
+      statusEl.textContent = '⚠️ افتح الصفحة من داخل Telegram Mini App. الإعلانات لن تعمل في المتصفح العادي.';
+    } else {
+      // اختياري: تفعيل الثيم داخل التليجرام
+      try { window.Telegram.WebApp.expand(); } catch(_) {}
+    }
+
+    // تهيئة AdsGram (استعملنا debug لتظهر الأخطاء لو فيه مشكلة)
+    let AdController;
+    try {
+      AdController = window.Adsgram.init({
+        blockId: "int-14053",
+        debug: true // ⚠️ شيّله في الإنتاج
+        // debugBannerType: 'FullscreenMedia' // اختياري أثناء الاختبار
+      });
+      log('Adsgram inited');
+    } catch(e) {
+      log('Init error: ' + e.message, true);
+    }
+
+    document.getElementById('showAd').addEventListener('click', () => {
+      if (!AdController) {
+        status('لم يتم تهيئة AdsGram.');
+        return;
+      }
+      status('جاري تحميل الإعلان…');
+
+      AdController.show()
+        .then((result) => {
+          // في interstitial: الـ promise بتتحل عند الإنهاء أو الإغلاق
+          status('✅ الإعلان انتهى/أُغلق.');
+          log(result);
+          // لو كنت مستخدم "Rewarded" بدلاً من "Interstitial" استعمل:
+          // if (result.done && !result.error) { اعطي المكافأة }
+        })
+        .catch((result) => {
+          // أخطاء تشغيل/تخطي/رفض
+          status('❌ لم يكتمل عرض الإعلان.');
+          log(result, true);
+          // أمثلة على result.description:
+          // 'No ads to show', 'Wrong referrer', 'User closed', إلخ.
+        })
+        .finally(() => {
+          // أي تنظيف بعد الانتهاء
+        });
+    });
+
+    function status(msg){ statusEl.textContent = msg; }
+    function log(data, isErr){
+      const line = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
+      logEl.textContent += '\n' + (isErr ? '[ERR] ' : '') + line;
+    }
+  </script>
+</body>
+</html>
