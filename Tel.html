@@ -3,32 +3,132 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>AdsGram — Interstitial</title>
+  <title>نظام تجميع الكوينات</title>
 
-  <!-- مهم: افتح الصفحة داخل Telegram Mini App -->
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+  <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- سكربت AdsGram الصحيح -->
+  <!-- AdsGram SDK -->
   <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
   <style>
-    body{font-family:system-ui,Arial;display:flex;min-height:100dvh;align-items:center;justify-content:center;background:#f7f7f8;margin:0}
-    .card{background:#fff;padding:22px 20px;border-radius:18px;box-shadow:0 6px 24px rgba(0,0,0,.08);max-width:520px;width:92%}
-    h2{margin:0 0 8px;font-size:22px}
-    p{margin:0 0 14px;color:#555}
-    button{padding:12px 18px;border:0;border-radius:12px;cursor:pointer;font-size:16px}
-    .primary{background:#0ea5e9;color:#fff}
-    .muted{margin-top:10px;font-size:13px;color:#666}
-    #status{margin-top:12px;font-weight:600}
-    pre{background:#0f172a;color:#e2e8f0;padding:10px;border-radius:10px;overflow:auto;max-height:160px}
+    body {
+      font-family: system-ui, Arial;
+      display: flex;
+      min-height: 100dvh;
+      align-items: center;
+      justify-content: center;
+      background: #f7f7f8;
+      margin: 0;
+      padding: 20px;
+    }
+    .card {
+      background: #fff;
+      padding: 22px 20px;
+      border-radius: 18px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.08);
+      max-width: 520px;
+      width: 92%;
+      text-align: center;
+    }
+    h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      color: #0ea5e9;
+    }
+    p {
+      margin: 0 0 14px;
+      color: #555;
+    }
+    .balance-container {
+      background: #f1f5f9;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 20px 0;
+    }
+    .balance-label {
+      font-size: 16px;
+      color: #64748b;
+    }
+    .balance-amount {
+      font-size: 28px;
+      font-weight: bold;
+      color: #0ea5e9;
+      margin: 5px 0;
+    }
+    button {
+      padding: 12px 18px;
+      border: 0;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    .primary {
+      background: #0ea5e9;
+      color: #fff;
+    }
+    .primary:hover {
+      background: #0284c7;
+    }
+    .muted {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #666;
+    }
+    #status {
+      margin-top: 12px;
+      font-weight: 600;
+      color: #475569;
+    }
+    pre {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 10px;
+      border-radius: 10px;
+      overflow: auto;
+      max-height: 160px;
+    }
+    .reward-animation {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 40px;
+      font-weight: bold;
+      color: gold;
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      border-radius: 15px;
+      z-index: 1000;
+      animation: popup 1.5s ease-out;
+      display: none;
+    }
+    @keyframes popup {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h2>عرض إعلان AdsGram (Interstitial)</h2>
-    <p>اضغط لعرض الإعلان. (لازم تكون فاتح داخل Telegram)</p>
-    <button id="showAd" class="primary">🎬 عرض الإعلان</button>
+    <h2>نظام تجميع الكوينات</h2>
+    <p>شاهد الإعلانات واكسب كوينات لاستخدامها داخل التطبيق</p>
+    
+    <div class="balance-container">
+      <div class="balance-label">رصيدك الحالي</div>
+      <div class="balance-amount" id="userBalance">0 كوين</div>
+    </div>
+    
+    <button id="showAd" class="primary">🎬 شاهد إعلان واحصل على كوين</button>
     <div id="status"></div>
+    
     <details style="margin-top:10px">
       <summary>تفاصيل للديبج</summary>
       <pre id="log">جاهز…</pre>
@@ -36,66 +136,164 @@
     <div class="muted">Block ID: <b>int-14053</b></div>
   </div>
 
+  <div id="rewardAnimation" class="reward-animation">+1 كوين! 🎉</div>
+
   <script>
+    // عناصر DOM
     const statusEl = document.getElementById('status');
     const logEl = document.getElementById('log');
-
+    const userBalanceEl = document.getElementById('userBalance');
+    const rewardAnimationEl = document.getElementById('rewardAnimation');
+    
+    // تهيئة Firebase
+    const firebaseConfig = {
+  apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+  authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+  databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+  projectId: "hhhhhh-d4fb8",
+  storageBucket: "hhhhhh-d4fb8.appspot.com",
+  messagingSenderId: "24512338206",
+  appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+  measurementId: "G-HD4R7GNQ5H"
+};
+    
+    // تهيئة Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    // متغيرات التطبيق
+    let AdController;
+    let userId = null;
+    let userData = { balance: 0 };
+    
     // تحذير لو الصفحة اتفتحت خارج Telegram
     const inTelegram = !!(window.Telegram && window.Telegram.WebApp);
     if (!inTelegram) {
       statusEl.textContent = '⚠️ افتح الصفحة من داخل Telegram Mini App. الإعلانات لن تعمل في المتصفح العادي.';
+      // استخدام معرف افتراضي للاختبار خارج Telegram
+      userId = "test-user-" + Date.now();
+      loadUserData();
     } else {
-      // اختياري: تفعيل الثيم داخل التليجرام
-      try { window.Telegram.WebApp.expand(); } catch(_) {}
+      try { 
+        window.Telegram.WebApp.expand(); 
+        // الحصول على معرف المستخدم من Telegram
+        userId = Telegram.WebApp.initDataUnsafe.user?.id;
+        if (userId) {
+          loadUserData();
+        } else {
+          statusEl.textContent = '⚠️ لا يمكن تحديد هوية المستخدم';
+        }
+      } catch(e) {
+        log('Telegram error: ' + e.message, true);
+      }
     }
 
-    // تهيئة AdsGram (استعملنا debug لتظهر الأخطاء لو فيه مشكلة)
-    let AdController;
+    // تهيئة AdsGram
     try {
       AdController = window.Adsgram.init({
         blockId: "int-14053",
-        debug: true // ⚠️ شيّله في الإنتاج
-        // debugBannerType: 'FullscreenMedia' // اختياري أثناء الاختبار
+        debug: true
       });
-      log('Adsgram inited');
+      log('تم تهيئة Adsgram بنجاح');
     } catch(e) {
-      log('Init error: ' + e.message, true);
+      log('خطأ في التهيئة: ' + e.message, true);
     }
 
+    // تحميل بيانات المستخدم من Firebase
+    function loadUserData() {
+      db.collection("users").doc(userId.toString()).get()
+        .then((doc) => {
+          if (doc.exists) {
+            userData = doc.data();
+            updateBalanceDisplay();
+            log('تم تحميل بيانات المستخدم');
+          } else {
+            // إنشاء مستخدم جديد إذا لم يكن موجوداً
+            userData = { balance: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
+            db.collection("users").doc(userId.toString()).set(userData)
+              .then(() => {
+                log('تم إنشاء مستخدم جديد');
+                updateBalanceDisplay();
+              })
+              .catch((error) => {
+                log("خطأ في إنشاء المستخدم: " + error.message, true);
+              });
+          }
+        })
+        .catch((error) => {
+          log("خطأ في تحميل البيانات: " + error.message, true);
+        });
+    }
+
+    // تحديث عرض الرصيد
+    function updateBalanceDisplay() {
+      userBalanceEl.textContent = userData.balance + " كوين";
+    }
+
+    // إضافة كوين للمستخدم
+    function addCoins(amount) {
+      userData.balance += amount;
+      
+      // تحديث البيانات في Firebase
+      db.collection("users").doc(userId.toString()).update({
+        balance: userData.balance,
+        lastReward: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+        updateBalanceDisplay();
+        showRewardAnimation(amount);
+        log(`تم إضافة ${amount} كوين للمستخدم`);
+      })
+      .catch((error) => {
+        log("خطأ في تحديث الرصيد: " + error.message, true);
+      });
+    }
+
+    // عرض رسمة المكافأة
+    function showRewardAnimation(amount) {
+      rewardAnimationEl.textContent = `+${amount} كوين! 🎉`;
+      rewardAnimationEl.style.display = 'block';
+      
+      setTimeout(() => {
+        rewardAnimationEl.style.display = 'none';
+      }, 1500);
+    }
+
+    // التعامل مع النقر على زر عرض الإعلان
     document.getElementById('showAd').addEventListener('click', () => {
       if (!AdController) {
         status('لم يتم تهيئة AdsGram.');
         return;
       }
+      
+      if (!userId) {
+        status('لم يتم التعرف على المستخدم.');
+        return;
+      }
+      
       status('جاري تحميل الإعلان…');
 
       AdController.show()
         .then((result) => {
-          // في interstitial: الـ promise بتتحل عند الإنهاء أو الإغلاق
           status('✅ الإعلان انتهى/أُغلق.');
           log(result);
-          // لو كنت مستخدم "Rewarded" بدلاً من "Interstitial" استعمل:
-          // if (result.done && !result.error) { اعطي المكافأة }
+          
+          // منح المستخدم كوين عند مشاهدة الإعلان كاملاً
+          addCoins(1);
         })
         .catch((result) => {
-          // أخطاء تشغيل/تخطي/رفض
           status('❌ لم يكتمل عرض الإعلان.');
           log(result, true);
-          // أمثلة على result.description:
-          // 'No ads to show', 'Wrong referrer', 'User closed', إلخ.
-        })
-        .finally(() => {
-          // أي تنظيف بعد الانتهاء
         });
     });
 
+    // دوال المساعدة
     function status(msg){ statusEl.textContent = msg; }
     function log(data, isErr){
       const line = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
       logEl.textContent += '\n' + (isErr ? '[ERR] ' : '') + line;
+      logEl.scrollTop = logEl.scrollHeight;
     }
   </script>
 </body>
 </html>
-
-
