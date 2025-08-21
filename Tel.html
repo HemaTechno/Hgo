@@ -2,7 +2,7 @@
 <html lang="ar">
 <head>
 <meta charset="UTF-8">
-<title>Mini App مع AdsGram و Firebase</title>
+<title>Mini App AdsGram + Firebase</title>
 
 <!-- Firebase SDK -->
 <script type="module">
@@ -10,7 +10,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.0/firebas
 import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore.js";
 import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-auth.js";
 
-// إعدادات Firebase
+// معلومات Firebase الخاصة بك
 const firebaseConfig = {
   apiKey: "AIzaSyDoK427q44Fj87JhgZh2vKeUnACkjl8HDc",
   authDomain: "treng-c6027.firebaseapp.com",
@@ -121,8 +121,7 @@ document.getElementById('showAd').addEventListener('click', async () => {
       });
 
       // تحديث واجهة المستخدم
-      document.getElementById('coins').innerText = `النقاط: ${userData.coins}`;
-      document.getElementById('tasksCompleted').innerText = `المهام المنجزة: ${userData.tasksCompleted}/6`;
+      updateUI();
 
       alert(`🎉 حصلت على 10 نقاط! المهام المنجزة: ${userData.tasksCompleted}/6`);
     })
@@ -134,6 +133,7 @@ document.getElementById('showAd').addEventListener('click', async () => {
 
 </body>
 </html>
+
 
 
 
