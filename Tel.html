@@ -8,9 +8,8 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.3.0/firebase-auth.js";
 
-// إعدادات Firebase الخاصة بك
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDoK427q44Fj87JhgZh2vKeUnACkjl8HDc",
   authDomain: "treng-c6027.firebaseapp.com",
@@ -23,16 +22,19 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth();
 
-let currentUserId;
+let telegramUserId;
 let userData;
 
-async function initUser() {
-  const userCredential = await signInAnonymously(auth);
-  currentUserId = userCredential.user.uid;
+// جلب Telegram ID
+function initTelegram() {
+  const tg = window.Telegram.WebApp;
+  telegramUserId = tg.initDataUnsafe.user.id.toString(); // ID المستخدم
+}
 
-  const userRef = doc(db, "users", currentUserId);
+// تهيئة المستخدم في Firebase
+async function initUser() {
+  const userRef = doc(db, "users", telegramUserId);
   const userSnap = await getDoc(userRef);
 
   if (!userSnap.exists()) {
@@ -50,16 +52,17 @@ async function initUser() {
   updateUI();
 }
 
+// تحديث واجهة المستخدم
 function updateUI() {
   document.getElementById('coins').innerText = `النقاط: ${userData.coins}`;
-  document.getElementById('tasksCompleted')?.remove();
-  const tasksDiv = document.createElement('div');
-  tasksDiv.id = 'tasksCompleted';
+  let tasksDiv = document.getElementById('tasksCompleted');
+  if (!tasksDiv) {
+    tasksDiv = document.createElement('div');
+    tasksDiv.id = 'tasksCompleted';
+    document.body.appendChild(tasksDiv);
+  }
   tasksDiv.innerText = `المهام المنجزة: ${userData.tasksCompleted}/6`;
-  document.body.appendChild(tasksDiv);
 }
-
-initUser();
 </script>
 
 <!-- AdsGram SDK -->
@@ -79,7 +82,11 @@ button { padding: 15px 30px; font-size:18px; cursor:pointer; margin-top:20px; }
 <div id="coins">النقاط: 0</div>
 
 <script type="module">
-let AdController = window.Adsgram.init({ blockId: "int-14053" });
+// تهيئة Telegram و Firebase
+initTelegram();
+await initUser();
+
+const AdController = window.Adsgram.init({ blockId: "int-14053" });
 
 document.getElementById('showAd').addEventListener('click', async () => {
   const now = new Date();
@@ -93,20 +100,17 @@ document.getElementById('showAd').addEventListener('click', async () => {
 
   AdController.show()
     .then(async () => {
-      // إضافة النقاط
       userData.coins += 10;
 
-      // تحديث عدد المهام
       if (now > oneHourLater) {
-        userData.tasksCompleted = 1; // إعادة ضبط المهام كل ساعة
+        userData.tasksCompleted = 1;
       } else {
         userData.tasksCompleted += 1;
       }
 
       userData.lastTaskTimestamp = now;
 
-      // تحديث Firebase
-      const userRef = doc(db, "users", currentUserId);
+      const userRef = doc(db, "users", telegramUserId);
       await updateDoc(userRef, {
         coins: userData.coins,
         tasksCompleted: userData.tasksCompleted,
@@ -123,6 +127,7 @@ document.getElementById('showAd').addEventListener('click', async () => {
 
 </body>
 </html>
+
 
 
 
