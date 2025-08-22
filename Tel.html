@@ -655,6 +655,8 @@
           <div class="user-details">
             <h2 id="userName">جارٍ التحميل...</h2>
             <p><strong>ID:</strong> <span id="userId">--</span></p>
+            <p><strong>اسم المستخدم:</strong> <span id="userUsername">--</span></p>
+            <p><strong>اللغة:</strong> <span id="userLanguage">--</span></p>
           </div>
         </div>
         
@@ -772,6 +774,7 @@
     // Telegram WebApp init
     const tg = window.Telegram.WebApp;
     tg.expand();
+    tg.enableClosingConfirmation();
     
     // بيانات المستخدم
     let user = null;
@@ -788,6 +791,8 @@
     // عناصر واجهة المستخدم
     const userIdEl = document.getElementById("userId");
     const userNameEl = document.getElementById("userName");
+    const userUsernameEl = document.getElementById("userUsername");
+    const userLanguageEl = document.getElementById("userLanguage");
     const userAvatarEl = document.getElementById("userAvatar");
     const userBalanceEl = document.getElementById("userBalance");
     const robuxBalanceEl = document.getElementById("robuxBalance");
@@ -834,10 +839,15 @@
     
     // عند تحميل الصفحة
     document.addEventListener("DOMContentLoaded", function() {
+      // تهيئة واجهة Telegram
+      tg.ready();
+      
       if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
         user = tg.initDataUnsafe.user;
         userIdEl.textContent = user.id;
-        userNameEl.textContent = `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`;
+        userNameEl.textContent = `${user.first_name || ''}${user.last_name ? ' ' + user.last_name : ''}`;
+        userUsernameEl.textContent = user.username || "غير متوفر";
+        userLanguageEl.textContent = user.language_code || "غير معروف";
         
         // تحميل صورة المستخدم إذا كانت متاحة
         if (user.photo_url) {
@@ -852,14 +862,38 @@
         // تحميل المهام
         loadTasks();
       } else {
-        userIdEl.textContent = "غير متاح";
-        userNameEl.textContent = "غير متاح";
+        // وضع الاختبار (للتطوير)
+        user = {
+          id: 123456789,
+          first_name: "مستخدم",
+          last_name: "تجريبي",
+          username: "testuser",
+          language_code: "ar"
+        };
+        
+        userIdEl.textContent = user.id;
+        userNameEl.textContent = `${user.first_name} ${user.last_name}`;
+        userUsernameEl.textContent = user.username;
+        userLanguageEl.textContent = user.language_code;
         userAvatarEl.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+        
+        // تحميل بيانات المستخدم من Firebase
+        loadUserData();
+        
+        // تحميل المهام
+        loadTasks();
+        
+        showNotification("وضع الاختبار: بيانات مستخدم تجريبية");
       }
     });
     
     // تحميل بيانات المستخدم من Firebase
     function loadUserData() {
+      if (!user || !user.id) {
+        showNotification("خطأ: لم يتم التعرف على المستخدم");
+        return;
+      }
+      
       db.collection("users").doc(user.id.toString()).onSnapshot((doc) => {
         if (doc.exists) {
           userData = doc.data();
@@ -877,7 +911,7 @@
           // إنشاء مستخدم جديد إذا لم يكن موجوداً
           const newUser = {
             id: user.id,
-            name: `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`,
+            name: `${user.first_name || ''}${user.last_name ? ' ' + user.last_name : ''}`,
             username: user.username || "",
             balance: 0,
             completedTasks: {},
@@ -889,8 +923,15 @@
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
           };
           
-          db.collection("users").doc(user.id.toString()).set(newUser);
-          userData = newUser;
+          db.collection("users").doc(user.id.toString()).set(newUser)
+            .then(() => {
+              userData = newUser;
+              showNotification("تم إنشاء حساب جديد لك!");
+            })
+            .catch((error) => {
+              console.error("Error creating user:", error);
+              showNotification("حدث خطأ أثناء إنشاء الحساب");
+            });
         }
       }, (error) => {
         console.error("Error loading user data:", error);
@@ -1195,7 +1236,7 @@
         console.error("Error processing withdrawal:", error);
         showNotification("حدث خطأ أثناء معالجة طلب السحب");
       });
-    }
+    });
     
     // تحميل العمليات
     function loadTransactions() {
@@ -1323,8 +1364,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
