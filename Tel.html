@@ -9,59 +9,313 @@
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    :root {
+      --primary-color: #00c6ff;
+      --secondary-color: #0072ff;
+      --dark-bg: linear-gradient(135deg, #141e30, #243b55);
+      --card-bg: rgba(255, 255, 255, 0.1);
+      --text-light: #fff;
+      --text-gold: #ffd700;
+      --text-gray: #ccc;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
     body {
       font-family: 'Cairo', sans-serif;
-      background: linear-gradient(135deg,#141e30,#243b55);
-      color: #fff;
+      background: var(--dark-bg);
+      color: var(--text-light);
       text-align: center;
-      padding: 20px;
+      padding: 15px;
+      min-height: 100vh;
     }
+    
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    header {
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      font-size: 24px;
+      margin: 10px 0;
+      color: var(--text-light);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .tabs {
+      display: flex;
+      justify-content: center;
+      margin: 15px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: all 0.3s;
+    }
+    
+    .tab.active {
+      opacity: 1;
+      border-bottom: 2px solid var(--primary-color);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
     .card {
-      background: rgba(255,255,255,0.1);
-      border-radius: 20px;
-      padding: 20px;
-      margin: 15px auto;
-      max-width: 400px;
+      background: var(--card-bg);
+      border-radius: 15px;
+      padding: 15px;
+      margin: 15px 0;
       box-shadow: 0 4px 15px rgba(0,0,0,0.3);
       transition: transform 0.2s;
+      backdrop-filter: blur(10px);
     }
+    
     .card:hover {
-      transform: translateY(-5px);
+      transform: translateY(-3px);
     }
-    button {
-      background: #00c6ff;
-      border: none;
-      border-radius: 12px;
-      padding: 10px 20px;
-      margin-top: 10px;
-      color: #fff;
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      text-align: right;
+      margin-bottom: 15px;
+    }
+    
+    .user-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      margin-left: 15px;
+      border: 2px solid var(--primary-color);
+    }
+    
+    .user-details {
+      flex: 1;
+    }
+    
+    .balance {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--text-gold);
+      margin: 10px 0;
+    }
+    
+    .task {
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px 0;
+      text-align: right;
+      position: relative;
+    }
+    
+    .task-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .task-title {
+      font-weight: bold;
       font-size: 16px;
+    }
+    
+    .task-reward {
+      color: var(--text-gold);
+      font-weight: bold;
+    }
+    
+    .task-description {
+      font-size: 14px;
+      color: var(--text-gray);
+      margin-bottom: 10px;
+    }
+    
+    .task-progress {
+      height: 5px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: var(--primary-color);
+      width: 0%;
+      transition: width 0.5s;
+    }
+    
+    button {
+      background: var(--primary-color);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 15px;
+      color: var(--text-light);
+      font-family: 'Cairo', sans-serif;
+      font-size: 14px;
+      font-weight: bold;
       cursor: pointer;
       transition: background 0.3s;
+      width: 100%;
     }
-    button:hover { background: #0072ff; }
-    .task { margin: 10px 0; }
-    #adStatus { margin-top: 10px; font-size: 14px; color: #ffd700; }
+    
+    button:hover {
+      background: var(--secondary-color);
+    }
+    
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+    
+    .task-timer {
+      font-size: 12px;
+      color: var(--text-gray);
+      margin-top: 5px;
+    }
+    
+    .last-task {
+      font-size: 14px;
+      color: var(--text-gray);
+      margin-top: 10px;
+    }
+    
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-align: right;
+    }
+    
+    .rank {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    
+    .leaderboard-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-left: 10px;
+    }
+    
+    .leaderboard-details {
+      flex: 1;
+      text-align: right;
+    }
+    
+    .leaderboard-name {
+      font-weight: bold;
+    }
+    
+    .leaderboard-score {
+      color: var(--text-gold);
+      font-weight: bold;
+    }
+    
+    .cooldown {
+      color: #ff4757;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    
+    .completed {
+      background: rgba(0, 200, 83, 0.2);
+    }
+    
+    .locked {
+      opacity: 0.6;
+    }
   </style>
 </head>
 <body>
-  <h1>🎯 نظام المهام والمكافآت</h1>
-  <div class="card" id="userCard">
-    <h2>👤 معلومات المستخدم</h2>
-    <p><strong>ID:</strong> <span id="telegramId">جارٍ التحميل...</span></p>
-    <p><strong>الاسم:</strong> <span id="telegramName">جارٍ التحميل...</span></p>
-  </div>
-
-  <div class="card">
-    <h2>📋 المهام المتاحة</h2>
-    <div id="tasksList">جارٍ تحميل المهام...</div>
-  </div>
-
-  <div class="card">
-    <h2>🎥 إعلان ومكافأة</h2>
-    <button id="watchAdBtn">شاهد إعلان</button>
-    <div id="adStatus"></div>
+  <div class="container">
+    <header>
+      <h1>🎯 نظام المهام والمكافآت</h1>
+    </header>
+    
+    <div class="tabs">
+      <div class="tab active" data-tab="main">الصفحة الرئيسية</div>
+      <div class="tab" data-tab="tasks">المهام</div>
+      <div class="tab" data-tab="leaderboard">ترتيب الأعضاء</div>
+    </div>
+    
+    <!-- الصفحة الرئيسية -->
+    <div class="tab-content active" id="mainTab">
+      <div class="card">
+        <div class="user-info">
+          <img id="userAvatar" src="" class="user-avatar" alt="صورة المستخدم">
+          <div class="user-details">
+            <h2 id="userName">جارٍ التحميل...</h2>
+            <p><strong>ID:</strong> <span id="userId">--</span></p>
+          </div>
+        </div>
+        
+        <div class="balance">
+          <i class="fas fa-coins"></i>
+          <span id="userBalance">0</span> نقطة
+        </div>
+        
+        <div class="last-task">
+          <i class="fas fa-tasks"></i>
+          آخر مهمة: <span id="lastCompletedTask">0</span> / 20
+        </div>
+      </div>
+      
+      <div class="card">
+        <h2>🎥 مشاهدة إعلان</h2>
+        <p>شاهد إعلانًا واحصل على نقاط إضافية!</p>
+        <button id="watchAdBtn">شاهد إعلان</button>
+        <div id="adStatus"></div>
+      </div>
+    </div>
+    
+    <!-- قسم المهام -->
+    <div class="tab-content" id="tasksTab">
+      <div class="card">
+        <h2>📋 المهام اليومية</h2>
+        <p>اكمل المهام اليومية لتحصل على النقاط (20 مهمة متاحة يوميًا)</p>
+        <div id="tasksContainer"></div>
+      </div>
+    </div>
+    
+    <!-- ترتيب الأعضاء -->
+    <div class="tab-content" id="leaderboardTab">
+      <div class="card">
+        <h2>🏆 ترتيب الأعضاء</h2>
+        <div id="leaderboardContainer"></div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -76,121 +330,329 @@
       appId: "1:24512338206:web:dfe045db59bd3434a2110f",
       measurementId: "G-HD4R7GNQ5H"
     };
+    
+    // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     // Telegram WebApp init
     const tg = window.Telegram.WebApp;
     tg.expand();
-
-    const userIdEl = document.getElementById("telegramId");
-    const userNameEl = document.getElementById("telegramName");
-
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-      const user = tg.initDataUnsafe.user;
-      userIdEl.textContent = user.id;
-      userNameEl.textContent = user.first_name + (user.last_name ? " " + user.last_name : "");
-      // حفظ بيانات المستخدم في Firebase
-      firebase.database().ref("users/" + user.id).set({
-        id: user.id,
-        name: user.first_name + (user.last_name ? " " + user.last_name : ""),
-        username: user.username || "",
-        timestamp: Date.now()
-      });
-    } else {
-      userIdEl.textContent = "غير متاح";
-      userNameEl.textContent = "غير متاح";
-    }
-
-    // جلب المهام ديناميكياً
-    const tasksList = document.getElementById("tasksList");
-    db.ref("tasks").on("value", snap => {
-      tasksList.innerHTML = "";
-      if (!snap.exists()) {
-        tasksList.innerHTML = "<p>لا توجد مهام حالياً.</p>";
-        return;
-      }
-      snap.forEach(taskSnap => {
-        const task = taskSnap.val();
-        const div = document.createElement("div");
-        div.className = "task";
-        div.innerHTML = `
-          <p><strong>${task.title}</strong></p>
-          <p>${task.description}</p>
-          <button onclick="window.open('${task.link}','_blank')">تنفيذ</button>
-        `;
-        tasksList.appendChild(div);
+    
+    // بيانات المستخدم
+    let user = null;
+    let userData = {
+      balance: 0,
+      completedTasks: {},
+      lastTaskTime: 0,
+      lastCompletedTask: 0
+    };
+    
+    // عناصر واجهة المستخدم
+    const userIdEl = document.getElementById("userId");
+    const userNameEl = document.getElementById("userName");
+    const userAvatarEl = document.getElementById("userAvatar");
+    const userBalanceEl = document.getElementById("userBalance");
+    const lastCompletedTaskEl = document.getElementById("lastCompletedTask");
+    const tasksContainer = document.getElementById("tasksContainer");
+    const leaderboardContainer = document.getElementById("leaderboardContainer");
+    const watchAdBtn = document.getElementById("watchAdBtn");
+    const adStatusEl = document.getElementById("adStatus");
+    const tabs = document.querySelectorAll(".tab");
+    const tabContents = document.querySelectorAll(".tab-content");
+    
+    // تهيئة التبويبات
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        const tabId = tab.getAttribute("data-tab");
+        
+        // إزالة النشاط من جميع التبويبات
+        tabs.forEach(t => t.classList.remove("active"));
+        tabContents.forEach(tc => tc.classList.remove("active"));
+        
+        // إضافة النشاط للتبويب المحدد
+        tab.classList.add("active");
+        document.getElementById(`${tabId}Tab`).classList.add("active");
+        
+        // إذا كان تبويب الترتيب، قم بتحميل البيانات
+        if (tabId === "leaderboard") {
+          loadLeaderboard();
+        }
       });
     });
-
-  </script>
-
-  <!-- ===== AdsGram loader & handler ===== -->
-  <script>
-  (async function(){
-    const SDK_URLS = [
-      'https://sad.adsgram.ai/js/sad.min.js',
-      'https://adsgram.ai/js/adsgram.js'
-    ];
-    const blockId = 'int-14053';
-    const statusEl = document.getElementById('adStatus');
-    const watchBtn = document.getElementById('watchAdBtn');
-
-    function logStatus(msg){
-      console.log('[AdsGram] ', msg);
-      statusEl.textContent = msg;
-    }
-
-    async function loadSdk(){
-      for (const url of SDK_URLS){
-        try{
-          await new Promise((res,rej)=>{
-            const s=document.createElement('script');
-            s.src=url; s.async=true;
-            s.onload=()=>res();
-            s.onerror=()=>rej();
-            document.head.appendChild(s);
-          });
-          if (window.Adsgram || window.sad) return;
-        }catch(e){ console.warn('فشل تحميل',url); }
-      }
-      throw new Error("فشل تحميل SDK");
-    }
-
-    function initSdk(){
-      if (window.Adsgram) return window.Adsgram.init({blockId});
-      if (window.sad) return window.sad.init({blockId});
-      throw new Error("لم أجد init");
-    }
-
-    try {
-      logStatus("تحميل SDK...");
-      await loadSdk();
-      window.AdController = initSdk();
-      logStatus("SDK جاهز.");
-    } catch(e){
-      logStatus("خطأ SDK: "+e.message);
-      return;
-    }
-
-    watchBtn.onclick = async ()=>{
-      watchBtn.disabled=true;
-      logStatus("تشغيل الإعلان...");
-      try{
-        const result = await window.AdController.show();
-        console.log("Ad result:",result);
-        if (result && result.done) {
-          logStatus("✔ تمت المشاهدة");
+    
+    // عند تحميل الصفحة
+    document.addEventListener("DOMContentLoaded", function() {
+      if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        user = tg.initDataUnsafe.user;
+        userIdEl.textContent = user.id;
+        userNameEl.textContent = `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`;
+        
+        // تحميل صورة المستخدم إذا كانت متاحة
+        if (user.photo_url) {
+          userAvatarEl.src = user.photo_url;
         } else {
-          logStatus("الإعلان لم يكتمل.");
+          userAvatarEl.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
         }
-      }catch(err){
-        console.error(err);
-        logStatus("خطأ: "+err.message);
+        
+        // تحميل بيانات المستخدم من Firebase
+        loadUserData();
+        
+        // تحميل المهام
+        loadTasks();
+      } else {
+        userIdEl.textContent = "غير متاح";
+        userNameEl.textContent = "غير متاح";
+        userAvatarEl.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
       }
-      watchBtn.disabled=false;
-    };
-  })();
+    });
+    
+    // تحميل بيانات المستخدم من Firebase
+    function loadUserData() {
+      db.ref("users/" + user.id).on("value", snapshot => {
+        if (snapshot.exists()) {
+          userData = snapshot.val();
+          userBalanceEl.textContent = userData.balance || 0;
+          lastCompletedTaskEl.textContent = userData.lastCompletedTask || 0;
+        } else {
+          // إنشاء مستخدم جديد إذا لم يكن موجوداً
+          const newUser = {
+            id: user.id,
+            name: `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`,
+            username: user.username || "",
+            balance: 0,
+            completedTasks: {},
+            lastTaskTime: 0,
+            lastCompletedTask: 0,
+            timestamp: Date.now()
+          };
+          
+          db.ref("users/" + user.id).set(newUser);
+          userData = newUser;
+        }
+      });
+    }
+    
+    // تحميل المهام
+    function loadTasks() {
+      db.ref("tasks").once("value").then(snapshot => {
+        tasksContainer.innerHTML = "";
+        
+        if (!snapshot.exists()) {
+          // إنشاء المهام إذا لم تكن موجودة
+          createDefaultTasks();
+          loadTasks(); // إعادة تحميل المهام
+          return;
+        }
+        
+        const tasks = snapshot.val();
+        const taskIds = Object.keys(tasks);
+        
+        // عرض المهام
+        taskIds.forEach((taskId, index) => {
+          const task = tasks[taskId];
+          const taskNumber = index + 1;
+          const isCompleted = userData.completedTasks && userData.completedTasks[taskId] === true;
+          const isLocked = !isCompleted && taskNumber > 1 && 
+                          (!userData.completedTasks || !userData.completedTasks[taskIds[taskNumber-2]]);
+          
+          const taskEl = document.createElement("div");
+          taskEl.className = `task ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`;
+          
+          taskEl.innerHTML = `
+            <div class="task-header">
+              <div class="task-title">المهمة ${taskNumber}: ${task.title}</div>
+              <div class="task-reward">+${task.reward} نقطة</div>
+            </div>
+            <div class="task-description">${task.description}</div>
+            <div class="task-progress">
+              <div class="progress-bar" style="width: ${isCompleted ? '100' : '0'}%"></div>
+            </div>
+            ${isCompleted ? 
+              `<button disabled>مكتمل</button>` : 
+              `<button onclick="completeTask('${taskId}', ${task.reward}, ${taskNumber})" ${isLocked ? 'disabled' : ''}>
+                ${isLocked ? 'مقفل' : 'إكمال المهمة'}
+              </button>`
+            }
+            ${!isCompleted && !isLocked && canStartTask() ? 
+              `<div class="cooldown">يجب الانتظار 40 ثانية بين المهام</div>` : ''
+            }
+          `;
+          
+          tasksContainer.appendChild(taskEl);
+        });
+      });
+    }
+    
+    // إنشاء مهام افتراضية
+    function createDefaultTasks() {
+      const defaultTasks = {};
+      
+      for (let i = 1; i <= 20; i++) {
+        const taskId = "task" + i;
+        defaultTasks[taskId] = {
+          id: taskId,
+          title: "مهمة " + i,
+          description: "هذه هي المهمة رقم " + i + ". قم بإكمالها للحصول على النقاط.",
+          reward: i * 5,
+          link: "#",
+          order: i
+        };
+      }
+      
+      db.ref("tasks").set(defaultTasks);
+    }
+    
+    // التحقق إذا كان يمكن بدء مهمة جديدة
+    function canStartTask() {
+      if (!userData.lastTaskTime) return true;
+      
+      const currentTime = Date.now();
+      const timeDiff = (currentTime - userData.lastTaskTime) / 1000; // الفارق بالثواني
+      
+      return timeDiff < 40; // إذا مر أقل من 40 ثانية
+    }
+    
+    // إكمال المهمة
+    function completeTask(taskId, reward, taskNumber) {
+      const currentTime = Date.now();
+      
+      // التحقق من الوقت المنقضي منذ آخر مهمة
+      if (userData.lastTaskTime) {
+        const timeDiff = (currentTime - userData.lastTaskTime) / 1000;
+        
+        if (timeDiff < 40) {
+          const remainingTime = Math.ceil(40 - timeDiff);
+          alert(`يجب الانتظار ${remainingTime} ثانية قبل البدء في مهمة جديدة`);
+          return;
+        }
+      }
+      
+      // تحديث بيانات المستخدم
+      const updates = {};
+      updates[`users/${user.id}/balance`] = (userData.balance || 0) + reward;
+      updates[`users/${user.id}/completedTasks/${taskId}`] = true;
+      updates[`users/${user.id}/lastTaskTime`] = currentTime;
+      updates[`users/${user.id}/lastCompletedTask`] = taskNumber;
+      
+      db.ref().update(updates)
+        .then(() => {
+          alert(`مبروك! لقد أكملت المهمة وحصلت على ${reward} نقاط`);
+          loadTasks(); // إعادة تحميل المهام
+        })
+        .catch(error => {
+          console.error("Error completing task:", error);
+          alert("حدث خطأ أثناء إكمال المهمة");
+        });
+    }
+    
+    // تحميل لوحة المتصدرين
+    function loadLeaderboard() {
+      db.ref("users").orderByChild("balance").limitToLast(10).once("value").then(snapshot => {
+        leaderboardContainer.innerHTML = "";
+        
+        if (!snapshot.exists()) {
+          leaderboardContainer.innerHTML = "<p>لا يوجد بيانات حتى الآن</p>";
+          return;
+        }
+        
+        const users = [];
+        snapshot.forEach(userSnapshot => {
+          users.push(userSnapshot.val());
+        });
+        
+        // ترتيب المستخدمين من الأعلى رصيداً إلى الأقل
+        users.sort((a, b) => (b.balance || 0) - (a.balance || 0));
+        
+        // عرض المتصدرين
+        users.forEach((user, index) => {
+          const rank = index + 1;
+          const leaderboardItem = document.createElement("div");
+          leaderboardItem.className = "leaderboard-item";
+          
+          leaderboardItem.innerHTML = `
+            <div class="rank">${rank}</div>
+            <img src="${user.photo_url || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}" 
+                 class="leaderboard-avatar" alt="صورة ${user.name}">
+            <div class="leaderboard-details">
+              <div class="leaderboard-name">${user.name}</div>
+              <div class="leaderboard-score">${user.balance || 0} نقطة</div>
+            </div>
+          `;
+          
+          leaderboardContainer.appendChild(leaderboardItem);
+        });
+      });
+    }
+    
+    // ===== AdsGram loader & handler =====
+    (async function(){
+      const SDK_URLS = [
+        'https://sad.adsgram.ai/js/sad.min.js',
+        'https://adsgram.ai/js/adsgram.js'
+      ];
+      const blockId = 'int-14053';
+
+      function logStatus(msg){
+        console.log('[AdsGram] ', msg);
+        adStatusEl.textContent = msg;
+      }
+
+      async function loadSdk(){
+        for (const url of SDK_URLS){
+          try{
+            await new Promise((res,rej)=>{
+              const s=document.createElement('script');
+              s.src=url; s.async=true;
+              s.onload=()=>res();
+              s.onerror=()=>rej();
+              document.head.appendChild(s);
+            });
+            if (window.Adsgram || window.sad) return;
+          }catch(e){ console.warn('فشل تحميل',url); }
+        }
+        throw new Error("فشل تحميل SDK");
+      }
+
+      function initSdk(){
+        if (window.Adsgram) return window.Adsgram.init({blockId});
+        if (window.sad) return window.sad.init({blockId});
+        throw new Error("لم أجد init");
+      }
+
+      try {
+        logStatus("جاري التحميل...");
+        await loadSdk();
+        window.AdController = initSdk();
+        logStatus("جاهز لمشاهدة الإعلانات");
+      } catch(e){
+        logStatus("خطأ في تحميل الإعلانات: "+e.message);
+        return;
+      }
+
+      watchAdBtn.onclick = async ()=>{
+        watchAdBtn.disabled=true;
+        logStatus("جاري تشغيل الإعلان...");
+        try{
+          const result = await window.AdController.show();
+          console.log("Ad result:",result);
+          if (result && result.done) {
+            // منح المستخدم نقاط الإعلان
+            const adReward = 10;
+            const newBalance = (userData.balance || 0) + adReward;
+            db.ref("users/" + user.id + "/balance").set(newBalance);
+            
+            logStatus(`✔ تمت المشاهدة! وحصلت على ${adReward} نقاط`);
+          } else {
+            logStatus("الإعلان لم يكتمل.");
+          }
+        }catch(err){
+          console.error(err);
+          logStatus("خطأ: "+err.message);
+        }
+        watchAdBtn.disabled=false;
+      };
+    })();
   </script>
 </body>
 </html>
