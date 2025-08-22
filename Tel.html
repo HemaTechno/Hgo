@@ -813,7 +813,7 @@
       const currentTime = Date.now();
       const timeDiff = (currentTime - userData.lastTaskTime) / 1000; // الفارق بالثواني
       
-      return timeDiff < 40; // إذا مر أقل من 40 ثانية
+      return timeDiff < 5; // إذا مر أقل من 40 ثانية
     }
     
     // بدء مهمة مع عرض إعلان
