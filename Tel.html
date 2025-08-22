@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <title>نظام المهام والمكافآت</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Telegram SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
@@ -21,7 +23,6 @@
       --completed-color: rgba(46, 204, 113, 0.2);
       --locked-color: rgba(127, 140, 141, 0.4);
       --gift-color: #ff6b6b;
-      --cooldown-color: #ff4757;
     }
     
     * {
@@ -285,10 +286,9 @@
     }
     
     .cooldown {
-      color: var(--cooldown-color);
+      color: #ff4757;
       font-size: 12px;
       margin-top: 5px;
-      font-weight: bold;
     }
     
     .completed {
@@ -432,14 +432,6 @@
     .ad-required i {
       margin-left: 5px;
     }
-    
-    .cooldown-timer {
-      background: rgba(255, 71, 87, 0.2);
-      padding: 8px;
-      border-radius: 8px;
-      margin-top: 10px;
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -472,9 +464,9 @@
     <div class="tab-content active" id="mainTab">
       <div class="card">
         <div class="user-info">
-          <img id="userAvatar" src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" class="user-avatar" alt="صورة المستخدم">
+          <img id="userAvatar" src="" class="user-avatar" alt="صورة المستخدم">
           <div class="user-details">
-            <h2 id="userName">مستخدم</h2>
+            <h2 id="userName">جارٍ التحميل...</h2>
             <p><strong>ID:</strong> <span id="userId">--</span></p>
           </div>
         </div>
@@ -508,7 +500,9 @@
           يجب مشاهدة إعلان بعد كل مهمة لتحصل على 1 كوين
         </div>
         <div id="tasksContainer">
-          <!-- سيتم تحميل المهام هنا -->
+          <div class="loading">
+            <div class="spinner"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -518,7 +512,9 @@
       <div class="card">
         <h2>🏆 ترتيب الأعضاء</h2>
         <div id="leaderboardContainer">
-          <p>لا يوجد بيانات حتى الآن</p>
+          <div class="loading">
+            <div class="spinner"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -539,8 +535,13 @@
     // تهيئة Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+
+    // Telegram WebApp init
+    const tg = window.Telegram.WebApp;
+    tg.expand();
     
     // بيانات المستخدم
+    let user = null;
     let userData = {
       balance: 0,
       completedTasks: {},
@@ -566,11 +567,6 @@
     const completedCountEl = document.getElementById("completedCount");
     const remainingCountEl = document.getElementById("remainingCount");
     
-    // متغيرات التبريد
-    let cooldownActive = false;
-    let cooldownTime = 40; // 40 ثانية بين المهام
-    let cooldownTimer = null;
-    
     // تهيئة التبويبات
     tabs.forEach(tab => {
       tab.addEventListener("click", () => {
@@ -593,57 +589,134 @@
     
     // عند تحميل الصفحة
     document.addEventListener("DOMContentLoaded", function() {
-      // تعيين معرف مستخدم افتراضي لأغراض العرض
-      userIdEl.textContent = "12345";
-      userNameEl.textContent = "مستخدم التليجرام";
-      
-      // تحميل بيانات المستخدم
-      loadUserData();
-      
-      // تحميل المهام
-      loadTasks();
+      if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+        user = tg.initDataUnsafe.user;
+        userIdEl.textContent = user.id;
+        userNameEl.textContent = `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`;
+        
+        // تحميل صورة المستخدم إذا كانت متاحة
+        if (user.photo_url) {
+          userAvatarEl.src = user.photo_url;
+        } else {
+          userAvatarEl.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+        }
+        
+        // تحميل بيانات المستخدم من Firebase
+        loadUserData();
+        
+        // تحميل المهام
+        loadTasks();
+      } else {
+        userIdEl.textContent = "غير متاح";
+        userNameEl.textContent = "غير متاح";
+        userAvatarEl.src = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png";
+      }
     });
     
-    // تحميل بيانات المستخدم
+    // تحميل بيانات المستخدم من Firebase
     function loadUserData() {
-      // في بيئة حقيقية، سيتم تحميل البيانات من Firebase
-      // هنا نستخدم بيانات وهمية لأغراض العرض
-      userBalanceEl.textContent = (userData.balance || 0).toFixed(2);
-      lastCompletedTaskEl.textContent = userData.lastCompletedTask || 0;
-      totalPointsEl.textContent = (userData.totalPoints || 0).toFixed(2);
-      
-      // تحديث إحصائيات المهام
-      updateTaskStats();
-      
-      // تحديث حالة الهدية اليومية
-      updateGiftButton();
+      db.collection("users").doc(user.id.toString()).onSnapshot((doc) => {
+        if (doc.exists) {
+          userData = doc.data();
+          userBalanceEl.textContent = (userData.balance || 0).toFixed(2);
+          lastCompletedTaskEl.textContent = userData.lastCompletedTask || 0;
+          totalPointsEl.textContent = (userData.totalPoints || 0).toFixed(2);
+          
+          // تحديث إحصائيات المهام
+          updateTaskStats();
+          
+          // تحديث حالة الهدية اليومية
+          updateGiftButton();
+        } else {
+          // إنشاء مستخدم جديد إذا لم يكن موجوداً
+          const newUser = {
+            id: user.id,
+            name: `${user.first_name}${user.last_name ? ' ' + user.last_name : ''}`,
+            username: user.username || "",
+            balance: 0,
+            completedTasks: {},
+            lastTaskTime: 0,
+            lastCompletedTask: 0,
+            totalPoints: 0,
+            lastGiftDate: null,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+          };
+          
+          db.collection("users").doc(user.id.toString()).set(newUser);
+          userData = newUser;
+        }
+      }, (error) => {
+        console.error("Error loading user data:", error);
+        showNotification("حدث خطأ في تحميل بيانات المستخدم");
+      });
     }
     
     // تحديث حالة زر الهدية اليومية
     function updateGiftButton() {
-      // في بيئة حقيقية، سيتم التحقق من تاريخ آخر هدية
-      dailyGiftBtn.disabled = false;
-      giftStatusEl.textContent = "يمكنك المطالبة بهديتك اليومية الآن!";
+      if (!userData.lastGiftDate) {
+        dailyGiftBtn.disabled = false;
+        giftStatusEl.textContent = "يمكنك المطالبة بهديتك اليومية الآن!";
+        return;
+      }
+      
+      const lastGiftDate = userData.lastGiftDate.toDate ? userData.lastGiftDate.toDate() : new Date(userData.lastGiftDate);
+      const today = new Date();
+      
+      // التحقق إذا كان قد حصل على الهدية اليوم
+      if (
+        lastGiftDate.getDate() === today.getDate() &&
+        lastGiftDate.getMonth() === today.getMonth() &&
+        lastGiftDate.getFullYear() === today.getFullYear()
+      ) {
+        dailyGiftBtn.disabled = true;
+        giftStatusEl.textContent = "لقد حصلت على هديتك اليومية بالفعل. عد غدًا!";
+      } else {
+        dailyGiftBtn.disabled = false;
+        giftStatusEl.textContent = "يمكنك المطالبة بهديتك اليومية الآن!";
+      }
     }
     
     // المطالبة بالهدية اليومية
     dailyGiftBtn.addEventListener("click", function() {
+      const today = new Date();
+      
+      // التحقق مرة أخرى إذا كان قد حصل على الهدية اليوم
+      if (userData.lastGiftDate) {
+        const lastGiftDate = userData.lastGiftDate.toDate ? userData.lastGiftDate.toDate() : new Date(userData.lastGiftDate);
+        
+        if (
+          lastGiftDate.getDate() === today.getDate() &&
+          lastGiftDate.getMonth() === today.getMonth() &&
+          lastGiftDate.getFullYear() === today.getFullYear()
+        ) {
+          showNotification("لقد حصلت على هديتك اليومية بالفعل!");
+          return;
+        }
+      }
+      
       // توليد قيمة عشوائية بين 0.2 و 1.5
       const randomGift = (Math.random() * 1.3 + 0.2).toFixed(2);
       const giftValue = parseFloat(randomGift);
       
       // تحديث رصيد المستخدم
-      userData.balance += giftValue;
-      userData.totalPoints += giftValue;
+      const newBalance = (userData.balance || 0) + giftValue;
+      const newTotalPoints = (userData.totalPoints || 0) + giftValue;
       
-      // تحديث واجهة المستخدم
-      userBalanceEl.textContent = userData.balance.toFixed(2);
-      totalPointsEl.textContent = userData.totalPoints.toFixed(2);
-      
-      showPointsAnimation(giftValue);
-      showNotification(`مبروك! لقد حصلت على ${giftValue} كوين كهدية يومية`);
-      dailyGiftBtn.disabled = true;
-      giftStatusEl.textContent = "لقد حصلت على هديتك اليومية. عد غدًا!";
+      db.collection("users").doc(user.id.toString()).update({
+        balance: newBalance,
+        totalPoints: newTotalPoints,
+        lastGiftDate: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+        showPointsAnimation(giftValue);
+        showNotification(`مبروك! لقد حصلت على ${giftValue} كوين كهدية يومية`);
+        dailyGiftBtn.disabled = true;
+        giftStatusEl.textContent = "لقد حصلت على هديتك اليومية. عد غدًا!";
+      })
+      .catch((error) => {
+        console.error("Error claiming daily gift:", error);
+        showNotification("حدث خطأ أثناء المطالبة بالهدية اليومية");
+      });
     });
     
     // تحديث إحصائيات المهام
@@ -659,107 +732,158 @@
     
     // تحميل المهام
     function loadTasks() {
-      // في بيئة حقيقية، سيتم تحميل المهام من Firebase
-      // هنا ننشئ مهام وهمية لأغراض العرض
-      tasksContainer.innerHTML = "";
+      db.collection("tasks").orderBy("order").get().then((querySnapshot) => {
+        tasksContainer.innerHTML = "";
+        
+        if (querySnapshot.empty) {
+          // إنشاء المهام إذا لم تكن موجودة
+          createDefaultTasks();
+          loadTasks(); // إعادة تحميل المهام
+          return;
+        }
+        
+        const tasks = [];
+        querySnapshot.forEach((doc) => {
+          tasks.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // عرض المهام
+        tasks.forEach((task, index) => {
+          const taskNumber = index + 1;
+          const isCompleted = userData.completedTasks && userData.completedTasks[task.id] === true;
+          const isLocked = !isCompleted && taskNumber > 1 && 
+                          (!userData.completedTasks || !userData.completedTasks[tasks[taskNumber-2].id]);
+          
+          const taskEl = document.createElement("div");
+          taskEl.className = `task ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`;
+          
+          taskEl.innerHTML = `
+            <div class="task-number">${taskNumber}</div>
+            <div class="task-header">
+              <div class="task-title">${task.title}</div>
+              <div class="task-reward">+${task.reward} كوين</div>
+            </div>
+            <div class="task-description">${task.description}</div>
+            <div class="task-progress">
+              <div class="progress-bar" style="width: ${isCompleted ? '100' : '0'}%"></div>
+            </div>
+            ${isCompleted ? 
+              `<button disabled><i class="fas fa-check-circle"></i> مكتمل</button>` : 
+              `<button onclick="startTaskWithAd('${task.id}', ${task.reward}, ${taskNumber})" ${isLocked ? 'disabled' : ''}>
+                ${isLocked ? '<i class="fas fa-lock"></i> مقفل' : '<i class="fas fa-play-circle"></i> إكمال المهمة'}
+              </button>`
+            }
+            ${!isCompleted && !isLocked && canStartTask() ? 
+              `<div class="cooldown">يجب الانتظار 40 ثانية بين المهام</div>` : ''
+            }
+          `;
+          
+          tasksContainer.appendChild(taskEl);
+        });
+      }).catch((error) => {
+        console.error("Error loading tasks:", error);
+        tasksContainer.innerHTML = "<p>حدث خطأ في تحميل المهام</p>";
+      });
+    }
+    
+    // إنشاء مهام افتراضية
+    function createDefaultTasks() {
+      const defaultTasks = [];
       
       for (let i = 1; i <= 20; i++) {
-        const taskNumber = i;
-        const isCompleted = userData.completedTasks && userData.completedTasks[`task-${i}`] === true;
-        const isLocked = !isCompleted && taskNumber > 1 && 
-                        (!userData.completedTasks || !userData.completedTasks[`task-${i-1}`]);
-        
-        const taskEl = document.createElement("div");
-        taskEl.className = `task ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`;
-        
-        taskEl.innerHTML = `
-          <div class="task-number">${taskNumber}</div>
-          <div class="task-header">
-            <div class="task-title">مهمة ${taskNumber}</div>
-            <div class="task-reward">+1 كوين</div>
-          </div>
-          <div class="task-description">هذه هي المهمة رقم ${taskNumber}. قم بإكمالها ثم شاهد الإعلان لتحصل على 1 كوين.</div>
-          <div class="task-progress">
-            <div class="progress-bar" style="width: ${isCompleted ? '100' : '0'}%"></div>
-          </div>
-          ${isCompleted ? 
-            `<button disabled><i class="fas fa-check-circle"></i> مكتمل</button>` : 
-            `<button onclick="startTaskWithAd('task-${taskNumber}', 1, ${taskNumber})" ${isLocked ? 'disabled' : ''}>
-              ${isLocked ? '<i class="fas fa-lock"></i> مقفل' : '<i class="fas fa-play-circle"></i> إكمال المهمة'}
-            </button>`
-          }
-          ${!isCompleted && !isLocked && cooldownActive ? 
-            `<div class="cooldown">يجب الانتظار ${cooldownTime} ثانية بين المهام</div>` : ''
-          }
-        `;
-        
-        tasksContainer.appendChild(taskEl);
+        defaultTasks.push({
+          title: "مهمة " + i,
+          description: "هذه هي المهمة رقم " + i + ". قم بإكمالها ثم شاهد الإعلان لتحصل على 1 كوين.",
+          reward: 1,  // كل مهمة تعطي 1 كوين فقط
+          link: "#",
+          order: i
+        });
       }
+      
+      // إضافة المهام إلى Firestore
+      defaultTasks.forEach((task) => {
+        db.collection("tasks").add(task);
+      });
+    }
+    
+    // التحقق إذا كان يمكن بدء مهمة جديدة
+    function canStartTask() {
+      if (!userData.lastTaskTime) return true;
+      
+      const currentTime = Date.now();
+      const timeDiff = (currentTime - userData.lastTaskTime) / 1000; // الفارق بالثواني
+      
+      return timeDiff < 40; // إذا مر أقل من 40 ثانية
     }
     
     // بدء مهمة مع عرض إعلان
     function startTaskWithAd(taskId, reward, taskNumber) {
-      if (cooldownActive) {
-        showNotification(`يجب الانتظار ${cooldownTime} ثانية قبل البدء في مهمة جديدة`);
-        return;
+      const currentTime = Date.now();
+      
+      // التحقق من الوقت المنقضي منذ آخر مهمة
+      if (userData.lastTaskTime) {
+        const timeDiff = (currentTime - userData.lastTaskTime) / 1000;
+        
+        if (timeDiff < 40) {
+          const remainingTime = Math.ceil(40 - timeDiff);
+          showNotification(`يجب الانتظار ${remainingTime} ثانية قبل البدء في مهمة جديدة`);
+          return;
+        }
       }
       
-      // محاكاة مشاهدة إعلان
-      showNotification("جاري تحميل الإعلان...");
-      
-      // بعد 2 ثانية (محاكاة لمشاهدة الإعلان)
-      setTimeout(() => {
+      // عرض إعلان قبل إكمال المهمة
+      showAdForTask(taskId, reward, taskNumber);
+    }
+    
+    // عرض إعلان للمهمة
+    function showAdForTask(taskId, reward, taskNumber) {
+      if (window.AdController) {
+        window.AdController.show()
+          .then(result => {
+            if (result && result.done) {
+              // إذا اكتمل الإعلان، اكمل المهمة
+              completeTask(taskId, reward, taskNumber);
+            } else {
+              showNotification("لم يتم إكمال الإعلان، لم تحصل على المكافأة");
+            }
+          })
+          .catch(error => {
+            console.error("Error showing ad:", error);
+            showNotification("حدث خطأ في عرض الإعلان");
+          });
+      } else {
+        // إذا لم يكن هناك إعلان، اكمل المهمة مباشرة (لأغراض الاختبار)
         completeTask(taskId, reward, taskNumber);
-      }, 2000);
+      }
     }
     
     // إكمال المهمة
     function completeTask(taskId, reward, taskNumber) {
+      const currentTime = Date.now();
+      
       // تحديث بيانات المستخدم
-      userData.completedTasks[taskId] = true;
-      userData.balance += reward;
-      userData.totalPoints += reward;
-      userData.lastCompletedTask = taskNumber;
-      userData.lastTaskTime = Date.now();
+      const updatedCompletedTasks = {
+        ...userData.completedTasks,
+        [taskId]: true
+      };
       
-      // تحديث واجهة المستخدم
-      userBalanceEl.textContent = userData.balance.toFixed(2);
-      totalPointsEl.textContent = userData.totalPoints.toFixed(2);
-      lastCompletedTaskEl.textContent = taskNumber;
+      const updates = {
+        balance: (userData.balance || 0) + reward,
+        completedTasks: updatedCompletedTasks,
+        lastTaskTime: currentTime,
+        lastCompletedTask: taskNumber,
+        totalPoints: (userData.totalPoints || 0) + reward
+      };
       
-      // تحديث إحصائيات المهام
-      updateTaskStats();
-      
-      showPointsAnimation(reward);
-      showNotification(`مبروك! لقد أكملت المهمة وشاهدت الإعلان وحصلت على ${reward} كوين`);
-      
-      // تفعيل فترة التبريد
-      startCooldown();
-      
-      // إعادة تحميل المهام لتحديث حالتها
-      setTimeout(() => {
-        loadTasks();
-      }, 1000);
-    }
-    
-    // بدء فترة التبريد
-    function startCooldown() {
-      cooldownActive = true;
-      let timeLeft = cooldownTime;
-      
-      // تحديث واجهة المستخدم لإظهار التبريد
-      loadTasks();
-      
-      // بدء العد التنازلي
-      cooldownTimer = setInterval(() => {
-        timeLeft--;
-        
-        if (timeLeft <= 0) {
-          clearInterval(cooldownTimer);
-          cooldownActive = false;
-          loadTasks(); // إعادة تحميل المهام لإزالة رسالة التبريد
-        }
-      }, 1000);
+      db.collection("users").doc(user.id.toString()).update(updates)
+        .then(() => {
+          showPointsAnimation(reward);
+          showNotification(`مبروك! لقد أكملت المهمة وشاهدت الإعلان وحصلت على ${reward} كوين`);
+        })
+        .catch((error) => {
+          console.error("Error completing task:", error);
+          showNotification("حدث خطأ أثناء إكمال المهمة");
+        });
     }
     
     // عرض رسالة تأكيد
@@ -791,8 +915,88 @@
     
     // تحميل لوحة المتصدرين
     function loadLeaderboard() {
-      leaderboardContainer.innerHTML = "<p>لا يوجد بيانات حتى الآن</p>";
+      leaderboardContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+      
+      db.collection("users").orderBy("balance", "desc").limit(10).get()
+        .then((querySnapshot) => {
+          leaderboardContainer.innerHTML = "";
+          
+          if (querySnapshot.empty) {
+            leaderboardContainer.innerHTML = "<p>لا يوجد بيانات حتى الآن</p>";
+            return;
+          }
+          
+          const users = [];
+          querySnapshot.forEach((doc) => {
+            users.push(doc.data());
+          });
+          
+          // عرض المتصدرين
+          users.forEach((user, index) => {
+            const rank = index + 1;
+            const leaderboardItem = document.createElement("div");
+            leaderboardItem.className = "leaderboard-item";
+            
+            leaderboardItem.innerHTML = `
+              <div class="rank">${rank}</div>
+              <img src="${user.photo_url || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png'}" 
+                   class="leaderboard-avatar" alt="صورة ${user.name}">
+              <div class="leaderboard-details">
+                <div class="leaderboard-name">${user.name}</div>
+                <div class="leaderboard-score">${(user.balance || 0).toFixed(2)} كوين</div>
+              </div>
+            `;
+            
+            leaderboardContainer.appendChild(leaderboardItem);
+          });
+        })
+        .catch((error) => {
+          console.error("Error loading leaderboard:", error);
+          leaderboardContainer.innerHTML = "<p>حدث خطأ في تحميل المتصدرين</p>";
+        });
     }
+    
+    // ===== AdsGram loader & handler =====
+    (async function(){
+      const SDK_URLS = [
+        'https://sad.adsgram.ai/js/sad.min.js',
+        'https://adsgram.ai/js/adsgram.js'
+      ];
+      const blockId = 'int-14053';
+
+      function logStatus(msg){
+        console.log('[AdsGram] ', msg);
+      }
+
+      async function loadSdk(){
+        for (const url of SDK_URLS){
+          try{
+            await new Promise((res,rej)=>{
+              const s=document.createElement('script');
+              s.src=url; s.async=true;
+              s.onload=()=>res();
+              s.onerror=()=>rej();
+              document.head.appendChild(s);
+            });
+            if (window.Adsgram || window.sad) return;
+          }catch(e){ console.warn('فشل تحميل',url); }
+        }
+        throw new Error("فشل تحميل SDK");
+      }
+
+      function initSdk(){
+        if (window.Adsgram) return window.Adsgram.init({blockId});
+        if (window.sad) return window.sad.init({blockId});
+        throw new Error("لم أجد init");
+      }
+
+      try {
+        await loadSdk();
+        window.AdController = initSdk();
+      } catch(e){
+        console.error("خطأ في تحميل الإعلانات: "+e.message);
+      }
+    })();
   </script>
 </body>
 </html>
