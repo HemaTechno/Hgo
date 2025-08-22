@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -9,6 +8,10 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- AdsGram SDK (vanilla JS) -->
   <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0f1115;
@@ -16,106 +19,459 @@
       --text: #e8ebf0;
       --muted: #a8b3c7;
       --accent: #22c55e;
+      --accent-dark: #16a34a;
       --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --purple: #a855f7;
+      --gradient: linear-gradient(135deg, var(--accent), var(--info));
+      --border-radius: 16px;
+      --transition: all 0.3s ease;
     }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+    
+    html, body { 
+      height: 100%; 
+    }
+    
     body {
-      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg); color: var(--text);
-      display: grid; place-items: center;
+      margin: 0; 
+      font-family: 'Tajawal', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); 
+      color: var(--text);
+      display: grid; 
+      place-items: center;
+      padding: 16px;
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(34, 197, 94, 0.05) 0%, transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.05) 0%, transparent 25%);
     }
-    .wrap { width: min(680px, 92vw); }
+    
+    .wrap { 
+      width: min(680px, 92vw); 
+      animation: fadeIn 0.5s ease-out;
+    }
+    
     .card {
-      background: var(--card); border-radius: 20px; padding: 22px; box-shadow: 0 10px 30px rgb(0 0 0 / 30%);
+      background: var(--card); 
+      border-radius: var(--border-radius); 
+      padding: 28px; 
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+      overflow: hidden;
     }
-    h1 { margin: 0 0 8px; font-size: 22px; }
-    p { margin: 0 0 16px; color: var(--muted); line-height: 1.6; }
-    .actions { display: flex; gap: 10px; align-items: center; }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: var(--gradient);
+    }
+    
+    h1 { 
+      margin: 0 0 12px; 
+      font-size: 26px; 
+      font-weight: 700;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: inline-block;
+    }
+    
+    p { 
+      margin: 0 0 20px; 
+      color: var(--muted); 
+      line-height: 1.6; 
+      font-size: 15px;
+    }
+    
+    .actions { 
+      display: flex; 
+      gap: 12px; 
+      align-items: center; 
+      margin-bottom: 20px;
+    }
+    
     button {
-      appearance: none; border: 0; border-radius: 14px; padding: 12px 18px; font-weight: 700; cursor: pointer;
+      appearance: none; 
+      border: 0; 
+      border-radius: 14px; 
+      padding: 14px 22px; 
+      font-weight: 700; 
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 15px;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
-    #watchAdBtn { background: var(--accent); color: #052e13; }
-    #watchAdBtn[disabled] { opacity: .6; cursor: not-allowed; }
-    .pill { padding: 8px 12px; border-radius: 999px; font-size: 13px; }
-    .pill.ok { background: rgb(34 197 94 / 18%); color: #6ee7b7; }
-    .pill.err { background: rgb(239 68 68 / 15%); color: #fecaca; }
-    .hidden { display: none; }
-    a.cta { color: var(--accent); text-decoration: none; font-weight: 700; }
-    .footer { margin-top: 14px; font-size: 12px; color: var(--muted); opacity: .8; }
-    .grid { display: grid; gap: 12px; }
-    .two { grid-template-columns: 1fr 1fr; }
-    .stat { background: #0e1220; border-radius: 14px; padding: 12px; }
-    .stat h3 { margin: 0 0 6px; font-size: 14px; color: #a8b3c7; font-weight: 600; }
-    .stat .v { font-size: 20px; font-weight: 800; }
-    .task { display:flex; justify-content: space-between; align-items:center; padding:10px; border-radius:12px; background:#0e1220; }
-    .task small { color: var(--muted); }
+    
+    #watchAdBtn { 
+      background: var(--accent); 
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+    }
+    
+    #watchAdBtn:hover:not([disabled]) {
+      background: var(--accent-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+    }
+    
+    #watchAdBtn[disabled] { 
+      opacity: .6; 
+      cursor: not-allowed; 
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    
+    .pill { 
+      padding: 10px 14px; 
+      border-radius: 999px; 
+      font-size: 13px; 
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .pill.ok { 
+      background: rgba(34, 197, 94, 0.18); 
+      color: #6ee7b7; 
+    }
+    
+    .pill.err { 
+      background: rgba(239, 68, 68, 0.15); 
+      color: #fecaca; 
+    }
+    
+    .pill.warn { 
+      background: rgba(245, 158, 11, 0.15); 
+      color: #fde68a; 
+    }
+    
+    .pill.info { 
+      background: rgba(59, 130, 246, 0.15); 
+      color: #93c5fd; 
+    }
+    
+    .hidden { 
+      display: none; 
+    }
+    
+    a.cta { 
+      color: var(--accent); 
+      text-decoration: none; 
+      font-weight: 700; 
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    a.cta:hover {
+      color: var(--accent-dark);
+      text-decoration: underline;
+    }
+    
+    .footer { 
+      margin-top: 20px; 
+      font-size: 12px; 
+      color: var(--muted); 
+      opacity: .8; 
+      text-align: center;
+      padding: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .grid { 
+      display: grid; 
+      gap: 16px; 
+      margin-bottom: 20px;
+    }
+    
+    .two { 
+      grid-template-columns: 1fr 1fr; 
+    }
+    
+    .stat { 
+      background: rgba(14, 18, 32, 0.6); 
+      border-radius: 14px; 
+      padding: 16px; 
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: var(--transition);
+    }
+    
+    .stat:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stat h3 { 
+      margin: 0 0 8px; 
+      font-size: 13px; 
+      color: #a8b3c7; 
+      font-weight: 600; 
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .stat .v { 
+      font-size: 22px; 
+      font-weight: 800; 
+    }
+    
+    .task { 
+      display:flex; 
+      justify-content: space-between; 
+      align-items:center; 
+      padding: 14px; 
+      border-radius: 12px; 
+      background: rgba(14, 18, 32, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: var(--transition);
+    }
+    
+    .task:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .task small { 
+      color: var(--muted); 
+      font-size: 12px;
+    }
+    
+    .taskBtn {
+      background: var(--info);
+      color: white;
+      padding: 8px 14px;
+      font-size: 13px;
+    }
+    
+    .taskBtn:hover:not([disabled]) {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    
+    .taskBtn[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    hr.divider {
+      border: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.08); 
+      margin: 22px 0; 
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding: 12px;
+      background: rgba(14, 18, 32, 0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .user-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+    }
+    
+    .user-details {
+      flex: 1;
+    }
+    
+    .user-name {
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .user-id {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      padding: 20px;
+    }
+    
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--accent);
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .two {
+        grid-template-columns: 1fr;
+      }
+      
+      .card {
+        padding: 20px;
+      }
+      
+      .actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      button {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
+      <!-- معلومات المستخدم -->
+      <div id="userInfo" class="user-info hidden">
+        <div class="user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="user-details">
+          <div class="user-name" id="userName">جارٍ التحميل...</div>
+          <div class="user-id" id="userId">ID: </div>
+        </div>
+      </div>
+      
       <h1>شاهد إعلان واحصل على المكافأة</h1>
       <p>بالضغط على الزر بالأسفل سيتم عرض إعلان <strong>AdsGram</strong>. بعد المشاهدة حتى النهاية سيتم فتح المكافأة.</p>
+      
       <div class="actions">
-        <button id="watchAdBtn">▶️ شاهد الإعلان</button>
+        <button id="watchAdBtn">
+          <i class="fas fa-play-circle"></i>
+          شاهد الإعلان
+        </button>
         <span id="status" class="pill hidden"></span>
       </div>
-      <div id="reward" class="hidden" style="margin-top:14px">
-        <p class="pill ok">✅ تهانينا! تم فتح المكافأة.</p>
-        <!-- عدّل الرابط التالي بما يناسبك -->
-        <p><a id="rewardLink" class="cta" href="#" target="_blank" rel="noopener">افتح المكافأة الآن</a></p>
+      
+      <div id="reward" class="hidden" style="margin-top:16px">
+        <p class="pill ok">
+          <i class="fas fa-trophy"></i>
+          تهانينا! تم فتح المكافأة.
+        </p>
+        <p>
+          <a id="rewardLink" class="cta" href="#" target="_blank" rel="noopener">
+            <i class="fas fa-gift"></i>
+            افتح المكافأة الآن
+          </a>
+        </p>
       </div>
-      <div id="errorBox" class="hidden" style="margin-top:14px">
-        <p class="pill err">⚠️ حدث خطأ أثناء عرض الإعلان. حاول مرة أخرى لاحقًا.</p>
+      
+      <div id="errorBox" class="hidden" style="margin-top:16px">
+        <p class="pill err">
+          <i class="fas fa-exclamation-triangle"></i>
+          حدث خطأ أثناء عرض الإعلان. حاول مرة أخرى لاحقًا.
+        </p>
       </div>
+      
       <div class="footer">Mini App يعمل داخل تليجرام. لو فتحته من المتصفح قد لا تظهر الإعلانات.</div>
 
-      <hr style="border:0;border-top:1px solid #222; margin:18px 0; opacity:.5">
+      <hr class="divider">
 
       <!-- لوحة الإحصائيات -->
       <div class="grid two">
         <div class="stat">
-          <h3>الرصيد (Coins)</h3>
+          <h3><i class="fas fa-coins"></i> الرصيد (Coins)</h3>
           <div class="v" id="coins">0</div>
         </div>
         <div class="stat">
-          <h3>مستوى اليوم</h3>
+          <h3><i class="fas fa-chart-line"></i> مستوى اليوم</h3>
           <div class="v"><span id="levelToday">0</span>/20</div>
         </div>
         <div class="stat">
-          <h3>انتظار بين المستويات</h3>
+          <h3><i class="fas fa-clock"></i> انتظار بين المستويات</h3>
           <div class="v" id="cooldown">جاهز</div>
         </div>
         <div class="stat">
-          <h3>مهام اليوم</h3>
+          <h3><i class="fas fa-tasks"></i> مهام اليوم</h3>
           <div class="v" id="tasksToday">0</div>
         </div>
       </div>
 
-      <div style="margin-top:14px" class="grid">
-        <button id="claimDailyBtn">🎁 الحصول على المكافأة اليومية</button>
+      <div class="grid">
+        <button id="claimDailyBtn">
+          <i class="fas fa-calendar-day"></i>
+          الحصول على المكافأة اليومية
+        </button>
         <span id="dailyStatus" class="pill hidden"></span>
       </div>
 
       <!-- قائمة مهام تجريبية -->
-      <div style="margin-top:14px" class="grid">
+      <div class="grid">
         <div class="task">
           <div>
             <div>مهمة رقم 1</div>
             <small>يكسب 1 كوين — يتطلب مشاهدة إعلان</small>
           </div>
-          <button data-task-id="task1" class="taskBtn">تنفيذ</button>
+          <button data-task-id="task1" class="taskBtn">
+            <i class="fas fa-play"></i>
+            تنفيذ
+          </button>
         </div>
         <div class="task">
           <div>
             <div>مهمة رقم 2</div>
             <small>يكسب 1 كوين — يتطلب مشاهدة إعلان</small>
           </div>
-          <button data-task-id="task2" class="taskBtn">تنفيذ</button>
+          <button data-task-id="task2" class="taskBtn">
+            <i class="fas fa-play"></i>
+            تنفيذ
+          </button>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -146,12 +502,16 @@
     const reward = document.getElementById('reward');
     const rewardLink = document.getElementById('rewardLink');
     const errorBox = document.getElementById('errorBox');
+    const userInfo = document.getElementById('userInfo');
+    const userName = document.getElementById('userName');
+    const userId = document.getElementById('userId');
 
     function setStatus(text, kind) {
       status.textContent = text;
       status.className = `pill ${kind || ''}`;
       status.classList.remove('hidden');
     }
+    
     function clearStatus() {
       status.classList.add('hidden');
     }
@@ -161,16 +521,23 @@
 
     // ===== Show ad on click (Rewarded logic) =====
     btn.addEventListener('click', async () => {
-      clearStatus(); errorBox.classList.add('hidden'); reward.classList.add('hidden');
+      clearStatus(); 
+      errorBox.classList.add('hidden'); 
+      reward.classList.add('hidden');
       btn.disabled = true;
+      
       if (tg && tg.HapticFeedback) {
         try { tg.HapticFeedback.impactOccurred('light'); } catch (e) {}
       }
+      
       if (!AdController || !AdController.show) {
         setStatus('المكوّن غير جاهز', 'err');
-        btn.disabled = false; return;
+        btn.disabled = false; 
+        return;
       }
-      setStatus('جارٍ تحميل الإعلان…', '');
+      
+      setStatus('جارٍ تحميل الإعلان…', 'info');
+      
       try {
         const result = await AdController.show();
         // في rewarded: يتحقق done && !error عندما يشاهد المستخدم حتى النهاية
@@ -206,15 +573,15 @@
 
     // 1) ضع إعدادات Firebase الخاصة بك هنا
     const firebaseConfig = {
-  apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
-  authDomain: "hhhhhh-d4fb8.firebaseapp.com",
-  databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
-  projectId: "hhhhhh-d4fb8",
-  storageBucket: "hhhhhh-d4fb8.appspot.com",
-  messagingSenderId: "24512338206",
-  appId: "1:24512338206:web:dfe045db59bd3434a2110f",
-  measurementId: "G-HD4R7GNQ5H"
-};
+      apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+      authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+      databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+      projectId: "hhhhhh-d4fb8",
+      storageBucket: "hhhhhh-d4fb8.appspot.com",
+      messagingSenderId: "24512338206",
+      appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+      measurementId: "G-HD4R7GNQ5H"
+    };
 
     // 2) التهيئة
     const app = initializeApp(firebaseConfig);
@@ -222,9 +589,8 @@
     const auth = getAuth(app);
 
     // Helpers للتواريخ حسب القاهرة
-    const tzOffsetMs = new Date().getTimezoneOffset() * 60000; // سنستخدم تاريخ المتصفح؛ يمكن تعويضه بالسيرفر لاحقًا
     function todayKey() {
-      const d = new Date(Date.now());
+      const d = new Date();
       // مفتاح اليوم YYYY-MM-DD
       const y = d.getFullYear();
       const m = String(d.getMonth()+1).padStart(2,'0');
@@ -239,32 +605,45 @@
     const tasksTodayEl = document.getElementById('tasksToday');
     const dailyBtn = document.getElementById('claimDailyBtn');
     const dailyStatus = document.getElementById('dailyStatus');
-
     const taskButtons = Array.from(document.querySelectorAll('.taskBtn'));
 
     // بيانات المستخدم
     let uid = null;          // uid من Firebase (مجهول)
     let tgId = null;         // Telegram user id
     let userDocRef = null;
+    let cooldownInterval = null;
 
     // جلب معرّف المستخدم من تليجرام Mini App
-    function getTelegramId() {
+    function getTelegramUser() {
       try {
         const u = window.tg?.initDataUnsafe?.user;
-        return u?.id ? String(u.id) : null;
+        return u || null;
       } catch (e) { return null; }
+    }
+
+    // عرض معلومات المستخدم
+    function displayUserInfo(userData) {
+      const tgUser = getTelegramUser();
+      if (tgUser) {
+        userName.textContent = tgUser.first_name || tgUser.username || 'مستخدم تليجرام';
+        userId.textContent = `ID: ${tgUser.id}`;
+        userInfo.classList.remove('hidden');
+      } else {
+        userInfo.classList.add('hidden');
+      }
     }
 
     // إنشاء / تحديث مستند المستخدم
     async function ensureUser() {
-      tgId = getTelegramId();
-      if (!tgId) {
-        console.warn('لم يتم التقاط معرف تليجرام — افتح الميني آب داخل تليجرام.');
-      }
-      userDocRef = doc(db, 'users', tgId || 'debug-guest');
+      const tgUser = getTelegramUser();
+      tgId = tgUser ? String(tgUser.id) : 'debug-guest';
+      
+      userDocRef = doc(db, 'users', tgId);
       const snap = await getDoc(userDocRef);
+      
       const base = {
-        tgId: tgId || null,
+        tgId: tgId,
+        tgUser: tgUser || null,
         coins: 0,
         levels: {},             // map: dayKey -> count
         lastLevelAt: 0,         // timestamp ms
@@ -274,6 +653,7 @@
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       };
+      
       if (!snap.exists()) {
         await setDoc(userDocRef, base);
         return base;
@@ -287,15 +667,37 @@
       const levelCount = (data.levels && data.levels[day]) || 0;
       const tasksCount = (data.tasks && data.tasks[day]?.count) || 0;
       const cdSec = Math.max(0, Math.ceil(( (data.lastLevelAt||0) + 60*1000 - Date.now() )/1000));
+      
       coinsEl.textContent = Number(data.coins||0).toFixed(2).replace(/\.00$/, '');
       levelTodayEl.textContent = levelCount;
-      cooldownEl.textContent = cdSec>0 ? `${cdSec} ثانية` : 'جاهز';
       tasksTodayEl.textContent = tasksCount;
+      
+      // تحديث العد التنازلي
+      updateCooldownText(cdSec);
+      
+      // إدارة المؤقت
+      if (cooldownInterval) clearInterval(cooldownInterval);
+      if (cdSec > 0) {
+        cooldownInterval = setInterval(() => {
+          const newCdSec = Math.max(0, Math.ceil(( (data.lastLevelAt||0) + 60*1000 - Date.now() )/1000));
+          updateCooldownText(newCdSec);
+          if (newCdSec <= 0) clearInterval(cooldownInterval);
+        }, 1000);
+      }
+    }
+    
+    function updateCooldownText(seconds) {
+      cooldownEl.textContent = seconds > 0 ? `${seconds} ثانية` : 'جاهز';
+      cooldownEl.style.color = seconds > 0 ? (seconds <= 10 ? '#ef4444' : '#f59e0b') : '#22c55e';
     }
 
     async function loadAndSetUI(){
       const snap = await getDoc(userDocRef);
-      if (snap.exists()) setUI(snap.data());
+      if (snap.exists()) {
+        const data = snap.data();
+        setUI(data);
+        displayUserInfo(data);
+      }
     }
 
     // منطق المستويات (الإعلانات)
@@ -306,6 +708,7 @@
       const levelCount = (data.levels && data.levels[day]) || 0;
       const lastAt = data.lastLevelAt || 0;
       const onCooldown = (Date.now() - lastAt) < 60*1000; // 1 دقيقة
+      
       if (levelCount >= 20) return {ok:false, reason:'تم بلوغ 20 لفل اليوم'};
       if (onCooldown) return {ok:false, reason:'انتظر دقيقة بين المستويات'};
       return {ok:true, data};
@@ -317,11 +720,14 @@
       const data = snap.data() || {};
       const lvls = Object.assign({}, data.levels||{});
       lvls[day] = (lvls[day]||0)+1;
+      
       await updateDoc(userDocRef, {
         levels: lvls,
         lastLevelAt: Date.now(),
+        coins: increment(1), // إضافة عملة لكل إعلان
         updatedAt: serverTimestamp(),
       });
+      
       await loadAndSetUI();
     }
 
@@ -337,20 +743,24 @@
       const data = snap.data() || {};
       const tasks = Object.assign({} , data.tasks||{});
       const dayObj = Object.assign({count:0, completed: {}}, tasks[day]||{});
+      
       if (dayObj.completed && dayObj.completed[taskId]) {
         throw new Error('أتممت هذه المهمة اليوم بالفعل');
       }
+      
       dayObj.count = (dayObj.count||0)+1;
       dayObj.completed = Object.assign({}, dayObj.completed, {[taskId]: true});
       tasks[day] = dayObj;
 
       const newCoins = Number(data.coins||0) + 1; // 1 كوين لكل مهمة
+      
       await updateDoc(userDocRef, {
         tasks,
         coins: newCoins,
         lastTaskAt: Date.now(),
         updatedAt: serverTimestamp(),
       });
+      
       await loadAndSetUI();
       return {ok:true};
     }
@@ -392,7 +802,11 @@
       // لا نغيّر منطق الإعلان الأصلي، لكن نضيف طبقة "ليفل" فوقه
       try {
         const can = await canGainLevel();
-        if (!can.ok) { setStatus(can.reason, 'err'); return; }
+        if (!can.ok) { 
+          setStatus(can.reason, 'err'); 
+          return; 
+        }
+        
         const res = await window.AdController.show();
         if (res && res.done && !res.error) {
           await gainLevel();
@@ -413,7 +827,9 @@
           setStatus('أُنجزت المهمة +1 كوين', 'ok');
         } catch (e) {
           setStatus(e.message || 'تعذر إتمام المهمة', 'err');
-        } finally { btn.disabled = false; }
+        } finally { 
+          btn.disabled = false; 
+        }
       });
     });
 
@@ -421,11 +837,11 @@
       dailyStatus.classList.add('hidden');
       try {
         const amount = await claimDaily();
-        dailyStatus.textContent = `تم إيداع ${amount} كوين 🎉`;
+        dailyStatus.innerHTML = `<i class="fas fa-check-circle"></i> تم إيداع ${amount} كوين 🎉`;
         dailyStatus.className = 'pill ok';
         dailyStatus.classList.remove('hidden');
       } catch (e) {
-        dailyStatus.textContent = e.message || 'تعذر صرف المكافأة';
+        dailyStatus.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${e.message || 'تعذر صرف المكافأة'}`;
         dailyStatus.className = 'pill err';
         dailyStatus.classList.remove('hidden');
       }
@@ -438,6 +854,7 @@
       uid = user.uid;
       const data = await ensureUser();
       setUI(data);
+      displayUserInfo(data);
     });
 
   </script>
