@@ -1,298 +1,146 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>نظام تجميع الكوينات</title>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-
-  <!-- Telegram Web App SDK -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>مشاهدة إعلان — AdsGram x Telegram Mini App</title>
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-  <!-- AdsGram SDK -->
+  <!-- AdsGram SDK (vanilla JS) -->
   <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-
   <style>
+    :root {
+      --bg: #0f1115;
+      --card: #151922;
+      --text: #e8ebf0;
+      --muted: #a8b3c7;
+      --accent: #22c55e;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
     body {
-      font-family: system-ui, Arial;
-      display: flex;
-      min-height: 100dvh;
-      align-items: center;
-      justify-content: center;
-      background: #f7f7f8;
-      margin: 0;
-      padding: 20px;
+      margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg); color: var(--text);
+      display: grid; place-items: center;
     }
+    .wrap { width: min(680px, 92vw); }
     .card {
-      background: #fff;
-      padding: 22px 20px;
-      border-radius: 18px;
-      box-shadow: 0 6px 24px rgba(0,0,0,.08);
-      max-width: 520px;
-      width: 92%;
-      text-align: center;
+      background: var(--card); border-radius: 20px; padding: 22px; box-shadow: 0 10px 30px rgb(0 0 0 / 30%);
     }
-    h2 {
-      margin: 0 0 8px;
-      font-size: 22px;
-      color: #0ea5e9;
-    }
-    p {
-      margin: 0 0 14px;
-      color: #555;
-    }
-    .balance-container {
-      background: #f1f5f9;
-      padding: 15px;
-      border-radius: 12px;
-      margin: 20px 0;
-    }
-    .balance-label {
-      font-size: 16px;
-      color: #64748b;
-    }
-    .balance-amount {
-      font-size: 28px;
-      font-weight: bold;
-      color: #0ea5e9;
-      margin: 5px 0;
-    }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    p { margin: 0 0 16px; color: var(--muted); line-height: 1.6; }
+    .actions { display: flex; gap: 10px; align-items: center; }
     button {
-      padding: 12px 18px;
-      border: 0;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 16px;
-      transition: all 0.3s;
+      appearance: none; border: 0; border-radius: 14px; padding: 12px 18px; font-weight: 700; cursor: pointer;
     }
-    .primary {
-      background: #0ea5e9;
-      color: #fff;
-    }
-    .primary:hover {
-      background: #0284c7;
-    }
-    .muted {
-      margin-top: 10px;
-      font-size: 13px;
-      color: #666;
-    }
-    #status {
-      margin-top: 12px;
-      font-weight: 600;
-      color: #475569;
-    }
-    pre {
-      background: #0f172a;
-      color: #e2e8f0;
-      padding: 10px;
-      border-radius: 10px;
-      overflow: auto;
-      max-height: 160px;
-    }
-    .reward-animation {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 40px;
-      font-weight: bold;
-      color: gold;
-      background: rgba(0,0,0,0.7);
-      padding: 20px;
-      border-radius: 15px;
-      z-index: 1000;
-      animation: popup 1.5s ease-out;
-      display: none;
-    }
-    @keyframes popup {
-      0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-      100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-    }
+    #watchAdBtn { background: var(--accent); color: #052e13; }
+    #watchAdBtn[disabled] { opacity: .6; cursor: not-allowed; }
+    .pill { padding: 8px 12px; border-radius: 999px; font-size: 13px; }
+    .pill.ok { background: rgb(34 197 94 / 18%); color: #6ee7b7; }
+    .pill.err { background: rgb(239 68 68 / 15%); color: #fecaca; }
+    .hidden { display: none; }
+    a.cta { color: var(--accent); text-decoration: none; font-weight: 700; }
+    .footer { margin-top: 14px; font-size: 12px; color: var(--muted); opacity: .8; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>نظام تجميع الكوينات</h2>
-    <p>شاهد الإعلانات واكسب كوينات لاستخدامها داخل التطبيق</p>
-    
-    <div class="balance-container">
-      <div class="balance-label">رصيدك الحالي</div>
-      <div class="balance-amount" id="userBalance">0 كوين</div>
+  <div class="wrap">
+    <div class="card">
+      <h1>شاهد إعلان واحصل على المكافأة</h1>
+      <p>بالضغط على الزر بالأسفل سيتم عرض إعلان <strong>AdsGram</strong>. بعد المشاهدة حتى النهاية سيتم فتح المكافأة.</p>
+      <div class="actions">
+        <button id="watchAdBtn">▶️ شاهد الإعلان</button>
+        <span id="status" class="pill hidden"></span>
+      </div>
+      <div id="reward" class="hidden" style="margin-top:14px">
+        <p class="pill ok">✅ تهانينا! تم فتح المكافأة.</p>
+        <!-- عدّل الرابط التالي بما يناسبك -->
+        <p><a id="rewardLink" class="cta" href="#" target="_blank" rel="noopener">افتح المكافأة الآن</a></p>
+      </div>
+      <div id="errorBox" class="hidden" style="margin-top:14px">
+        <p class="pill err">⚠️ حدث خطأ أثناء عرض الإعلان. حاول مرة أخرى لاحقًا.</p>
+      </div>
+      <div class="footer">Mini App يعمل داخل تليجرام. لو فتحته من المتصفح قد لا تظهر الإعلانات.</div>
     </div>
-    
-    <button id="showAd" class="primary">🎬 شاهد إعلان واحصل على كوين</button>
-    <div id="status"></div>
-    
-    <details style="margin-top:10px">
-      <summary>تفاصيل للديبج</summary>
-      <pre id="log">جاهز…</pre>
-    </details>
-    <div class="muted">Block ID: <b>int-14053</b></div>
   </div>
 
-  <div id="rewardAnimation" class="reward-animation">+1 كوين! 🎉</div>
-
   <script>
-    // عناصر DOM
-    const statusEl = document.getElementById('status');
-    const logEl = document.getElementById('log');
-    const userBalanceEl = document.getElementById('userBalance');
-    const rewardAnimationEl = document.getElementById('rewardAnimation');
-    
-    // تهيئة Firebase
-    const firebaseConfig = {
-  apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
-  authDomain: "hhhhhh-d4fb8.firebaseapp.com",
-  databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
-  projectId: "hhhhhh-d4fb8",
-  storageBucket: "hhhhhh-d4fb8.appspot.com",
-  messagingSenderId: "24512338206",
-  appId: "1:24512338206:web:dfe045db59bd3434a2110f",
-  measurementId: "G-HD4R7GNQ5H"
-};
-    
-    // تهيئة Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    
-    // متغيرات التطبيق
-    let AdController;
-    let userId = null;
-    let userData = { balance: 0 };
-    
-    // تحذير لو الصفحة اتفتحت خارج Telegram
-    const inTelegram = !!(window.Telegram && window.Telegram.WebApp);
-    if (!inTelegram) {
-      statusEl.textContent = '⚠️ افتح الصفحة من داخل Telegram Mini App. الإعلانات لن تعمل في المتصفح العادي.';
-      // استخدام معرف افتراضي للاختبار خارج Telegram
-      userId = "test-user-" + Date.now();
-      loadUserData();
-    } else {
-      try { 
-        window.Telegram.WebApp.expand(); 
-        // الحصول على معرف المستخدم من Telegram
-        userId = Telegram.WebApp.initDataUnsafe.user?.id;
-        if (userId) {
-          loadUserData();
-        } else {
-          statusEl.textContent = '⚠️ لا يمكن تحديد هوية المستخدم';
-        }
-      } catch(e) {
-        log('Telegram error: ' + e.message, true);
-      }
+    // ===== Telegram Mini App bootstrapping =====
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    if (tg) {
+      tg.ready();
+      try { tg.expand(); } catch (e) {}
+      // موازنة الألوان حسب ثيم تليجرام
+      const theme = tg.themeParams || {};
+      if (theme.bg_color) document.body.style.background = theme.bg_color;
     }
 
-    // تهيئة AdsGram
+    // ===== AdsGram init =====
+    const blockId = 'int-14053'; // <-- blockId الذي أعطيتني إياه
+    let AdController = null;
     try {
-      AdController = window.Adsgram.init({
-        blockId: "int-14053",
-        debug: true
-      });
-      log('تم تهيئة Adsgram بنجاح');
-    } catch(e) {
-      log('خطأ في التهيئة: ' + e.message, true);
+      AdController = window.Adsgram.init({ blockId });
+    } catch (e) {
+      console.warn('AdsGram init failed:', e);
     }
 
-    // تحميل بيانات المستخدم من Firebase
-    function loadUserData() {
-      db.collection("users").doc(userId.toString()).get()
-        .then((doc) => {
-          if (doc.exists) {
-            userData = doc.data();
-            updateBalanceDisplay();
-            log('تم تحميل بيانات المستخدم');
-          } else {
-            // إنشاء مستخدم جديد إذا لم يكن موجوداً
-            userData = { balance: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp() };
-            db.collection("users").doc(userId.toString()).set(userData)
-              .then(() => {
-                log('تم إنشاء مستخدم جديد');
-                updateBalanceDisplay();
-              })
-              .catch((error) => {
-                log("خطأ في إنشاء المستخدم: " + error.message, true);
-              });
-          }
-        })
-        .catch((error) => {
-          log("خطأ في تحميل البيانات: " + error.message, true);
-        });
+    // ===== UI helpers =====
+    const btn = document.getElementById('watchAdBtn');
+    const status = document.getElementById('status');
+    const reward = document.getElementById('reward');
+    const rewardLink = document.getElementById('rewardLink');
+    const errorBox = document.getElementById('errorBox');
+
+    function setStatus(text, kind) {
+      status.textContent = text;
+      status.className = `pill ${kind || ''}`;
+      status.classList.remove('hidden');
+    }
+    function clearStatus() {
+      status.classList.add('hidden');
     }
 
-    // تحديث عرض الرصيد
-    function updateBalanceDisplay() {
-      userBalanceEl.textContent = userData.balance + " كوين";
-    }
+    // عدّل رابط المكافأة كما تريد (مثلاً رابط تنزيل أو صفحة خاصة)
+    rewardLink.href = 'https://t.me/';
 
-    // إضافة كوين للمستخدم
-    function addCoins(amount) {
-      userData.balance += amount;
-      
-      // تحديث البيانات في Firebase
-      db.collection("users").doc(userId.toString()).update({
-        balance: userData.balance,
-        lastReward: firebase.firestore.FieldValue.serverTimestamp()
-      })
-      .then(() => {
-        updateBalanceDisplay();
-        showRewardAnimation(amount);
-        log(`تم إضافة ${amount} كوين للمستخدم`);
-      })
-      .catch((error) => {
-        log("خطأ في تحديث الرصيد: " + error.message, true);
-      });
-    }
-
-    // عرض رسمة المكافأة
-    function showRewardAnimation(amount) {
-      rewardAnimationEl.textContent = `+${amount} كوين! 🎉`;
-      rewardAnimationEl.style.display = 'block';
-      
-      setTimeout(() => {
-        rewardAnimationEl.style.display = 'none';
-      }, 1500);
-    }
-
-    // التعامل مع النقر على زر عرض الإعلان
-    document.getElementById('showAd').addEventListener('click', () => {
-      if (!AdController) {
-        status('لم يتم تهيئة AdsGram.');
-        return;
+    // ===== Show ad on click (Rewarded logic) =====
+    btn.addEventListener('click', async () => {
+      clearStatus(); errorBox.classList.add('hidden'); reward.classList.add('hidden');
+      btn.disabled = true;
+      if (tg && tg.HapticFeedback) {
+        try { tg.HapticFeedback.impactOccurred('light'); } catch (e) {}
       }
-      
-      if (!userId) {
-        status('لم يتم التعرف على المستخدم.');
-        return;
+      if (!AdController || !AdController.show) {
+        setStatus('المكوّن غير جاهز', 'err');
+        btn.disabled = false; return;
       }
-      
-      status('جاري تحميل الإعلان…');
-
-      AdController.show()
-        .then((result) => {
-          status('✅ الإعلان انتهى/أُغلق.');
-          log(result);
-          
-          // منح المستخدم كوين عند مشاهدة الإعلان كاملاً
-          addCoins(1);
-        })
-        .catch((result) => {
-          status('❌ لم يكتمل عرض الإعلان.');
-          log(result, true);
-        });
+      setStatus('جارٍ تحميل الإعلان…', '');
+      try {
+        const result = await AdController.show();
+        // في rewarded: يتحقق done && !error عندما يشاهد المستخدم حتى النهاية
+        // في interstitial: تتحقق حتى لو أغلق الإعلان — اعمل منطقك حسب نوع البلوك
+        if (result && result.done && !result.error) {
+          setStatus('تمت المشاهدة ✔', 'ok');
+          reward.classList.remove('hidden');
+          if (tg && tg.HapticFeedback) try { tg.HapticFeedback.notificationOccurred('success'); } catch (e) {}
+        } else {
+          setStatus('لم تكتمل المشاهدة', 'err');
+        }
+      } catch (err) {
+        console.warn('Ads error', err);
+        errorBox.classList.remove('hidden');
+        setStatus('خطأ أثناء التشغيل', 'err');
+        if (tg && tg.HapticFeedback) try { tg.HapticFeedback.notificationOccurred('error'); } catch (e) {}
+      } finally {
+        btn.disabled = false;
+      }
     });
 
-    // دوال المساعدة
-    function status(msg){ statusEl.textContent = msg; }
-    function log(data, isErr){
-      const line = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
-      logEl.textContent += '\n' + (isErr ? '[ERR] ' : '') + line;
-      logEl.scrollTop = logEl.scrollHeight;
+    // تحذير خفيف عند التشغيل خارج تليجرام (لأغراض الاختبار)
+    if (!tg) {
+      console.info('يُفضَّل فتح هذا الملف داخل تليجرام عبر زر web_app في البوت.');
     }
   </script>
 </body>
