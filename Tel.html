@@ -1,18 +1,71 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>نظام المهام والإعلانات</title>
+  <title>نظام المهام والمكافآت</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Firebase -->
-  <script type="module">
-    // Import Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(135deg,#141e30,#243b55);
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    .card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 20px;
+      padding: 20px;
+      margin: 15px auto;
+      max-width: 400px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    button {
+      background: #00c6ff;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 20px;
+      margin-top: 10px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover { background: #0072ff; }
+    .task { margin: 10px 0; }
+    #adStatus { margin-top: 10px; font-size: 14px; color: #ffd700; }
+  </style>
+</head>
+<body>
+  <h1>🎯 نظام المهام والمكافآت</h1>
+  <div class="card" id="userCard">
+    <h2>👤 معلومات المستخدم</h2>
+    <p><strong>ID:</strong> <span id="telegramId">جارٍ التحميل...</span></p>
+    <p><strong>الاسم:</strong> <span id="telegramName">جارٍ التحميل...</span></p>
+  </div>
 
-    // Firebase Config
+  <div class="card">
+    <h2>📋 المهام المتاحة</h2>
+    <div id="tasksList">جارٍ تحميل المهام...</div>
+  </div>
+
+  <div class="card">
+    <h2>🎥 إعلان ومكافأة</h2>
+    <button id="watchAdBtn">شاهد إعلان</button>
+    <div id="adStatus"></div>
+  </div>
+
+  <script>
+    // إعداد Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
       authDomain: "hhhhhh-d4fb8.firebaseapp.com",
@@ -23,80 +76,125 @@
       appId: "1:24512338206:web:dfe045db59bd3434a2110f",
       measurementId: "G-HD4R7GNQ5H"
     };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Telegram Init
+    // Telegram WebApp init
     const tg = window.Telegram.WebApp;
-    tg.expand(); 
+    tg.expand();
 
-    const user = tg.initDataUnsafe.user;
-    const userId = user?.id;
+    const userIdEl = document.getElementById("telegramId");
+    const userNameEl = document.getElementById("telegramName");
 
-    async function loadUserData() {
-      if (!userId) {
-        document.getElementById("info").innerHTML = "لم يتم التعرف على المستخدم!";
-        return;
-      }
-
-      const userRef = doc(db, "users", String(userId));
-      const snap = await getDoc(userRef);
-
-      if (!snap.exists()) {
-        // إنشاء مستخدم جديد
-        await setDoc(userRef, {
-          name: user.first_name,
-          photo: user.photo_url || "",
-          coins: 0,
-          balance: 0,
-          tasksCompleted: 0,
-          date: new Date().toISOString().split("T")[0],
-          lastBonusTime: null,
-          lastReward: null,
-          lastTaskTime: null
-        });
-        document.getElementById("info").innerHTML = `أهلاً ${user.first_name} 👋 تم إنشاء حسابك بنجاح`;
-      } else {
-        const data = snap.data();
-        document.getElementById("info").innerHTML = `
-          <img src="${data.photo}" width="60" style="border-radius:50%"><br>
-          الاسم: ${data.name}<br>
-          الرصيد: ${data.coins} كوينز<br>
-          المهام المنجزة: ${data.tasksCompleted}
-        `;
-      }
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      const user = tg.initDataUnsafe.user;
+      userIdEl.textContent = user.id;
+      userNameEl.textContent = user.first_name + (user.last_name ? " " + user.last_name : "");
+      // حفظ بيانات المستخدم في Firebase
+      firebase.database().ref("users/" + user.id).set({
+        id: user.id,
+        name: user.first_name + (user.last_name ? " " + user.last_name : ""),
+        username: user.username || "",
+        timestamp: Date.now()
+      });
+    } else {
+      userIdEl.textContent = "غير متاح";
+      userNameEl.textContent = "غير متاح";
     }
 
-    loadUserData();
-  </script>
-
-  <!-- AdsGram SDK -->
-  <script src="https://adsgram.ai/js/ads.js"></script>
-</head>
-<body style="font-family: Arial; text-align:center; padding:20px; background:#111; color:#fff;">
-  <h2>🚀 نظام المهام والإعلانات</h2>
-  <div id="info">جاري تحميل بياناتك...</div>
-
-  <button id="showAd" style="margin-top:20px; padding:10px 20px; border:none; border-radius:8px; background:#ff9800; color:white; font-size:16px;">
-    🎥 مشاهدة إعلان
-  </button>
-
-  <script>
-    // AdsGram Integration
-    const adController = window.Adsgram.init({ blockId: "int-14053" });
-
-    document.getElementById("showAd").addEventListener("click", () => {
-      adController.show().then(() => {
-        alert("✅ تمت مشاهدة الإعلان!");
-      }).catch((e) => {
-        console.error("خطأ في عرض الإعلان:", e);
+    // جلب المهام ديناميكياً
+    const tasksList = document.getElementById("tasksList");
+    db.ref("tasks").on("value", snap => {
+      tasksList.innerHTML = "";
+      if (!snap.exists()) {
+        tasksList.innerHTML = "<p>لا توجد مهام حالياً.</p>";
+        return;
+      }
+      snap.forEach(taskSnap => {
+        const task = taskSnap.val();
+        const div = document.createElement("div");
+        div.className = "task";
+        div.innerHTML = `
+          <p><strong>${task.title}</strong></p>
+          <p>${task.description}</p>
+          <button onclick="window.open('${task.link}','_blank')">تنفيذ</button>
+        `;
+        tasksList.appendChild(div);
       });
     });
+
+  </script>
+
+  <!-- ===== AdsGram loader & handler ===== -->
+  <script>
+  (async function(){
+    const SDK_URLS = [
+      'https://sad.adsgram.ai/js/sad.min.js',
+      'https://adsgram.ai/js/adsgram.js'
+    ];
+    const blockId = 'int-14053';
+    const statusEl = document.getElementById('adStatus');
+    const watchBtn = document.getElementById('watchAdBtn');
+
+    function logStatus(msg){
+      console.log('[AdsGram] ', msg);
+      statusEl.textContent = msg;
+    }
+
+    async function loadSdk(){
+      for (const url of SDK_URLS){
+        try{
+          await new Promise((res,rej)=>{
+            const s=document.createElement('script');
+            s.src=url; s.async=true;
+            s.onload=()=>res();
+            s.onerror=()=>rej();
+            document.head.appendChild(s);
+          });
+          if (window.Adsgram || window.sad) return;
+        }catch(e){ console.warn('فشل تحميل',url); }
+      }
+      throw new Error("فشل تحميل SDK");
+    }
+
+    function initSdk(){
+      if (window.Adsgram) return window.Adsgram.init({blockId});
+      if (window.sad) return window.sad.init({blockId});
+      throw new Error("لم أجد init");
+    }
+
+    try {
+      logStatus("تحميل SDK...");
+      await loadSdk();
+      window.AdController = initSdk();
+      logStatus("SDK جاهز.");
+    } catch(e){
+      logStatus("خطأ SDK: "+e.message);
+      return;
+    }
+
+    watchBtn.onclick = async ()=>{
+      watchBtn.disabled=true;
+      logStatus("تشغيل الإعلان...");
+      try{
+        const result = await window.AdController.show();
+        console.log("Ad result:",result);
+        if (result && result.done) {
+          logStatus("✔ تمت المشاهدة");
+        } else {
+          logStatus("الإعلان لم يكتمل.");
+        }
+      }catch(err){
+        console.error(err);
+        logStatus("خطأ: "+err.message);
+      }
+      watchBtn.disabled=false;
+    };
+  })();
   </script>
 </body>
 </html>
+
 
 
 
