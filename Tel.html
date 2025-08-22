@@ -1,100 +1,18 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8" />
-  <title>Mini App | Ads + Tasks</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+  <meta charset="UTF-8">
+  <title>نظام المهام والإعلانات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-  <!-- AdsGram SDK -->
-  <script async src="https://adsgram.ai/js/adsgram.js"></script>
-
-  <style>
-    body {
-      font-family: "Cairo", sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #141e30, #243b55);
-      color: #fff;
-      text-align: center;
-    }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      padding: 20px;
-    }
-    .card {
-      background: rgba(255,255,255,0.08);
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    }
-    h2 {
-      margin: 0 0 10px;
-      font-size: 22px;
-    }
-    button {
-      background: #00c6ff;
-      background: linear-gradient(to right, #0072ff, #00c6ff);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 12px 18px;
-      font-size: 16px;
-      margin-top: 10px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .task {
-      background: rgba(255,255,255,0.05);
-      padding: 12px;
-      border-radius: 12px;
-      margin-bottom: 10px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>🎉 نظام المهام و الإعلانات</h1>
-    <div class="card" id="userCard">
-      <h2>👤 المستخدم</h2>
-      <p id="userName">جارٍ التحميل...</p>
-      <p id="coins">رصيد: 0</p>
-      <p id="levels">المستويات اليوم: 0/20</p>
-    </div>
-
-    <div class="card">
-      <h2>📺 إعلان</h2>
-      <button id="watchAdBtn">شاهد إعلان</button>
-      <p id="adStatus"></p>
-    </div>
-
-    <div class="card">
-      <h2>🎁 مكافأة يومية</h2>
-      <button id="dailyRewardBtn">احصل على المكافأة</button>
-      <p id="dailyStatus"></p>
-    </div>
-
-    <div class="card">
-      <h2>📝 المهام</h2>
-      <div id="tasksList">جارٍ تحميل المهام...</div>
-    </div>
-  </div>
-
-  <script>
-    // -------- Firebase Config ----------
+    // Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
       authDomain: "hhhhhh-d4fb8.firebaseapp.com",
@@ -105,174 +23,79 @@
       appId: "1:24512338206:web:dfe045db59bd3434a2110f",
       measurementId: "G-HD4R7GNQ5H"
     };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
 
-    // -------- Telegram Init ------------
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Telegram Init
     const tg = window.Telegram.WebApp;
-    tg.expand();
-    let userId = "guest";
-    let userName = "ضيف";
+    tg.expand(); 
 
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-      userId = tg.initDataUnsafe.user.id.toString();
-      userName = tg.initDataUnsafe.user.first_name;
-    }
+    const user = tg.initDataUnsafe.user;
+    const userId = user?.id;
 
-    document.getElementById("userName").innerText = `${userName} (ID: ${userId})`;
+    async function loadUserData() {
+      if (!userId) {
+        document.getElementById("info").innerHTML = "لم يتم التعرف على المستخدم!";
+        return;
+      }
 
-    // -------- User Ref -----------------
-    const userRef = db.collection("users").doc(userId);
+      const userRef = doc(db, "users", String(userId));
+      const snap = await getDoc(userRef);
 
-    // -------- Auth Anon ----------------
-    auth.signInAnonymously().then(() => {
-      initUser();
-    });
-
-    async function initUser() {
-      const snap = await userRef.get();
-      if (!snap.exists) {
-        await userRef.set({
+      if (!snap.exists()) {
+        // إنشاء مستخدم جديد
+        await setDoc(userRef, {
+          name: user.first_name,
+          photo: user.photo_url || "",
           coins: 0,
-          lastLevelAt: 0,
-          levelsToday: 0,
-          tasks: {},
-          daily: {}
+          balance: 0,
+          tasksCompleted: 0,
+          date: new Date().toISOString().split("T")[0],
+          lastBonusTime: null,
+          lastReward: null,
+          lastTaskTime: null
         });
-      }
-      listenUser();
-      loadTasks();
-    }
-
-    function listenUser() {
-      userRef.onSnapshot(doc => {
-        const data = doc.data();
-        document.getElementById("coins").innerText = `رصيد: ${data.coins}`;
-        document.getElementById("levels").innerText = `المستويات اليوم: ${data.levelsToday}/20`;
-      });
-    }
-
-    // -------- Watch Ad -----------------
-    const adBtn = document.getElementById("watchAdBtn");
-    const adStatus = document.getElementById("adStatus");
-
-    adBtn.onclick = async () => {
-      const doc = await userRef.get();
-      const data = doc.data();
-      const now = Date.now();
-      if (data.levelsToday >= 20) {
-        adStatus.innerText = "وصلت للحد اليومي!";
-        return;
-      }
-      if (now - data.lastLevelAt < 60000) {
-        adStatus.innerText = "انتظر دقيقة بين كل لفل.";
-        return;
-      }
-
-      AdController.show('int-14053').then(async () => {
-        await userRef.update({
-          coins: data.coins + 1,
-          levelsToday: data.levelsToday + 1,
-          lastLevelAt: now
-        });
-        adStatus.innerText = "✅ تمت إضافة 1 كوين";
-      }).catch(() => {
-        adStatus.innerText = "❌ فشل عرض الإعلان";
-      });
-    };
-
-    // -------- Daily Reward -------------
-    const dailyBtn = document.getElementById("dailyRewardBtn");
-    const dailyStatus = document.getElementById("dailyStatus");
-
-    dailyBtn.onclick = async () => {
-      const today = new Date().toISOString().slice(0,10);
-      const doc = await userRef.get();
-      const data = doc.data();
-      if (data.daily && data.daily[today]?.claimed) {
-        dailyStatus.innerText = "أخذت المكافأة اليوم.";
-        return;
-      }
-
-      // شرط: لازم يكون شاهد إعلان واحد و عامل مهمة واحدة
-      if (data.levelsToday < 1) {
-        dailyStatus.innerText = "لازم تشوف إعلان واحد عالأقل.";
-        return;
-      }
-      if (!data.tasks[today] || data.tasks[today].count < 1) {
-        dailyStatus.innerText = "لازم تنجز مهمة واحدة عالأقل.";
-        return;
-      }
-
-      const amount = +(Math.random() * (1.5 - 0.2) + 0.2).toFixed(2);
-      await userRef.update({
-        coins: data.coins + amount,
-        [`daily.${today}`]: { claimed: true, amount }
-      });
-      dailyStatus.innerText = `🎁 حصلت على ${amount} كوين`;
-    };
-
-    // -------- Tasks --------------------
-    const tasksList = document.getElementById("tasksList");
-
-    function loadTasks() {
-      db.collection("tasks").orderBy("order").onSnapshot(snapshot => {
-        tasksList.innerHTML = "";
-        if (snapshot.empty) {
-          tasksList.innerText = "لا توجد مهام حالياً.";
-          return;
-        }
-        snapshot.forEach(doc => {
-          const t = doc.data();
-          const div = document.createElement("div");
-          div.className = "task";
-          div.innerHTML = `<h3>${t.title}</h3><p>${t.description}</p><button>تنفيذ (${t.reward} كوين)</button>`;
-          const btn = div.querySelector("button");
-          btn.onclick = () => doTask(doc.id, t);
-          tasksList.appendChild(div);
-        });
-      });
-    }
-
-    async function doTask(taskId, task) {
-      const today = new Date().toISOString().slice(0,10);
-      const doc = await userRef.get();
-      const data = doc.data();
-      if (data.tasks[today]?.completed?.[taskId]) {
-        alert("أنجزت هذه المهمة اليوم.");
-        return;
-      }
-
-      const finishTask = async () => {
-        const newCoins = data.coins + task.reward;
-        await userRef.set({
-          coins: newCoins,
-          tasks: {
-            ...data.tasks,
-            [today]: {
-              count: (data.tasks[today]?.count || 0) + 1,
-              completed: {
-                ...(data.tasks[today]?.completed || {}),
-                [taskId]: true
-              }
-            }
-          }
-        }, { merge: true });
-        alert("✅ تمت المهمة وحصلت على كوين");
-      };
-
-      if (task.requireAd) {
-        AdController.show('int-14053').then(() => {
-          finishTask();
-        }).catch(() => {
-          alert("فشل الإعلان، حاول تاني.");
-        });
+        document.getElementById("info").innerHTML = `أهلاً ${user.first_name} 👋 تم إنشاء حسابك بنجاح`;
       } else {
-        finishTask();
+        const data = snap.data();
+        document.getElementById("info").innerHTML = `
+          <img src="${data.photo}" width="60" style="border-radius:50%"><br>
+          الاسم: ${data.name}<br>
+          الرصيد: ${data.coins} كوينز<br>
+          المهام المنجزة: ${data.tasksCompleted}
+        `;
       }
     }
+
+    loadUserData();
+  </script>
+
+  <!-- AdsGram SDK -->
+  <script src="https://adsgram.ai/js/ads.js"></script>
+</head>
+<body style="font-family: Arial; text-align:center; padding:20px; background:#111; color:#fff;">
+  <h2>🚀 نظام المهام والإعلانات</h2>
+  <div id="info">جاري تحميل بياناتك...</div>
+
+  <button id="showAd" style="margin-top:20px; padding:10px 20px; border:none; border-radius:8px; background:#ff9800; color:white; font-size:16px;">
+    🎥 مشاهدة إعلان
+  </button>
+
+  <script>
+    // AdsGram Integration
+    const adController = window.Adsgram.init({ blockId: "int-14053" });
+
+    document.getElementById("showAd").addEventListener("click", () => {
+      adController.show().then(() => {
+        alert("✅ تمت مشاهدة الإعلان!");
+      }).catch((e) => {
+        console.error("خطأ في عرض الإعلان:", e);
+      });
+    });
   </script>
 </body>
 </html>
+
 
