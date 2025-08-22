@@ -1,577 +1,100 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>مشاهدة إعلان — AdsGram x Telegram Mini App</title>
-  <!-- Telegram WebApp SDK -->
+  <title>Mini App | Ads + Tasks</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- AdsGram SDK (vanilla JS) -->
-  <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+
+  <!-- AdsGram SDK -->
+  <script async src="https://adsgram.ai/js/adsgram.js"></script>
+
   <style>
-    :root {
-      --bg: #0f1115;
-      --card: #151922;
-      --text: #e8ebf0;
-      --muted: #a8b3c7;
-      --accent: #22c55e;
-      --accent-dark: #16a34a;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --info: #3b82f6;
-      --purple: #a855f7;
-      --gradient: linear-gradient(135deg, var(--accent), var(--info));
-      --border-radius: 16px;
-      --transition: all 0.3s ease;
-    }
-    
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-    }
-    
-    html, body { 
-      height: 100%; 
-    }
-    
     body {
-      margin: 0; 
-      font-family: 'Tajawal', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg); 
-      color: var(--text);
-      display: grid; 
-      place-items: center;
-      padding: 16px;
-      background-image: 
-        radial-gradient(circle at 15% 50%, rgba(34, 197, 94, 0.05) 0%, transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.05) 0%, transparent 25%);
-    }
-    
-    .wrap { 
-      width: min(680px, 92vw); 
-      animation: fadeIn 0.5s ease-out;
-    }
-    
-    .card {
-      background: var(--card); 
-      border-radius: var(--border-radius); 
-      padding: 28px; 
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: var(--gradient);
-    }
-    
-    h1 { 
-      margin: 0 0 12px; 
-      font-size: 26px; 
-      font-weight: 700;
-      background: var(--gradient);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      display: inline-block;
-    }
-    
-    p { 
-      margin: 0 0 20px; 
-      color: var(--muted); 
-      line-height: 1.6; 
-      font-size: 15px;
-    }
-    
-    .actions { 
-      display: flex; 
-      gap: 12px; 
-      align-items: center; 
-      margin-bottom: 20px;
-    }
-    
-    button {
-      appearance: none; 
-      border: 0; 
-      border-radius: 14px; 
-      padding: 14px 22px; 
-      font-weight: 700; 
-      cursor: pointer;
-      font-family: inherit;
-      font-size: 15px;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    
-    #watchAdBtn { 
-      background: var(--accent); 
+      font-family: "Cairo", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #141e30, #243b55);
       color: #fff;
-      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-    }
-    
-    #watchAdBtn:hover:not([disabled]) {
-      background: var(--accent-dark);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
-    }
-    
-    #watchAdBtn[disabled] { 
-      opacity: .6; 
-      cursor: not-allowed; 
-      transform: none !important;
-      box-shadow: none !important;
-    }
-    
-    .pill { 
-      padding: 10px 14px; 
-      border-radius: 999px; 
-      font-size: 13px; 
-      font-weight: 500;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .pill.ok { 
-      background: rgba(34, 197, 94, 0.18); 
-      color: #6ee7b7; 
-    }
-    
-    .pill.err { 
-      background: rgba(239, 68, 68, 0.15); 
-      color: #fecaca; 
-    }
-    
-    .pill.warn { 
-      background: rgba(245, 158, 11, 0.15); 
-      color: #fde68a; 
-    }
-    
-    .pill.info { 
-      background: rgba(59, 130, 246, 0.15); 
-      color: #93c5fd; 
-    }
-    
-    .hidden { 
-      display: none; 
-    }
-    
-    a.cta { 
-      color: var(--accent); 
-      text-decoration: none; 
-      font-weight: 700; 
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    a.cta:hover {
-      color: var(--accent-dark);
-      text-decoration: underline;
-    }
-    
-    .footer { 
-      margin-top: 20px; 
-      font-size: 12px; 
-      color: var(--muted); 
-      opacity: .8; 
       text-align: center;
-      padding: 10px;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
-    
-    .grid { 
-      display: grid; 
-      gap: 16px; 
-      margin-bottom: 20px;
+    .container {
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
     }
-    
-    .two { 
-      grid-template-columns: 1fr 1fr; 
+    .card {
+      background: rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
     }
-    
-    .stat { 
-      background: rgba(14, 18, 32, 0.6); 
-      border-radius: 14px; 
-      padding: 16px; 
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: var(--transition);
+    h2 {
+      margin: 0 0 10px;
+      font-size: 22px;
     }
-    
-    .stat:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    }
-    
-    .stat h3 { 
-      margin: 0 0 8px; 
-      font-size: 13px; 
-      color: #a8b3c7; 
-      font-weight: 600; 
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .stat .v { 
-      font-size: 22px; 
-      font-weight: 800; 
-    }
-    
-    .task { 
-      display:flex; 
-      justify-content: space-between; 
-      align-items:center; 
-      padding: 14px; 
-      border-radius: 12px; 
-      background: rgba(14, 18, 32, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      transition: var(--transition);
-    }
-    
-    .task:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-    
-    .task small { 
-      color: var(--muted); 
-      font-size: 12px;
-    }
-    
-    .taskBtn {
-      background: var(--info);
+    button {
+      background: #00c6ff;
+      background: linear-gradient(to right, #0072ff, #00c6ff);
       color: white;
-      padding: 8px 14px;
-      font-size: 13px;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: 0.3s;
     }
-    
-    .taskBtn:hover:not([disabled]) {
-      background: #2563eb;
-      transform: translateY(-1px);
-    }
-    
-    .taskBtn[disabled] {
+    button:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
-    
-    hr.divider {
-      border: 0;
-      border-top: 1px solid rgba(255, 255, 255, 0.08); 
-      margin: 22px 0; 
-    }
-    
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 20px;
+    .task {
+      background: rgba(255,255,255,0.05);
       padding: 12px;
-      background: rgba(14, 18, 32, 0.6);
       border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .user-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: var(--gradient);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      color: white;
-    }
-    
-    .user-details {
-      flex: 1;
-    }
-    
-    .user-name {
-      font-weight: 700;
-      margin-bottom: 4px;
-    }
-    
-    .user-id {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    
-    .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      padding: 20px;
-    }
-    
-    .loading-spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 50%;
-      border-top-color: var(--accent);
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    
-    .pulse {
-      animation: pulse 2s infinite;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 600px) {
-      .two {
-        grid-template-columns: 1fr;
-      }
-      
-      .card {
-        padding: 20px;
-      }
-      
-      .actions {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      button {
-        width: 100%;
-      }
+      margin-bottom: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="container">
+    <h1>🎉 نظام المهام و الإعلانات</h1>
+    <div class="card" id="userCard">
+      <h2>👤 المستخدم</h2>
+      <p id="userName">جارٍ التحميل...</p>
+      <p id="coins">رصيد: 0</p>
+      <p id="levels">المستويات اليوم: 0/20</p>
+    </div>
+
     <div class="card">
-      <!-- معلومات المستخدم -->
-      <div id="userInfo" class="user-info hidden">
-        <div class="user-avatar">
-          <i class="fas fa-user"></i>
-        </div>
-        <div class="user-details">
-          <div class="user-name" id="userName">جارٍ التحميل...</div>
-          <div class="user-id" id="userId">ID: </div>
-        </div>
-      </div>
-      
-      <h1>شاهد إعلان واحصل على المكافأة</h1>
-      <p>بالضغط على الزر بالأسفل سيتم عرض إعلان <strong>AdsGram</strong>. بعد المشاهدة حتى النهاية سيتم فتح المكافأة.</p>
-      
-      <div class="actions">
-        <button id="watchAdBtn">
-          <i class="fas fa-play-circle"></i>
-          شاهد الإعلان
-        </button>
-        <span id="status" class="pill hidden"></span>
-      </div>
-      
-      <div id="reward" class="hidden" style="margin-top:16px">
-        <p class="pill ok">
-          <i class="fas fa-trophy"></i>
-          تهانينا! تم فتح المكافأة.
-        </p>
-        <p>
-          <a id="rewardLink" class="cta" href="#" target="_blank" rel="noopener">
-            <i class="fas fa-gift"></i>
-            افتح المكافأة الآن
-          </a>
-        </p>
-      </div>
-      
-      <div id="errorBox" class="hidden" style="margin-top:16px">
-        <p class="pill err">
-          <i class="fas fa-exclamation-triangle"></i>
-          حدث خطأ أثناء عرض الإعلان. حاول مرة أخرى لاحقًا.
-        </p>
-      </div>
-      
-      <div class="footer">Mini App يعمل داخل تليجرام. لو فتحته من المتصفح قد لا تظهر الإعلانات.</div>
+      <h2>📺 إعلان</h2>
+      <button id="watchAdBtn">شاهد إعلان</button>
+      <p id="adStatus"></p>
+    </div>
 
-      <hr class="divider">
+    <div class="card">
+      <h2>🎁 مكافأة يومية</h2>
+      <button id="dailyRewardBtn">احصل على المكافأة</button>
+      <p id="dailyStatus"></p>
+    </div>
 
-      <!-- لوحة الإحصائيات -->
-      <div class="grid two">
-        <div class="stat">
-          <h3><i class="fas fa-coins"></i> الرصيد (Coins)</h3>
-          <div class="v" id="coins">0</div>
-        </div>
-        <div class="stat">
-          <h3><i class="fas fa-chart-line"></i> مستوى اليوم</h3>
-          <div class="v"><span id="levelToday">0</span>/20</div>
-        </div>
-        <div class="stat">
-          <h3><i class="fas fa-clock"></i> انتظار بين المستويات</h3>
-          <div class="v" id="cooldown">جاهز</div>
-        </div>
-        <div class="stat">
-          <h3><i class="fas fa-tasks"></i> مهام اليوم</h3>
-          <div class="v" id="tasksToday">0</div>
-        </div>
-      </div>
-
-      <div class="grid">
-        <button id="claimDailyBtn">
-          <i class="fas fa-calendar-day"></i>
-          الحصول على المكافأة اليومية
-        </button>
-        <span id="dailyStatus" class="pill hidden"></span>
-      </div>
-
-      <!-- قائمة مهام تجريبية -->
-      <div class="grid">
-        <div class="task">
-          <div>
-            <div>مهمة رقم 1</div>
-            <small>يكسب 1 كوين — يتطلب مشاهدة إعلان</small>
-          </div>
-          <button data-task-id="task1" class="taskBtn">
-            <i class="fas fa-play"></i>
-            تنفيذ
-          </button>
-        </div>
-        <div class="task">
-          <div>
-            <div>مهمة رقم 2</div>
-            <small>يكسب 1 كوين — يتطلب مشاهدة إعلان</small>
-          </div>
-          <button data-task-id="task2" class="taskBtn">
-            <i class="fas fa-play"></i>
-            تنفيذ
-          </button>
-        </div>
-      </div>
+    <div class="card">
+      <h2>📝 المهام</h2>
+      <div id="tasksList">جارٍ تحميل المهام...</div>
     </div>
   </div>
 
   <script>
-    // ===== Telegram Mini App bootstrapping =====
-    window.tg = window.Telegram ? window.Telegram.WebApp : null;
-    const tg = window.tg;
-    if (tg) {
-      tg.ready();
-      try { tg.expand(); } catch (e) {}
-      // موازنة الألوان حسب ثيم تليجرام
-      const theme = tg.themeParams || {};
-      if (theme.bg_color) document.body.style.background = theme.bg_color;
-    }
-
-    // ===== AdsGram init =====
-    const blockId = 'int-14053'; // <-- blockId الذي أعطيتني إياه
-    let AdController = null;
-    try {
-      window.AdController = AdController = window.Adsgram.init({ blockId });
-    } catch (e) {
-      console.warn('AdsGram init failed:', e);
-    }
-
-    // ===== UI helpers =====
-    const btn = document.getElementById('watchAdBtn');
-    const status = document.getElementById('status');
-    const reward = document.getElementById('reward');
-    const rewardLink = document.getElementById('rewardLink');
-    const errorBox = document.getElementById('errorBox');
-    const userInfo = document.getElementById('userInfo');
-    const userName = document.getElementById('userName');
-    const userId = document.getElementById('userId');
-
-    function setStatus(text, kind) {
-      status.textContent = text;
-      status.className = `pill ${kind || ''}`;
-      status.classList.remove('hidden');
-    }
-    
-    function clearStatus() {
-      status.classList.add('hidden');
-    }
-
-    // عدّل رابط المكافأة كما تريد (مثلاً رابط تنزيل أو صفحة خاصة)
-    rewardLink.href = 'https://t.me/';
-
-    // ===== Show ad on click (Rewarded logic) =====
-    btn.addEventListener('click', async () => {
-      clearStatus(); 
-      errorBox.classList.add('hidden'); 
-      reward.classList.add('hidden');
-      btn.disabled = true;
-      
-      if (tg && tg.HapticFeedback) {
-        try { tg.HapticFeedback.impactOccurred('light'); } catch (e) {}
-      }
-      
-      if (!AdController || !AdController.show) {
-        setStatus('المكوّن غير جاهز', 'err');
-        btn.disabled = false; 
-        return;
-      }
-      
-      setStatus('جارٍ تحميل الإعلان…', 'info');
-      
-      try {
-        const result = await AdController.show();
-        // في rewarded: يتحقق done && !error عندما يشاهد المستخدم حتى النهاية
-        // في interstitial: تتحقق حتى لو أغلق الإعلان — اعمل منطقك حسب نوع البلوك
-        if (result && result.done && !result.error) {
-          setStatus('تمت المشاهدة ✔', 'ok');
-          reward.classList.remove('hidden');
-          if (tg && tg.HapticFeedback) try { tg.HapticFeedback.notificationOccurred('success'); } catch (e) {}
-        } else {
-          setStatus('لم تكتمل المشاهدة', 'err');
-        }
-      } catch (err) {
-        console.warn('Ads error', err);
-        errorBox.classList.remove('hidden');
-        setStatus('خطأ أثناء التشغيل', 'err');
-        if (tg && tg.HapticFeedback) try { tg.HapticFeedback.notificationOccurred('error'); } catch (e) {}
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    // تحذير خفيف عند التشغيل خارج تليجرام (لأغراض الاختبار)
-    if (!tg) {
-      console.info('يُفضَّل فتح هذا الملف داخل تليجرام عبر زر web_app في البوت.');
-    }
-  </script>
-
-  <!-- Firebase + منطق التخزين (Module) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-
-    // 1) ضع إعدادات Firebase الخاصة بك هنا
+    // -------- Firebase Config ----------
     const firebaseConfig = {
       apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
       authDomain: "hhhhhh-d4fb8.firebaseapp.com",
@@ -582,308 +105,174 @@
       appId: "1:24512338206:web:dfe045db59bd3434a2110f",
       measurementId: "G-HD4R7GNQ5H"
     };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    // 2) التهيئة
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
+    // -------- Telegram Init ------------
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    let userId = "guest";
+    let userName = "ضيف";
 
-    // Helpers للتواريخ حسب القاهرة
-    function todayKey() {
-      const d = new Date();
-      // مفتاح اليوم YYYY-MM-DD
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,'0');
-      const dd = String(d.getDate()).padStart(2,'0');
-      return `${y}-${m}-${dd}`;
+    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+      userId = tg.initDataUnsafe.user.id.toString();
+      userName = tg.initDataUnsafe.user.first_name;
     }
 
-    // مراجع عناصر الواجهة
-    const coinsEl = document.getElementById('coins');
-    const levelTodayEl = document.getElementById('levelToday');
-    const cooldownEl = document.getElementById('cooldown');
-    const tasksTodayEl = document.getElementById('tasksToday');
-    const dailyBtn = document.getElementById('claimDailyBtn');
-    const dailyStatus = document.getElementById('dailyStatus');
-    const taskButtons = Array.from(document.querySelectorAll('.taskBtn'));
+    document.getElementById("userName").innerText = `${userName} (ID: ${userId})`;
 
-    // بيانات المستخدم
-    let uid = null;          // uid من Firebase (مجهول)
-    let tgId = null;         // Telegram user id
-    let userDocRef = null;
-    let cooldownInterval = null;
+    // -------- User Ref -----------------
+    const userRef = db.collection("users").doc(userId);
 
-    // جلب معرّف المستخدم من تليجرام Mini App
-    function getTelegramUser() {
-      try {
-        const u = window.tg?.initDataUnsafe?.user;
-        return u || null;
-      } catch (e) { return null; }
-    }
+    // -------- Auth Anon ----------------
+    auth.signInAnonymously().then(() => {
+      initUser();
+    });
 
-    // عرض معلومات المستخدم
-    function displayUserInfo(userData) {
-      const tgUser = getTelegramUser();
-      if (tgUser) {
-        userName.textContent = tgUser.first_name || tgUser.username || 'مستخدم تليجرام';
-        userId.textContent = `ID: ${tgUser.id}`;
-        userInfo.classList.remove('hidden');
-      } else {
-        userInfo.classList.add('hidden');
+    async function initUser() {
+      const snap = await userRef.get();
+      if (!snap.exists) {
+        await userRef.set({
+          coins: 0,
+          lastLevelAt: 0,
+          levelsToday: 0,
+          tasks: {},
+          daily: {}
+        });
       }
+      listenUser();
+      loadTasks();
     }
 
-    // إنشاء / تحديث مستند المستخدم
-    async function ensureUser() {
-      const tgUser = getTelegramUser();
-      tgId = tgUser ? String(tgUser.id) : 'debug-guest';
-      
-      userDocRef = doc(db, 'users', tgId);
-      const snap = await getDoc(userDocRef);
-      
-      const base = {
-        tgId: tgId,
-        tgUser: tgUser || null,
-        coins: 0,
-        date: todayKey(), // استخدام نفس تنسيق التاريخ الموجود في قاعدة البيانات
-        lastOutline: serverTimestamp(), // استخدام نفس التنسيق الموجود في قاعدة البيانات
-        levels: {},             // map: dayKey -> count
-        lastLevelAt: 0,         // timestamp ms
-        tasks: {},              // map: dayKey -> {count: number}
-        lastTaskAt: 0,
-        daily: {},              // map: dayKey -> {claimed: bool, amount: number}
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+    function listenUser() {
+      userRef.onSnapshot(doc => {
+        const data = doc.data();
+        document.getElementById("coins").innerText = `رصيد: ${data.coins}`;
+        document.getElementById("levels").innerText = `المستويات اليوم: ${data.levelsToday}/20`;
+      });
+    }
+
+    // -------- Watch Ad -----------------
+    const adBtn = document.getElementById("watchAdBtn");
+    const adStatus = document.getElementById("adStatus");
+
+    adBtn.onclick = async () => {
+      const doc = await userRef.get();
+      const data = doc.data();
+      const now = Date.now();
+      if (data.levelsToday >= 20) {
+        adStatus.innerText = "وصلت للحد اليومي!";
+        return;
+      }
+      if (now - data.lastLevelAt < 60000) {
+        adStatus.innerText = "انتظر دقيقة بين كل لفل.";
+        return;
+      }
+
+      AdController.show('int-14053').then(async () => {
+        await userRef.update({
+          coins: data.coins + 1,
+          levelsToday: data.levelsToday + 1,
+          lastLevelAt: now
+        });
+        adStatus.innerText = "✅ تمت إضافة 1 كوين";
+      }).catch(() => {
+        adStatus.innerText = "❌ فشل عرض الإعلان";
+      });
+    };
+
+    // -------- Daily Reward -------------
+    const dailyBtn = document.getElementById("dailyRewardBtn");
+    const dailyStatus = document.getElementById("dailyStatus");
+
+    dailyBtn.onclick = async () => {
+      const today = new Date().toISOString().slice(0,10);
+      const doc = await userRef.get();
+      const data = doc.data();
+      if (data.daily && data.daily[today]?.claimed) {
+        dailyStatus.innerText = "أخذت المكافأة اليوم.";
+        return;
+      }
+
+      // شرط: لازم يكون شاهد إعلان واحد و عامل مهمة واحدة
+      if (data.levelsToday < 1) {
+        dailyStatus.innerText = "لازم تشوف إعلان واحد عالأقل.";
+        return;
+      }
+      if (!data.tasks[today] || data.tasks[today].count < 1) {
+        dailyStatus.innerText = "لازم تنجز مهمة واحدة عالأقل.";
+        return;
+      }
+
+      const amount = +(Math.random() * (1.5 - 0.2) + 0.2).toFixed(2);
+      await userRef.update({
+        coins: data.coins + amount,
+        [`daily.${today}`]: { claimed: true, amount }
+      });
+      dailyStatus.innerText = `🎁 حصلت على ${amount} كوين`;
+    };
+
+    // -------- Tasks --------------------
+    const tasksList = document.getElementById("tasksList");
+
+    function loadTasks() {
+      db.collection("tasks").orderBy("order").onSnapshot(snapshot => {
+        tasksList.innerHTML = "";
+        if (snapshot.empty) {
+          tasksList.innerText = "لا توجد مهام حالياً.";
+          return;
+        }
+        snapshot.forEach(doc => {
+          const t = doc.data();
+          const div = document.createElement("div");
+          div.className = "task";
+          div.innerHTML = `<h3>${t.title}</h3><p>${t.description}</p><button>تنفيذ (${t.reward} كوين)</button>`;
+          const btn = div.querySelector("button");
+          btn.onclick = () => doTask(doc.id, t);
+          tasksList.appendChild(div);
+        });
+      });
+    }
+
+    async function doTask(taskId, task) {
+      const today = new Date().toISOString().slice(0,10);
+      const doc = await userRef.get();
+      const data = doc.data();
+      if (data.tasks[today]?.completed?.[taskId]) {
+        alert("أنجزت هذه المهمة اليوم.");
+        return;
+      }
+
+      const finishTask = async () => {
+        const newCoins = data.coins + task.reward;
+        await userRef.set({
+          coins: newCoins,
+          tasks: {
+            ...data.tasks,
+            [today]: {
+              count: (data.tasks[today]?.count || 0) + 1,
+              completed: {
+                ...(data.tasks[today]?.completed || {}),
+                [taskId]: true
+              }
+            }
+          }
+        }, { merge: true });
+        alert("✅ تمت المهمة وحصلت على كوين");
       };
-      
-      if (!snap.exists()) {
-        await setDoc(userDocRef, base);
-        return base;
+
+      if (task.requireAd) {
+        AdController.show('int-14053').then(() => {
+          finishTask();
+        }).catch(() => {
+          alert("فشل الإعلان، حاول تاني.");
+        });
       } else {
-        // تحديث الحقول إذا كانت مفقودة
-        const existingData = snap.data();
-        const updatedData = {
-          ...base,
-          ...existingData,
-          updatedAt: serverTimestamp()
-        };
-        
-        // التأكد من أن coins موجودة وصحيحة
-        if (isNaN(updatedData.coins) || updatedData.coins === undefined) {
-          updatedData.coins = 0;
-        }
-        
-        await setDoc(userDocRef, updatedData, { merge: true });
-        return updatedData;
+        finishTask();
       }
     }
-
-    function setUI(data){
-      const day = todayKey();
-      const levelCount = (data.levels && data.levels[day]) || 0;
-      const tasksCount = (data.tasks && data.tasks[day]?.count) || 0;
-      const cdSec = Math.max(0, Math.ceil(( (data.lastLevelAt||0) + 60*1000 - Date.now() )/1000));
-      
-      // عرض coins مع التأكد من أنها قيمة رقمية
-      const coinsValue = isNaN(data.coins) ? 0 : Number(data.coins);
-      coinsEl.textContent = coinsValue.toFixed(2).replace(/\.00$/, '');
-      
-      levelTodayEl.textContent = levelCount;
-      tasksTodayEl.textContent = tasksCount;
-      
-      // تحديث العد التنازلي
-      updateCooldownText(cdSec);
-      
-      // إدارة المؤقت
-      if (cooldownInterval) clearInterval(cooldownInterval);
-      if (cdSec > 0) {
-        cooldownInterval = setInterval(() => {
-          const newCdSec = Math.max(0, Math.ceil(( (data.lastLevelAt||0) + 60*1000 - Date.now() )/1000));
-          updateCooldownText(newCdSec);
-          if (newCdSec <= 0) clearInterval(cooldownInterval);
-        }, 1000);
-      }
-    }
-    
-    function updateCooldownText(seconds) {
-      cooldownEl.textContent = seconds > 0 ? `${seconds} ثانية` : 'جاهز';
-      cooldownEl.style.color = seconds > 0 ? (seconds <= 10 ? '#ef4444' : '#f59e0b') : '#22c55e';
-    }
-
-    async function loadAndSetUI(){
-      const snap = await getDoc(userDocRef);
-      if (snap.exists()) {
-        const data = snap.data();
-        setUI(data);
-        displayUserInfo(data);
-      }
-    }
-
-    // منطق المستويات (الإعلانات)
-    async function canGainLevel(){
-      const snap = await getDoc(userDocRef);
-      const data = snap.data() || {};
-      const day = todayKey();
-      const levelCount = (data.levels && data.levels[day]) || 0;
-      const lastAt = data.lastLevelAt || 0;
-      const onCooldown = (Date.now() - lastAt) < 60*1000; // 1 دقيقة
-      
-      if (levelCount >= 20) return {ok:false, reason:'تم بلوغ 20 لفل اليوم'};
-      if (onCooldown) return {ok:false, reason:'انتظر دقيقة بين المستويات'};
-      return {ok:true, data};
-    }
-
-    async function gainLevel(){
-      const day = todayKey();
-      const snap = await getDoc(userDocRef);
-      const data = snap.data() || {};
-      const lvls = Object.assign({}, data.levels||{});
-      lvls[day] = (lvls[day]||0)+1;
-      
-      await updateDoc(userDocRef, {
-        levels: lvls,
-        lastLevelAt: Date.now(),
-        coins: increment(1), // إضافة عملة لكل إعلان
-        date: todayKey(), // تحديث التاريخ
-        lastOutline: serverTimestamp(), // تحديث الطابع الزمني
-        updatedAt: serverTimestamp(),
-      });
-      
-      await loadAndSetUI();
-    }
-
-    // منطق المهام (كل مهمة = 1 كوين وتتطلب إعلان)
-    async function completeTaskOnce(taskId){
-      // شغل إعلان أولاً
-      if (!window.AdController || !window.AdController.show) throw new Error('Ads not ready');
-      const r = await window.AdController.show();
-      if (!(r && r.done && !r.error)) throw new Error('لم تكتمل مشاهدة الإعلان');
-
-      const day = todayKey();
-      const snap = await getDoc(userDocRef);
-      const data = snap.data() || {};
-      const tasks = Object.assign({} , data.tasks||{});
-      const dayObj = Object.assign({count:0, completed: {}}, tasks[day]||{});
-      
-      if (dayObj.completed && dayObj.completed[taskId]) {
-        throw new Error('أتممت هذه المهمة اليوم بالفعل');
-      }
-      
-      dayObj.count = (dayObj.count||0)+1;
-      dayObj.completed = Object.assign({}, dayObj.completed, {[taskId]: true});
-      tasks[day] = dayObj;
-
-      const currentCoins = isNaN(data.coins) ? 0 : Number(data.coins);
-      const newCoins = currentCoins + 1; // 1 كوين لكل مهمة
-      
-      await updateDoc(userDocRef, {
-        tasks,
-        coins: newCoins,
-        lastTaskAt: Date.now(),
-        date: todayKey(), // تحديث التاريخ
-        lastOutline: serverTimestamp(), // تحديث الطابع الزمني
-        updatedAt: serverTimestamp(),
-      });
-      
-      await loadAndSetUI();
-      return {ok:true};
-    }
-
-    // مكافأة يومية (عشوائية 0.2 إلى 1.5) — تتطلب أن يكون المستخدم شاهد إعلانًا واحدًا على الأقل وأتم مهمة واحدة على الأقل اليوم
-    function randomDaily(){
-      const min = 0.2, max = 1.5;
-      return +(Math.random()*(max-min)+min).toFixed(2);
-    }
-
-    async function claimDaily(){
-      const day = todayKey();
-      const snap = await getDoc(userDocRef);
-      const data = snap.data() || {};
-      const lvls = (data.levels && data.levels[day]) || 0;
-      const tasksCount = (data.tasks && data.tasks[day]?.count) || 0;
-      const daily = Object.assign({}, data.daily||{});
-
-      if (daily[day]?.claimed) throw new Error('استلمت مكافأة اليوم بالفعل');
-      if (lvls < 1) throw new Error('شاهد إعلانًا واحدًا على الأقل أولًا');
-      if (tasksCount < 1) throw new Error('أكمل مهمة واحدة على الأقل أولًا');
-
-      const amount = randomDaily();
-      const currentCoins = isNaN(data.coins) ? 0 : Number(data.coins);
-      const newCoins = currentCoins + amount;
-      daily[day] = { claimed: true, amount };
-
-      await updateDoc(userDocRef, {
-        coins: newCoins,
-        daily,
-        date: todayKey(), // تحديث التاريخ
-        lastOutline: serverTimestamp(), // تحديث الطابع الزمني
-        updatedAt: serverTimestamp(),
-      });
-
-      await loadAndSetUI();
-      return amount;
-    }
-
-    // ربط الأزرار
-    document.getElementById('watchAdBtn').addEventListener('click', async () => {
-      // لا نغيّر منطق الإعلان الأصلي، لكن نضيف طبقة "ليفل" فوقه
-      try {
-        const can = await canGainLevel();
-        if (!can.ok) { 
-          setStatus(can.reason, 'err'); 
-          return; 
-        }
-        
-        const res = await window.AdController.show();
-        if (res && res.done && !res.error) {
-          await gainLevel();
-          setStatus('تم رفع المستوى ✔', 'ok');
-        } else {
-          setStatus('لم تكتمل المشاهدة', 'err');
-        }
-      } catch (e) {
-        setStatus(e.message || 'خطأ أثناء التشغيل', 'err');
-      }
-    });
-
-    taskButtons.forEach(btn => {
-      btn.addEventListener('click', async () => {
-        btn.disabled = true;
-        try {
-          await completeTaskOnce(btn.dataset.taskId);
-          setStatus('أُنجزت المهمة +1 كوين', 'ok');
-        } catch (e) {
-          setStatus(e.message || 'تعذر إتمام المهمة', 'err');
-        } finally { 
-          btn.disabled = false; 
-        }
-      });
-    });
-
-    dailyBtn.addEventListener('click', async ()=>{
-      dailyStatus.classList.add('hidden');
-      try {
-        const amount = await claimDaily();
-        dailyStatus.innerHTML = `<i class="fas fa-check-circle"></i> تم إيداع ${amount} كوين 🎉`;
-        dailyStatus.className = 'pill ok';
-        dailyStatus.classList.remove('hidden');
-      } catch (e) {
-        dailyStatus.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${e.message || 'تعذر صرف المكافأة'}`;
-        dailyStatus.className = 'pill err';
-        dailyStatus.classList.remove('hidden');
-      }
-    });
-
-    // 3) تسجيل مجهول ثم تهيئة بيانات المستخدم
-    signInAnonymously(auth).catch(console.error);
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      uid = user.uid;
-      const data = await ensureUser();
-      setUI(data);
-      displayUserInfo(data);
-    });
-
   </script>
 </body>
 </html>
+
