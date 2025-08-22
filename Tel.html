@@ -419,6 +419,19 @@
     .gift-button:disabled {
       background: #555;
     }
+    
+    .ad-required {
+      font-size: 12px;
+      color: var(--text-gray);
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .ad-required i {
+      margin-left: 5px;
+    }
   </style>
 </head>
 <body>
@@ -428,7 +441,7 @@
       <div class="stats">
         <div class="stat-item">
           <div class="stat-value" id="totalPoints">0</div>
-          <div class="stat-label">إجمالي النقاط</div>
+          <div class="stat-label">إجمالي الكوينز</div>
         </div>
         <div class="stat-item">
           <div class="stat-value" id="completedCount">0</div>
@@ -475,20 +488,17 @@
         <button id="dailyGiftBtn" class="gift-button">🎁 احصل على الهدية اليومية</button>
         <div id="giftStatus"></div>
       </div>
-      
-      <div class="card">
-        <h2>🎥 مشاهدة إعلان</h2>
-        <p>شاهد إعلانًا واحصل على 10 نقاط إضافية!</p>
-        <button id="watchAdBtn">شاهد إعلان</button>
-        <div id="adStatus"></div>
-      </div>
     </div>
     
     <!-- قسم المهام -->
     <div class="tab-content" id="tasksTab">
       <div class="card">
         <h2>📋 المهام اليومية</h2>
-        <p>اكمل المهام اليومية لتحصل على النقاط (20 مهمة متاحة يوميًا)</p>
+        <p>اكمل المهام اليومية لتحصل على الكوينز (20 مهمة متاحة يوميًا)</p>
+        <div class="ad-required">
+          <i class="fas fa-info-circle"></i>
+          يجب مشاهدة إعلان بعد كل مهمة لتحصل على 1 كوين
+        </div>
         <div id="tasksContainer">
           <div class="loading">
             <div class="spinner"></div>
@@ -549,8 +559,6 @@
     const lastCompletedTaskEl = document.getElementById("lastCompletedTask");
     const tasksContainer = document.getElementById("tasksContainer");
     const leaderboardContainer = document.getElementById("leaderboardContainer");
-    const watchAdBtn = document.getElementById("watchAdBtn");
-    const adStatusEl = document.getElementById("adStatus");
     const dailyGiftBtn = document.getElementById("dailyGiftBtn");
     const giftStatusEl = document.getElementById("giftStatus");
     const tabs = document.querySelectorAll(".tab");
@@ -761,7 +769,7 @@
             </div>
             ${isCompleted ? 
               `<button disabled><i class="fas fa-check-circle"></i> مكتمل</button>` : 
-              `<button onclick="completeTask('${task.id}', ${task.reward}, ${taskNumber})" ${isLocked ? 'disabled' : ''}>
+              `<button onclick="startTaskWithAd('${task.id}', ${task.reward}, ${taskNumber})" ${isLocked ? 'disabled' : ''}>
                 ${isLocked ? '<i class="fas fa-lock"></i> مقفل' : '<i class="fas fa-play-circle"></i> إكمال المهمة'}
               </button>`
             }
@@ -785,7 +793,7 @@
       for (let i = 1; i <= 20; i++) {
         defaultTasks.push({
           title: "مهمة " + i,
-          description: "هذه هي المهمة رقم " + i + ". قم بإكمالها للحصول على 1 كوين.",
+          description: "هذه هي المهمة رقم " + i + ". قم بإكمالها ثم شاهد الإعلان لتحصل على 1 كوين.",
           reward: 1,  // كل مهمة تعطي 1 كوين فقط
           link: "#",
           order: i
@@ -808,8 +816,8 @@
       return timeDiff < 40; // إذا مر أقل من 40 ثانية
     }
     
-    // إكمال المهمة
-    function completeTask(taskId, reward, taskNumber) {
+    // بدء مهمة مع عرض إعلان
+    function startTaskWithAd(taskId, reward, taskNumber) {
       const currentTime = Date.now();
       
       // التحقق من الوقت المنقضي منذ آخر مهمة
@@ -822,6 +830,36 @@
           return;
         }
       }
+      
+      // عرض إعلان قبل إكمال المهمة
+      showAdForTask(taskId, reward, taskNumber);
+    }
+    
+    // عرض إعلان للمهمة
+    function showAdForTask(taskId, reward, taskNumber) {
+      if (window.AdController) {
+        window.AdController.show()
+          .then(result => {
+            if (result && result.done) {
+              // إذا اكتمل الإعلان، اكمل المهمة
+              completeTask(taskId, reward, taskNumber);
+            } else {
+              showNotification("لم يتم إكمال الإعلان، لم تحصل على المكافأة");
+            }
+          })
+          .catch(error => {
+            console.error("Error showing ad:", error);
+            showNotification("حدث خطأ في عرض الإعلان");
+          });
+      } else {
+        // إذا لم يكن هناك إعلان، اكمل المهمة مباشرة (لأغراض الاختبار)
+        completeTask(taskId, reward, taskNumber);
+      }
+    }
+    
+    // إكمال المهمة
+    function completeTask(taskId, reward, taskNumber) {
+      const currentTime = Date.now();
       
       // تحديث بيانات المستخدم
       const updatedCompletedTasks = {
@@ -840,7 +878,7 @@
       db.collection("users").doc(user.id.toString()).update(updates)
         .then(() => {
           showPointsAnimation(reward);
-          showNotification(`مبروك! لقد أكملت المهمة وحصلت على ${reward} كوين`);
+          showNotification(`مبروك! لقد أكملت المهمة وشاهدت الإعلان وحصلت على ${reward} كوين`);
         })
         .catch((error) => {
           console.error("Error completing task:", error);
@@ -928,7 +966,6 @@
 
       function logStatus(msg){
         console.log('[AdsGram] ', msg);
-        adStatusEl.textContent = msg;
       }
 
       async function loadSdk(){
@@ -954,47 +991,16 @@
       }
 
       try {
-        logStatus("جاري التحميل...");
         await loadSdk();
         window.AdController = initSdk();
-        logStatus("جاهز لمشاهدة الإعلانات");
       } catch(e){
-        logStatus("خطأ في تحميل الإعلانات: "+e.message);
-        return;
+        console.error("خطأ في تحميل الإعلانات: "+e.message);
       }
-
-      watchAdBtn.onclick = async ()=>{
-        watchAdBtn.disabled=true;
-        logStatus("جاري تشغيل الإعلان...");
-        try{
-          const result = await window.AdController.show();
-          console.log("Ad result:",result);
-          if (result && result.done) {
-            // منح المستخدم نقاط الإعلان
-            const adReward = 10;
-            const newBalance = (userData.balance || 0) + adReward;
-            const newTotalPoints = (userData.totalPoints || 0) + adReward;
-            
-            db.collection("users").doc(user.id.toString()).update({
-              balance: newBalance,
-              totalPoints: newTotalPoints
-            });
-            
-            showPointsAnimation(adReward);
-            logStatus(`✔ تمت المشاهدة! وحصلت على ${adReward} نقاط`);
-          } else {
-            logStatus("الإعلان لم يكتمل.");
-          }
-        }catch(err){
-          console.error(err);
-          logStatus("خطأ: "+err.message);
-        }
-        watchAdBtn.disabled=false;
-      };
     })();
   </script>
 </body>
 </html>
+
 
 
 
