@@ -22,6 +22,7 @@
       --text-gray: #ccc;
       --completed-color: rgba(46, 204, 113, 0.2);
       --locked-color: rgba(127, 140, 141, 0.4);
+      --gift-color: #ff6b6b;
     }
     
     * {
@@ -405,6 +406,19 @@
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
+    
+    .gift-button {
+      background: linear-gradient(135deg, var(--gift-color), #ff8e8e);
+      margin-top: 10px;
+    }
+    
+    .gift-button:hover {
+      background: linear-gradient(135deg, #ff5252, var(--gift-color));
+    }
+    
+    .gift-button:disabled {
+      background: #555;
+    }
   </style>
 </head>
 <body>
@@ -446,13 +460,20 @@
         
         <div class="balance">
           <i class="fas fa-coins"></i>
-          <span id="userBalance">0</span> نقطة
+          <span id="userBalance">0</span> كوين
         </div>
         
         <div class="last-task">
           <i class="fas fa-tasks"></i>
           آخر مهمة: <span id="lastCompletedTask">0</span> / 20
         </div>
+      </div>
+      
+      <div class="card">
+        <h2>🎁 هدية يومية</h2>
+        <p>احصل على هدية يومية عشوائية من 0.2 إلى 1.5 كوين!</p>
+        <button id="dailyGiftBtn" class="gift-button">🎁 احصل على الهدية اليومية</button>
+        <div id="giftStatus"></div>
       </div>
       
       <div class="card">
@@ -516,7 +537,8 @@
       completedTasks: {},
       lastTaskTime: 0,
       lastCompletedTask: 0,
-      totalPoints: 0
+      totalPoints: 0,
+      lastGiftDate: null
     };
     
     // عناصر واجهة المستخدم
@@ -529,6 +551,8 @@
     const leaderboardContainer = document.getElementById("leaderboardContainer");
     const watchAdBtn = document.getElementById("watchAdBtn");
     const adStatusEl = document.getElementById("adStatus");
+    const dailyGiftBtn = document.getElementById("dailyGiftBtn");
+    const giftStatusEl = document.getElementById("giftStatus");
     const tabs = document.querySelectorAll(".tab");
     const tabContents = document.querySelectorAll(".tab-content");
     const totalPointsEl = document.getElementById("totalPoints");
@@ -586,12 +610,15 @@
       db.collection("users").doc(user.id.toString()).onSnapshot((doc) => {
         if (doc.exists) {
           userData = doc.data();
-          userBalanceEl.textContent = userData.balance || 0;
+          userBalanceEl.textContent = (userData.balance || 0).toFixed(2);
           lastCompletedTaskEl.textContent = userData.lastCompletedTask || 0;
-          totalPointsEl.textContent = userData.totalPoints || 0;
+          totalPointsEl.textContent = (userData.totalPoints || 0).toFixed(2);
           
           // تحديث إحصائيات المهام
           updateTaskStats();
+          
+          // تحديث حالة الهدية اليومية
+          updateGiftButton();
         } else {
           // إنشاء مستخدم جديد إذا لم يكن موجوداً
           const newUser = {
@@ -603,6 +630,7 @@
             lastTaskTime: 0,
             lastCompletedTask: 0,
             totalPoints: 0,
+            lastGiftDate: null,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
           };
           
@@ -614,6 +642,74 @@
         showNotification("حدث خطأ في تحميل بيانات المستخدم");
       });
     }
+    
+    // تحديث حالة زر الهدية اليومية
+    function updateGiftButton() {
+      if (!userData.lastGiftDate) {
+        dailyGiftBtn.disabled = false;
+        giftStatusEl.textContent = "يمكنك المطالبة بهديتك اليومية الآن!";
+        return;
+      }
+      
+      const lastGiftDate = userData.lastGiftDate.toDate ? userData.lastGiftDate.toDate() : new Date(userData.lastGiftDate);
+      const today = new Date();
+      
+      // التحقق إذا كان قد حصل على الهدية اليوم
+      if (
+        lastGiftDate.getDate() === today.getDate() &&
+        lastGiftDate.getMonth() === today.getMonth() &&
+        lastGiftDate.getFullYear() === today.getFullYear()
+      ) {
+        dailyGiftBtn.disabled = true;
+        giftStatusEl.textContent = "لقد حصلت على هديتك اليومية بالفعل. عد غدًا!";
+      } else {
+        dailyGiftBtn.disabled = false;
+        giftStatusEl.textContent = "يمكنك المطالبة بهديتك اليومية الآن!";
+      }
+    }
+    
+    // المطالبة بالهدية اليومية
+    dailyGiftBtn.addEventListener("click", function() {
+      const today = new Date();
+      
+      // التحقق مرة أخرى إذا كان قد حصل على الهدية اليوم
+      if (userData.lastGiftDate) {
+        const lastGiftDate = userData.lastGiftDate.toDate ? userData.lastGiftDate.toDate() : new Date(userData.lastGiftDate);
+        
+        if (
+          lastGiftDate.getDate() === today.getDate() &&
+          lastGiftDate.getMonth() === today.getMonth() &&
+          lastGiftDate.getFullYear() === today.getFullYear()
+        ) {
+          showNotification("لقد حصلت على هديتك اليومية بالفعل!");
+          return;
+        }
+      }
+      
+      // توليد قيمة عشوائية بين 0.2 و 1.5
+      const randomGift = (Math.random() * 1.3 + 0.2).toFixed(2);
+      const giftValue = parseFloat(randomGift);
+      
+      // تحديث رصيد المستخدم
+      const newBalance = (userData.balance || 0) + giftValue;
+      const newTotalPoints = (userData.totalPoints || 0) + giftValue;
+      
+      db.collection("users").doc(user.id.toString()).update({
+        balance: newBalance,
+        totalPoints: newTotalPoints,
+        lastGiftDate: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+        showPointsAnimation(giftValue);
+        showNotification(`مبروك! لقد حصلت على ${giftValue} كوين كهدية يومية`);
+        dailyGiftBtn.disabled = true;
+        giftStatusEl.textContent = "لقد حصلت على هديتك اليومية. عد غدًا!";
+      })
+      .catch((error) => {
+        console.error("Error claiming daily gift:", error);
+        showNotification("حدث خطأ أثناء المطالبة بالهدية اليومية");
+      });
+    });
     
     // تحديث إحصائيات المهام
     function updateTaskStats() {
@@ -657,7 +753,7 @@
             <div class="task-number">${taskNumber}</div>
             <div class="task-header">
               <div class="task-title">${task.title}</div>
-              <div class="task-reward">+${task.reward} نقطة</div>
+              <div class="task-reward">+${task.reward} كوين</div>
             </div>
             <div class="task-description">${task.description}</div>
             <div class="task-progress">
@@ -689,8 +785,8 @@
       for (let i = 1; i <= 20; i++) {
         defaultTasks.push({
           title: "مهمة " + i,
-          description: "هذه هي المهمة رقم " + i + ". قم بإكمالها للحصول على النقاط.",
-          reward: i * 5,  // نقاط مختلفة لكل مهمة
+          description: "هذه هي المهمة رقم " + i + ". قم بإكمالها للحصول على 1 كوين.",
+          reward: 1,  // كل مهمة تعطي 1 كوين فقط
           link: "#",
           order: i
         });
@@ -744,7 +840,7 @@
       db.collection("users").doc(user.id.toString()).update(updates)
         .then(() => {
           showPointsAnimation(reward);
-          showNotification(`مبروك! لقد أكملت المهمة وحصلت على ${reward} نقاط`);
+          showNotification(`مبروك! لقد أكملت المهمة وحصلت على ${reward} كوين`);
         })
         .catch((error) => {
           console.error("Error completing task:", error);
@@ -769,7 +865,7 @@
     function showPointsAnimation(points) {
       const pointsEl = document.createElement("div");
       pointsEl.className = "points-animation";
-      pointsEl.textContent = `+${points} نقاط`;
+      pointsEl.textContent = `+${points} كوين`;
       pointsEl.style.left = `${Math.random() * 70 + 15}%`;
       document.body.appendChild(pointsEl);
       
@@ -809,7 +905,7 @@
                    class="leaderboard-avatar" alt="صورة ${user.name}">
               <div class="leaderboard-details">
                 <div class="leaderboard-name">${user.name}</div>
-                <div class="leaderboard-score">${user.balance || 0} نقطة</div>
+                <div class="leaderboard-score">${(user.balance || 0).toFixed(2)} كوين</div>
               </div>
             `;
             
