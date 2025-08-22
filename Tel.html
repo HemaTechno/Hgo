@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>نظام المهام والإعلانات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Firebase -->
@@ -31,74 +31,40 @@
     // Telegram Init
     const tg = window.Telegram.WebApp;
     tg.expand(); 
-    tg.enableClosingConfirmation();
 
     const user = tg.initDataUnsafe.user;
     const userId = user?.id;
 
     async function loadUserData() {
       if (!userId) {
-        document.getElementById("info").innerHTML = `
-          <div class="error-message">
-            <p>لم يتم التعرف على المستخدم!</p>
-            <p>يرجى التأكد من فتح التطبيق عبر Telegram</p>
-          </div>
-        `;
+        document.getElementById("info").innerHTML = "لم يتم التعرف على المستخدم!";
         return;
       }
 
-      try {
-        const userRef = doc(db, "users", String(userId));
-        const snap = await getDoc(userRef);
+      const userRef = doc(db, "users", String(userId));
+      const snap = await getDoc(userRef);
 
-        if (!snap.exists()) {
-          // إنشاء مستخدم جديد
-          await setDoc(userRef, {
-            name: user.first_name,
-            photo: user.photo_url || "",
-            coins: 0,
-            balance: 0,
-            tasksCompleted: 0,
-            date: new Date().toISOString().split("T")[0],
-            lastBonusTime: null,
-            lastReward: null,
-            lastTaskTime: null
-          });
-          
-          document.getElementById("info").innerHTML = `
-            <div class="welcome-message">
-              <h3>أهلاً ${user.first_name} 👋</h3>
-              <p>تم إنشاء حسابك بنجاح</p>
-            </div>
-          `;
-        } else {
-          const data = snap.data();
-          document.getElementById("info").innerHTML = `
-            <div class="user-profile">
-              <img src="${data.photo || 'https://via.placeholder.com/60'}" width="60" height="60" alt="صورة المستخدم" class="user-avatar">
-              <div class="user-details">
-                <h3>${data.name}</h3>
-                <div class="stats">
-                  <div class="stat-item">
-                    <span class="stat-value">${data.coins}</span>
-                    <span class="stat-label">كوينز</span>
-                  </div>
-                  <div class="stat-item">
-                    <span class="stat-value">${data.tasksCompleted}</span>
-                    <span class="stat-label">مهمة مكتملة</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-        }
-      } catch (error) {
-        console.error("Error loading user data:", error);
+      if (!snap.exists()) {
+        // إنشاء مستخدم جديد
+        await setDoc(userRef, {
+          name: user.first_name,
+          photo: user.photo_url || "",
+          coins: 0,
+          balance: 0,
+          tasksCompleted: 0,
+          date: new Date().toISOString().split("T")[0],
+          lastBonusTime: null,
+          lastReward: null,
+          lastTaskTime: null
+        });
+        document.getElementById("info").innerHTML = `أهلاً ${user.first_name} 👋 تم إنشاء حسابك بنجاح`;
+      } else {
+        const data = snap.data();
         document.getElementById("info").innerHTML = `
-          <div class="error-message">
-            <p>حدث خطأ في تحميل البيانات</p>
-            <p>يرجى المحاولة مرة أخرى لاحقاً</p>
-          </div>
+          <img src="${data.photo}" width="60" style="border-radius:50%"><br>
+          الاسم: ${data.name}<br>
+          الرصيد: ${data.coins} كوينز<br>
+          المهام المنجزة: ${data.tasksCompleted}
         `;
       }
     }
@@ -108,219 +74,29 @@
 
   <!-- AdsGram SDK -->
   <script src="https://adsgram.ai/js/ads.js"></script>
-  
-  <style>
-    :root {
-      --primary-color: #ff9800;
-      --secondary-color: #2c2c2c;
-      --background-color: #111;
-      --text-color: #fff;
-      --card-bg: #1e1e1e;
-      --border-radius: 12px;
-      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--background-color);
-      color: var(--text-color);
-      padding: 20px;
-      line-height: 1.6;
-      text-align: center;
-    }
-    
-    .container {
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    
-    header {
-      margin-bottom: 25px;
-    }
-    
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 10px;
-      color: var(--primary-color);
-    }
-    
-    .subtitle {
-      color: #aaa;
-      font-size: 0.9rem;
-      margin-bottom: 20px;
-    }
-    
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: var(--box-shadow);
-    }
-    
-    .user-profile {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      text-align: right;
-    }
-    
-    .user-avatar {
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid var(--primary-color);
-    }
-    
-    .user-details h3 {
-      margin-bottom: 10px;
-    }
-    
-    .stats {
-      display: flex;
-      gap: 20px;
-    }
-    
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .stat-value {
-      font-weight: bold;
-      font-size: 1.2rem;
-      color: var(--primary-color);
-    }
-    
-    .stat-label {
-      font-size: 0.8rem;
-      color: #aaa;
-    }
-    
-    .welcome-message h3 {
-      color: var(--primary-color);
-      margin-bottom: 10px;
-    }
-    
-    .error-message {
-      color: #f44336;
-    }
-    
-    .btn {
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      border-radius: var(--border-radius);
-      padding: 12px 24px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-    }
-    
-    .btn:hover {
-      background: #e68900;
-      transform: translateY(-2px);
-    }
-    
-    .btn:active {
-      transform: translateY(0);
-    }
-    
-    .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100px;
-    }
-    
-    .loading-spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(255, 152, 0, 0.3);
-      border-radius: 50%;
-      border-top-color: var(--primary-color);
-      animation: spin 1s ease-in-out infinite;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    footer {
-      margin-top: 30px;
-      color: #666;
-      font-size: 0.8rem;
-    }
-  </style>
 </head>
-<body>
-  <div class="container">
-    <header>
-      <h1>🚀 نظام المهام والإعلانات</h1>
-      <p class="subtitle">اكسب الكوينز من خلال إكمال المهام ومشاهدة الإعلانات</p>
-    </header>
-    
-    <main>
-      <div class="card">
-        <div id="info">
-          <div class="loading">
-            <div class="loading-spinner"></div>
-          </div>
-        </div>
-      </div>
-      
-      <button id="showAd" class="btn">
-        <span>🎥</span>
-        مشاهدة إعلان وكسب الكوينز
-      </button>
-    </main>
-    
-    <footer>
-      <p>© 2023 نظام المهام - جميع الحقوق محفوظة</p>
-    </footer>
-  </div>
+<body style="font-family: Arial; text-align:center; padding:20px; background:#111; color:#fff;">
+  <h2>🚀 نظام المهام والإعلانات</h2>
+  <div id="info">جاري تحميل بياناتك...</div>
+
+  <button id="showAd" style="margin-top:20px; padding:10px 20px; border:none; border-radius:8px; background:#ff9800; color:white; font-size:16px;">
+    🎥 مشاهدة إعلان
+  </button>
 
   <script>
     // AdsGram Integration
     const adController = window.Adsgram.init({ blockId: "int-14053" });
 
     document.getElementById("showAd").addEventListener("click", () => {
-      // تعطيل الزر أثناء تحميل الإعلان
-      const button = document.getElementById("showAd");
-      button.disabled = true;
-      button.innerHTML = '<div class="loading-spinner" style="width:20px;height:20px;border-width:2px;"></div> جاري تحميل الإعلان...';
-      
       adController.show().then(() => {
-        button.disabled = false;
-        button.innerHTML = '<span>🎥</span> مشاهدة إعلان وكسب الكوينز';
-        
-        // يمكنك هنا إضافة منح المكافآت للمستخدم
-        tg.showPopup({
-          title: "تمت المشاهدة بنجاح",
-          message: "✅ شكراً لك على مشاهدة الإعلان! لقد تمت إضافة الكوينز إلى رصيدك.",
-          buttons: [{ type: "ok" }]
-        });
+        alert("✅ تمت مشاهدة الإعلان!");
       }).catch((e) => {
         console.error("خطأ في عرض الإعلان:", e);
-        button.disabled = false;
-        button.innerHTML = '<span>🎥</span> مشاهدة إعلان وكسب الكوينز';
-        
-        tg.showAlert("عذراً، حدث خطأ أثناء تحميل الإعلان. يرجى المحاولة مرة أخرى.");
       });
     });
   </script>
 </body>
 </html>
+
 
 
