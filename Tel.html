@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -604,7 +605,7 @@
     }
     
     ::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.1);
+      background: rgba(0, 极客时间, 0.1);
       border-radius: 10px;
     }
     
@@ -615,6 +616,96 @@
     
     ::-webkit-scrollbar-thumb:hover {
       background: var(--secondary-color);
+    }
+    
+    /* أنماط جديدة للمهام */
+    .task-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .task-controls button {
+      flex: 1;
+    }
+    
+    .complete-btn {
+      background: linear-gradient(135deg, #00b894, #00d2a3);
+    }
+    
+    .auto-watch-btn {
+      background: linear-gradient(135deg, #0984e3, #74b9ff);
+    }
+    
+    .progress-container {
+      margin: 20px 0;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      height: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 10px;
+    }
+    
+    .progress-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      color: white;
+      font-weight: bold;
+      line-height: 20px;
+      text-shadow: 0 0 3px rgba(0,0,0,0.7);
+    }
+    
+    .leaderboard-item {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-align: right;
+    }
+    
+    .leaderboard-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-left: 12px;
+      border: 2px solid var(--primary-color);
+    }
+    
+    .leaderboard-details {
+      flex: 1;
+      text-align: right;
+    }
+    
+    .leaderboard-name {
+      font-weight: bold;
+    }
+    
+    .leaderboard-score {
+      color: var(--text-gold);
+      font-size: 14px;
+    }
+    
+    .rank {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-left: 10px;
     }
   </style>
 </head>
@@ -666,6 +757,11 @@
           <small>(<span id="robuxBalance">0</span> روبكس)</small>
         </div>
         
+        <div class="progress-container">
+          <div class="progress-fill" id="globalProgress"></div>
+          <div class="progress-text" id="progressText">0% مكتمل</div>
+        </div>
+        
         <div class="last-task">
           <i class="fas fa-tasks"></i>
           آخر مهمة: <span id="lastCompletedTask">0</span> / 100
@@ -685,6 +781,17 @@
       <div class="card">
         <h2><i class="fas fa-tasks"></i> المهام اليومية</h2>
         <p>اكمل المهام اليومية لتحصل على Roblack (100 مهمة متاحة يوميًا)</p>
+        
+        <div class="progress-container">
+          <div class="progress-fill" id="tasksProgress"></div>
+          <div class="progress-text" id="tasksProgressText">0% مكتمل</div>
+        </div>
+        
+        <div class="task-controls">
+          <button id="completeTaskBtn" class="complete-btn"><i class="fas fa-check-circle"></i> استكمال المهمة</button>
+          <button id="autoWatchBtn" class="auto-watch-btn"><i class="fas fa-play-circle"></i> مشاهدة تلقائية</button>
+        </div>
+        
         <div class="ad-required">
           <i class="fas fa-info-circle"></i>
           يجب مشاهدة إعلان بعد كل مهمة لتحصل على 0.1 Roblack
@@ -810,6 +917,17 @@
     const totalPointsEl = document.getElementById("totalPoints");
     const completedCountEl = document.getElementById("completedCount");
     const remainingCountEl = document.getElementById("remainingCount");
+    const globalProgressEl = document.getElementById("globalProgress");
+    const progressTextEl = document.getElementById("progressText");
+    const tasksProgressEl = document.getElementById("tasksProgress");
+    const tasksProgressTextEl = document.getElementById("tasksProgressText");
+    const completeTaskBtn = document.getElementById("completeTaskBtn");
+    const autoWatchBtn = document.getElementById("autoWatchBtn");
+    
+    // متغيرات التحكم
+    let currentTaskIndex = 0;
+    let tasks = [];
+    let isAutoWatching = false;
     
     // تهيئة التبويبات
     tabs.forEach(tab => {
@@ -834,6 +952,8 @@
         loadLeaderboard();
       } else if (tabId === "transactions") {
         loadTransactions();
+      } else if (tabId === "tasks") {
+        loadTasks();
       }
     }
     
@@ -885,6 +1005,10 @@
         
         showNotification("وضع الاختبار: بيانات مستخدم تجريبية");
       }
+      
+      // إضافة مستمعي الأحداث للأزرار الجديدة
+      completeTaskBtn.addEventListener("click", completeCurrentTask);
+      autoWatchBtn.addEventListener("click", toggleAutoWatch);
     });
     
     // تحميل بيانات المستخدم من Firebase
@@ -907,6 +1031,9 @@
           
           // تحديث حالة الهدية اليومية
           updateGiftButton();
+          
+          // تحديث شريط التقدم
+          updateProgressBars();
         } else {
           // إنشاء مستخدم جديد إذا لم يكن موجوداً
           const newUser = {
@@ -962,6 +1089,20 @@
         dailyGiftBtn.disabled = false;
         giftStatusEl.textContent = "يمكنك المطالبة بهديتك اليومية الآن!";
       }
+    }
+    
+    // تحديث أشرطة التقدم
+    function updateProgressBars() {
+      let completedCount = 0;
+      if (userData.completedTasks) {
+        completedCount = Object.values(userData.completedTasks).filter(status => status === true).length;
+      }
+      
+      const progressPercentage = (completedCount / 100) * 100;
+      globalProgressEl.style.width = `${progressPercentage}%`;
+      tasksProgressEl.style.width = `${progressPercentage}%`;
+      progressTextEl.textContent = `${progressPercentage.toFixed(1)}% مكتمل`;
+      tasksProgressTextEl.textContent = `${progressPercentage.toFixed(1)}% مكتمل`;
     }
     
     // المطالبة بالهدية اليومية
@@ -1030,7 +1171,7 @@
           return;
         }
         
-        const tasks = [];
+        tasks = [];
         querySnapshot.forEach((doc) => {
           tasks.push({ id: doc.id, ...doc.data() });
         });
@@ -1069,6 +1210,9 @@
           
           tasksContainer.appendChild(taskEl);
         });
+        
+        // تحديث شريط التقدم
+        updateProgressBars();
       }).catch((error) => {
         console.error("Error loading tasks:", error);
         tasksContainer.innerHTML = "<p>حدث خطأ في تحميل المهام</p>";
@@ -1169,6 +1313,9 @@
           showPointsAnimation(reward);
           showNotification(`مبروك! لقد أكملت المهمة وشاهدت الإعلان وحصلت على ${reward} Roblack`);
           
+          // تحديث شريط التقدم
+          updateProgressBars();
+          
           // الانتقال التلقائي للمهمة التالية إذا كانت موجودة
           if (taskNumber < 100) {
             setTimeout(() => {
@@ -1185,6 +1332,111 @@
           console.error("Error completing task:", error);
           showNotification("حدث خطأ أثناء إكمال المهمة");
         });
+    }
+    
+    // إكمال المهمة الحالية
+    function completeCurrentTask() {
+      if (tasks.length === 0) {
+        showNotification("لا توجد مهام متاحة حالياً");
+        return;
+      }
+      
+      // العثور على المهمة الأولى غير المكتملة
+      let nextTask = null;
+      let nextTaskIndex = -1;
+      
+      for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        const isCompleted = userData.completedTasks && userData.completedTasks[task.id] === true;
+        
+        if (!isCompleted) {
+          nextTask = task;
+          nextTaskIndex = i;
+          break;
+        }
+      }
+      
+      if (!nextTask) {
+        showNotification("لقد أكملت جميع المهام المتاحة!");
+        return;
+      }
+      
+      // بدء المهمة
+      startTaskWithAd(nextTask.id, nextTask.reward, nextTaskIndex + 1);
+    }
+    
+    // تبديل وضع المشاهدة التلقائية
+    function toggleAutoWatch() {
+      if (isAutoWatching) {
+        // إيقاف المشاهدة التلقائية
+        isAutoWatching = false;
+        autoWatchBtn.innerHTML = '<i class="fas fa-play-circle"></i> مشاهدة تلقائية';
+        showNotification("تم إيقاف المشاهدة التلقائية");
+        return;
+      }
+      
+      // التحقق من عدد المهام المكتملة اليوم
+      let completedCount = 0;
+      if (userData.completedTasks) {
+        completedCount = Object.values(userData.completedTasks).filter(status => status === true).length;
+      }
+      
+      if (completedCount >= 100) {
+        showNotification("لقد أكملت الحد الأقصى للمهام اليوم (100 مهمة). عد غدًا!");
+        return;
+      }
+      
+      // بدء المشاهدة التلقائية
+      isAutoWatching = true;
+      autoWatchBtn.innerHTML = '<i class="fas fa-stop-circle"></i> إيقاف التلقائي';
+      showNotification("بدأت المشاهدة التلقائية للإعلانات");
+      
+      // بدء عملية المشاهدة التلقائية
+      startAutoWatching();
+    }
+    
+    // بدء المشاهدة التلقائية للإعلانات
+    function startAutoWatching() {
+      if (!isAutoWatching) return;
+      
+      // العثور على المهمة التالية غير المكتملة
+      let nextTask = null;
+      let nextTaskIndex = -1;
+      
+      for (let i = 0; i < tasks.length; i++) {
+        const task = tasks[i];
+        const isCompleted = userData.completedTasks && userData.completedTasks[task.id] === true;
+        
+        if (!isCompleted) {
+          nextTask = task;
+          nextTaskIndex = i;
+          break;
+        }
+      }
+      
+      if (!nextTask) {
+        isAutoWatching = false;
+        autoWatchBtn.innerHTML = '<i class="fas fa-play-circle"></i> مشاهدة تلقائية';
+        showNotification("لقد أكملت جميع المهام المتاحة!");
+        return;
+      }
+      
+      // محاكاة مشاهدة الإعلان
+      showNotification("جاري تحميل الإعلان... (" + (nextTaskIndex + 1) + "/100)");
+      
+      // الانتظار 20 ثانية ثم إكمال المهمة
+      setTimeout(() => {
+        if (!isAutoWatching) return;
+        
+        completeTask(nextTask.id, nextTask.reward, nextTaskIndex + 1);
+        
+        // الانتقال إلى المهمة التالية بعد 5 ثواني
+        setTimeout(() => {
+          if (isAutoWatching) {
+            startAutoWatching();
+          }
+        }, 5000);
+      }, 20000);
     }
     
     // طلب السحب
