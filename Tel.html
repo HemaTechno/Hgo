@@ -645,6 +645,8 @@
         tgId: tgId,
         tgUser: tgUser || null,
         coins: 0,
+        date: todayKey(), // استخدام نفس تنسيق التاريخ الموجود في قاعدة البيانات
+        lastOutline: serverTimestamp(), // استخدام نفس التنسيق الموجود في قاعدة البيانات
         levels: {},             // map: dayKey -> count
         lastLevelAt: 0,         // timestamp ms
         tasks: {},              // map: dayKey -> {count: number}
@@ -658,7 +660,21 @@
         await setDoc(userDocRef, base);
         return base;
       } else {
-        return snap.data();
+        // تحديث الحقول إذا كانت مفقودة
+        const existingData = snap.data();
+        const updatedData = {
+          ...base,
+          ...existingData,
+          updatedAt: serverTimestamp()
+        };
+        
+        // التأكد من أن coins موجودة وصحيحة
+        if (isNaN(updatedData.coins) || updatedData.coins === undefined) {
+          updatedData.coins = 0;
+        }
+        
+        await setDoc(userDocRef, updatedData, { merge: true });
+        return updatedData;
       }
     }
 
@@ -668,7 +684,10 @@
       const tasksCount = (data.tasks && data.tasks[day]?.count) || 0;
       const cdSec = Math.max(0, Math.ceil(( (data.lastLevelAt||0) + 60*1000 - Date.now() )/1000));
       
-      coinsEl.textContent = Number(data.coins||0).toFixed(2).replace(/\.00$/, '');
+      // عرض coins مع التأكد من أنها قيمة رقمية
+      const coinsValue = isNaN(data.coins) ? 0 : Number(data.coins);
+      coinsEl.textContent = coinsValue.toFixed(2).replace(/\.00$/, '');
+      
       levelTodayEl.textContent = levelCount;
       tasksTodayEl.textContent = tasksCount;
       
@@ -725,6 +744,8 @@
         levels: lvls,
         lastLevelAt: Date.now(),
         coins: increment(1), // إضافة عملة لكل إعلان
+        date: todayKey(), // تحديث التاريخ
+        lastOutline: serverTimestamp(), // تحديث الطابع الزمني
         updatedAt: serverTimestamp(),
       });
       
@@ -752,12 +773,15 @@
       dayObj.completed = Object.assign({}, dayObj.completed, {[taskId]: true});
       tasks[day] = dayObj;
 
-      const newCoins = Number(data.coins||0) + 1; // 1 كوين لكل مهمة
+      const currentCoins = isNaN(data.coins) ? 0 : Number(data.coins);
+      const newCoins = currentCoins + 1; // 1 كوين لكل مهمة
       
       await updateDoc(userDocRef, {
         tasks,
         coins: newCoins,
         lastTaskAt: Date.now(),
+        date: todayKey(), // تحديث التاريخ
+        lastOutline: serverTimestamp(), // تحديث الطابع الزمني
         updatedAt: serverTimestamp(),
       });
       
@@ -784,12 +808,15 @@
       if (tasksCount < 1) throw new Error('أكمل مهمة واحدة على الأقل أولًا');
 
       const amount = randomDaily();
-      const newCoins = Number(data.coins||0) + amount;
+      const currentCoins = isNaN(data.coins) ? 0 : Number(data.coins);
+      const newCoins = currentCoins + amount;
       daily[day] = { claimed: true, amount };
 
       await updateDoc(userDocRef, {
         coins: newCoins,
         daily,
+        date: todayKey(), // تحديث التاريخ
+        lastOutline: serverTimestamp(), // تحديث الطابع الزمني
         updatedAt: serverTimestamp(),
       });
 
