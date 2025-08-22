@@ -2,15 +2,15 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>نظام المهام والإعلانات</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>نظام المهام والإعلانات</title>
   <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <!-- Firebase -->
   <script type="module">
     // Import Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
     // Firebase Config
     const firebaseConfig = {
@@ -36,78 +36,15 @@
     const user = tg.initDataUnsafe.user;
     const userId = user?.id;
 
-    // عناصر واجهة المستخدم
-    const userInfoEl = document.getElementById("user-info");
-    const coinsEl = document.getElementById("coins");
-    const tasksCompletedEl = document.getElementById("tasks-completed");
-    const showAdBtn = document.getElementById("showAd");
-    const dailyBonusBtn = document.getElementById("daily-bonus");
-    const tasksContainer = document.getElementById("tasks-container");
-    const loadingEl = document.getElementById("loading");
-    const errorEl = document.getElementById("error");
-    const successEl = document.getElementById("success");
-
-    // إخفاء رسائل التنبيه بعد فترة
-    function hideAlert(alertEl, delay = 3000) {
-      setTimeout(() => {
-        alertEl.classList.remove('show');
-      }, delay);
-    }
-
-    // عرض رسالة خطأ
-    function showError(message) {
-      errorEl.textContent = message;
-      errorEl.classList.add('show');
-      hideAlert(errorEl);
-    }
-
-    // عرض رسالة نجاح
-    function showSuccess(message) {
-      successEl.textContent = message;
-      successEl.classList.add('show');
-      hideAlert(successEl);
-    }
-
-    // تحديث واجهة المستخدم ببيانات المستخدم
-    function updateUI(userData) {
-      coinsEl.textContent = userData.coins.toLocaleString();
-      tasksCompletedEl.textContent = userData.tasksCompleted.toLocaleString();
-      
-      userInfoEl.innerHTML = `
-        <img src="${userData.photo}" alt="صورة المستخدم" class="user-avatar">
-        <div class="user-details">
-          <h3>${userData.name}</h3>
-          <p>مرحباً بك في نظام المكافآت!</p>
-        </div>
-      `;
-
-      // التحقق من المكافأة اليومية
-      const now = new Date();
-      const lastBonusTime = userData.lastBonusTime ? new Date(userData.lastBonusTime.seconds * 1000) : null;
-      
-      if (lastBonusTime) {
-        const timeDiff = now - lastBonusTime;
-        const hoursDiff = timeDiff / (1000 * 60 * 60);
-        
-        if (hoursDiff < 24) {
-          dailyBonusBtn.disabled = true;
-          const remainingHours = (24 - hoursDiff).toFixed(1);
-          dailyBonusBtn.textContent = `المكافأة اليومية (${remainingHours} ساعة متبقية)`;
-        } else {
-          dailyBonusBtn.disabled = false;
-          dailyBonusBtn.textContent = "🎁 المكافأة اليومية";
-        }
-      } else {
-        dailyBonusBtn.disabled = false;
-        dailyBonusBtn.textContent = "🎁 المكافأة اليومية";
-      }
-    }
-
-    // تحميل بيانات المستخدم
     async function loadUserData() {
       if (!userId) {
-        showError("لم يتم التعرف على المستخدم!");
-        return null;
+        document.getElementById("info").innerHTML = `
+          <div class="error-message">
+            <p>لم يتم التعرف على المستخدم!</p>
+            <p>يرجى التأكد من فتح التطبيق عبر Telegram</p>
+          </div>
+        `;
+        return;
       }
 
       try {
@@ -116,99 +53,57 @@
 
         if (!snap.exists()) {
           // إنشاء مستخدم جديد
-          const newUserData = {
+          await setDoc(userRef, {
             name: user.first_name,
-            photo: user.photo_url || "https://via.placeholder.com/150",
+            photo: user.photo_url || "",
             coins: 0,
             balance: 0,
             tasksCompleted: 0,
             date: new Date().toISOString().split("T")[0],
             lastBonusTime: null,
             lastReward: null,
-            lastTaskTime: null,
-            createdAt: serverTimestamp()
-          };
+            lastTaskTime: null
+          });
           
-          await setDoc(userRef, newUserData);
-          showSuccess(`أهلاً ${user.first_name} 👋 تم إنشاء حسابك بنجاح`);
-          return newUserData;
+          document.getElementById("info").innerHTML = `
+            <div class="welcome-message">
+              <h3>أهلاً ${user.first_name} 👋</h3>
+              <p>تم إنشاء حسابك بنجاح</p>
+            </div>
+          `;
         } else {
-          return snap.data();
+          const data = snap.data();
+          document.getElementById("info").innerHTML = `
+            <div class="user-profile">
+              <img src="${data.photo || 'https://via.placeholder.com/60'}" width="60" height="60" alt="صورة المستخدم" class="user-avatar">
+              <div class="user-details">
+                <h3>${data.name}</h3>
+                <div class="stats">
+                  <div class="stat-item">
+                    <span class="stat-value">${data.coins}</span>
+                    <span class="stat-label">كوينز</span>
+                  </div>
+                  <div class="stat-item">
+                    <span class="stat-value">${data.tasksCompleted}</span>
+                    <span class="stat-label">مهمة مكتملة</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
         }
       } catch (error) {
         console.error("Error loading user data:", error);
-        showError("حدث خطأ في تحميل البيانات");
-        return null;
+        document.getElementById("info").innerHTML = `
+          <div class="error-message">
+            <p>حدث خطأ في تحميل البيانات</p>
+            <p>يرجى المحاولة مرة أخرى لاحقاً</p>
+          </div>
+        `;
       }
     }
 
-    // منح المكافأة اليومية
-    async function grantDailyBonus() {
-      if (!userId) return;
-      
-      try {
-        const userRef = doc(db, "users", String(userId));
-        await updateDoc(userRef, {
-          coins: increment(50),
-          lastBonusTime: serverTimestamp()
-        });
-        
-        showSuccess("🎉 لقد حصلت على 50 قطعة نقدية كمكافأة يومية!");
-        
-        // تحديث البيانات
-        const userData = await loadUserData();
-        if (userData) updateUI(userData);
-      } catch (error) {
-        console.error("Error granting daily bonus:", error);
-        showError("حدث خطأ أثناء منح المكافأة");
-      }
-    }
-
-    // تهيئة التطبيق
-    async function initApp() {
-      loadingEl.style.display = 'block';
-      
-      const userData = await loadUserData();
-      if (userData) {
-        updateUI(userData);
-        loadingEl.style.display = 'none';
-      }
-      
-      // إضافة مستمعي الأحداث
-      dailyBonusBtn.addEventListener("click", grantDailyBonus);
-      
-      showAdBtn.addEventListener("click", () => {
-        // AdsGram Integration
-        if (typeof Adsgram !== 'undefined') {
-          const adController = window.Adsgram.init({ blockId: "int-14053" });
-          
-          adController.show().then(() => {
-            // تحديث رصيد المستخدم بعد مشاهدة الإعلان
-            if (userId) {
-              const userRef = doc(db, "users", String(userId));
-              updateDoc(userRef, {
-                coins: increment(10),
-                tasksCompleted: increment(1)
-              }).then(() => {
-                showSuccess("✅ تمت مشاهدة الإعلان! لقد ربحت 10 قطع نقدية");
-                // تحديث البيانات
-                loadUserData().then(userData => {
-                  if (userData) updateUI(userData);
-                });
-              });
-            }
-          }).catch((e) => {
-            console.error("خطأ في عرض الإعلان:", e);
-            showError("عذراً، لا تتوفر إعلانات حالياً. حاول مرة أخرى لاحقاً.");
-          });
-        } else {
-          showError("عذراً، نظام الإعلانات غير متوفر حالياً.");
-        }
-      });
-    }
-
-    // بدء التطبيق عند تحميل الصفحة
-    document.addEventListener('DOMContentLoaded', initApp);
+    loadUserData();
   </script>
 
   <!-- AdsGram SDK -->
@@ -217,10 +112,12 @@
   <style>
     :root {
       --primary-color: #ff9800;
-      --secondary-color: #ff5722;
-      --dark-bg: #1a1a1a;
-      --card-bg: #252525;
-      --text-color: #ffffff;
+      --secondary-color: #2c2c2c;
+      --background-color: #111;
+      --text-color: #fff;
+      --card-bg: #1e1e1e;
+      --border-radius: 12px;
+      --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
     
     * {
@@ -231,218 +128,198 @@
     
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: var(--dark-bg);
+      background: var(--background-color);
       color: var(--text-color);
-      padding: 0;
-      margin: 0;
+      padding: 20px;
       line-height: 1.6;
+      text-align: center;
     }
     
     .container {
-      max-width: 100%;
-      padding: 15px;
+      max-width: 500px;
+      margin: 0 auto;
     }
     
     header {
-      text-align: center;
-      padding: 15px 0;
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      border-radius: 0 0 20px 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      margin-bottom: 25px;
     }
     
     h1 {
-      font-size: 1.5rem;
-      margin: 0;
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: var(--primary-color);
     }
     
-    .user-card {
+    .subtitle {
+      color: #aaa;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: var(--box-shadow);
+    }
+    
+    .user-profile {
       display: flex;
       align-items: center;
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      gap: 15px;
+      text-align: right;
     }
     
     .user-avatar {
-      width: 60px;
-      height: 60px;
       border-radius: 50%;
-      margin-left: 15px;
-      border: 3px solid var(--primary-color);
+      object-fit: cover;
+      border: 2px solid var(--primary-color);
     }
     
     .user-details h3 {
-      margin: 0;
-      font-size: 1.2rem;
+      margin-bottom: 10px;
     }
     
-    .stats-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 20px;
+    .stats {
+      display: flex;
+      gap: 20px;
     }
     
-    .stat-card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 15px;
-      text-align: center;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    .stat-item {
+      display: flex;
+      flex-direction: column;
     }
     
     .stat-value {
-      font-size: 1.8rem;
       font-weight: bold;
+      font-size: 1.2rem;
       color: var(--primary-color);
-      margin: 5px 0;
     }
     
     .stat-label {
-      font-size: 0.9rem;
-      opacity: 0.8;
+      font-size: 0.8rem;
+      color: #aaa;
     }
     
-    .actions-container {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 15px;
-      margin-bottom: 20px;
+    .welcome-message h3 {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+    
+    .error-message {
+      color: #f44336;
     }
     
     .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 15px;
+      background: var(--primary-color);
+      color: white;
       border: none;
-      border-radius: 12px;
+      border-radius: var(--border-radius);
+      padding: 12px 24px;
       font-size: 1rem;
       font-weight: bold;
       cursor: pointer;
       transition: all 0.3s ease;
-      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-      color: white;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
     }
     
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
-    .btn:hover:not(:disabled) {
+    .btn:hover {
+      background: #e68900;
       transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
     
-    .btn i {
-      margin-left: 8px;
-    }
-    
-    .alert {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 15px 20px;
-      border-radius: 8px;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      max-width: 90%;
-      text-align: center;
-    }
-    
-    .alert.show {
-      opacity: 1;
-    }
-    
-    .alert.error {
-      background: #f44336;
-      color: white;
-    }
-    
-    .alert.success {
-      background: #4caf50;
-      color: white;
+    .btn:active {
+      transform: translateY(0);
     }
     
     .loading {
-      text-align: center;
-      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
     }
     
-    .spinner {
-      border: 4px solid rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      border-top: 4px solid var(--primary-color);
+    .loading-spinner {
       width: 40px;
       height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 15px;
+      border: 4px solid rgba(255, 152, 0, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary-color);
+      animation: spin 1s ease-in-out infinite;
     }
     
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
     
     footer {
-      text-align: center;
-      padding: 20px 0;
-      font-size: 0.8rem;
-      opacity: 0.7;
       margin-top: 30px;
+      color: #666;
+      font-size: 0.8rem;
     }
   </style>
 </head>
 <body>
-  <header>
-    <h1>🚀 نظام المهام والإعلانات</h1>
-  </header>
-  
   <div class="container">
-    <div class="user-card" id="user-info">
-      <div class="loading" id="loading">
-        <div class="spinner"></div>
-        <p>جاري تحميل البيانات...</p>
-      </div>
-    </div>
+    <header>
+      <h1>🚀 نظام المهام والإعلانات</h1>
+      <p class="subtitle">اكسب الكوينز من خلال إكمال المهام ومشاهدة الإعلانات</p>
+    </header>
     
-    <div class="stats-container">
-      <div class="stat-card">
-        <div class="stat-value" id="coins">0</div>
-        <div class="stat-label">القطع النقدية</div>
+    <main>
+      <div class="card">
+        <div id="info">
+          <div class="loading">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
       </div>
       
-      <div class="stat-card">
-        <div class="stat-value" id="tasks-completed">0</div>
-        <div class="stat-label">المهام المكتملة</div>
-      </div>
-    </div>
+      <button id="showAd" class="btn">
+        <span>🎥</span>
+        مشاهدة إعلان وكسب الكوينز
+      </button>
+    </main>
     
-    <div class="actions-container">
-      <button class="btn" id="showAd">
-        <i>🎥</i> مشاهدة إعلان (+10 قطع نقدية)
-      </button>
-      
-      <button class="btn" id="daily-bonus">
-        <i>🎁</i> المكافأة اليومية
-      </button>
-    </div>
+    <footer>
+      <p>© 2023 نظام المهام - جميع الحقوق محفوظة</p>
+    </footer>
   </div>
-  
-  <div class="alert error" id="error"></div>
-  <div class="alert success" id="success"></div>
-  
-  <footer>
-    <p>جميع الحقوق محفوظة © 2023</p>
-  </footer>
+
+  <script>
+    // AdsGram Integration
+    const adController = window.Adsgram.init({ blockId: "int-14053" });
+
+    document.getElementById("showAd").addEventListener("click", () => {
+      // تعطيل الزر أثناء تحميل الإعلان
+      const button = document.getElementById("showAd");
+      button.disabled = true;
+      button.innerHTML = '<div class="loading-spinner" style="width:20px;height:20px;border-width:2px;"></div> جاري تحميل الإعلان...';
+      
+      adController.show().then(() => {
+        button.disabled = false;
+        button.innerHTML = '<span>🎥</span> مشاهدة إعلان وكسب الكوينز';
+        
+        // يمكنك هنا إضافة منح المكافآت للمستخدم
+        tg.showPopup({
+          title: "تمت المشاهدة بنجاح",
+          message: "✅ شكراً لك على مشاهدة الإعلان! لقد تمت إضافة الكوينز إلى رصيدك.",
+          buttons: [{ type: "ok" }]
+        });
+      }).catch((e) => {
+        console.error("خطأ في عرض الإعلان:", e);
+        button.disabled = false;
+        button.innerHTML = '<span>🎥</span> مشاهدة إعلان وكسب الكوينز';
+        
+        tg.showAlert("عذراً، حدث خطأ أثناء تحميل الإعلان. يرجى المحاولة مرة أخرى.");
+      });
+    });
+  </script>
 </body>
 </html>
 
