@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>نظام المهام والمكافآت</title>
+  <title>نظام تجميع الكوينات وتحويلها لروبكس</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- Telegram SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -23,6 +23,7 @@
       --completed-color: rgba(46, 204, 113, 0.2);
       --locked-color: rgba(127, 140, 141, 0.4);
       --gift-color: #ff6b6b;
+      --withdraw-color: #00b894;
     }
     
     * {
@@ -432,12 +433,101 @@
     .ad-required i {
       margin-left: 5px;
     }
+    
+    /* أنماط جديدة للسحب والعمليات */
+    .withdraw-button {
+      background: linear-gradient(135deg, var(--withdraw-color), #00d2a3);
+      margin-top: 10px;
+    }
+    
+    .withdraw-button:hover {
+      background: linear-gradient(135deg, #009975, var(--withdraw-color));
+    }
+    
+    .withdraw-form {
+      text-align: right;
+      margin-top: 15px;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.2);
+      color: white;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .video-tutorial {
+      margin: 20px 0;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      padding: 15px;
+    }
+    
+    .video-placeholder {
+      width: 100%;
+      height: 200px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-gray);
+      cursor: pointer;
+    }
+    
+    .transactions-list {
+      max-height: 300px;
+      overflow-y: auto;
+      margin-top: 15px;
+    }
+    
+    .transaction-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-align: right;
+    }
+    
+    .transaction-status {
+      padding: 3px 8px;
+      border-radius: 15px;
+      font-size: 12px;
+    }
+    
+    .status-pending {
+      background: rgba(255, 165, 0, 0.2);
+      color: orange;
+    }
+    
+    .status-completed {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+    }
+    
+    .status-rejected {
+      background: rgba(255, 71, 87, 0.2);
+      color: #ff4757;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>🎯 نظام المهام والمكافآت</h1>
+      <h1>💰 نظام تجميع الكوينات وتحويلها لروبكس</h1>
       <div class="stats">
         <div class="stat-item">
           <div class="stat-value" id="totalPoints">0</div>
@@ -448,7 +538,7 @@
           <div class="stat-label">مهام مكتملة</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value" id="remainingCount">20</div>
+          <div class="stat-value" id="remainingCount">100</div>
           <div class="stat-label">متبقي اليوم</div>
         </div>
       </div>
@@ -457,6 +547,8 @@
     <div class="tabs">
       <div class="tab active" data-tab="main">الصفحة الرئيسية</div>
       <div class="tab" data-tab="tasks">المهام</div>
+      <div class="tab" data-tab="withdraw">السحب</div>
+      <div class="tab" data-tab="transactions">العمليات</div>
       <div class="tab" data-tab="leaderboard">ترتيب الأعضاء</div>
     </div>
     
@@ -474,11 +566,12 @@
         <div class="balance">
           <i class="fas fa-coins"></i>
           <span id="userBalance">0</span> كوين
+          <small>(<span id="robuxBalance">0</span> روبكس)</small>
         </div>
         
         <div class="last-task">
           <i class="fas fa-tasks"></i>
-          آخر مهمة: <span id="lastCompletedTask">0</span> / 20
+          آخر مهمة: <span id="lastCompletedTask">0</span> / 100
         </div>
       </div>
       
@@ -494,12 +587,57 @@
     <div class="tab-content" id="tasksTab">
       <div class="card">
         <h2>📋 المهام اليومية</h2>
-        <p>اكمل المهام اليومية لتحصل على الكوينز (20 مهمة متاحة يوميًا)</p>
+        <p>اكمل المهام اليومية لتحصل على الكوينز (100 مهمة متاحة يوميًا)</p>
         <div class="ad-required">
           <i class="fas fa-info-circle"></i>
           يجب مشاهدة إعلان بعد كل مهمة لتحصل على 1 كوين
         </div>
         <div id="tasksContainer">
+          <div class="loading">
+            <div class="spinner"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- قسم السحب -->
+    <div class="tab-content" id="withdrawTab">
+      <div class="card">
+        <h2>💸 سحب الروبكس</h2>
+        <p>كل 1 كوين = 1 روبكس</p>
+        
+        <div class="video-tutorial">
+          <h3>🎥 طريقة عمل قناتك على Telegram</h3>
+          <div class="video-placeholder" onclick="showVideoTutorial()">
+            <i class="fas fa-play-circle" style="font-size: 48px;"></i>
+            <span style="margin-right: 10px;">انقر لمشاهدة الفيديو التوضيحي</span>
+          </div>
+        </div>
+        
+        <div class="withdraw-form">
+          <div class="form-group">
+            <label for="withdrawAmount">كمية الروبكس المراد سحبها</label>
+            <input type="number" id="withdrawAmount" placeholder="أدخل الكمية (الحد الأدنى: 10 روبكس)" min="10">
+          </div>
+          
+          <div class="form-group">
+            <label for="channelLink">رابط قناتك على Telegram</label>
+            <input type="url" id="channelLink" placeholder="https://t.me/yourchannel">
+          </div>
+          
+          <button id="withdrawBtn" class="withdraw-button">طلب السحب</button>
+          <p id="withdrawNote" style="font-size: 12px; margin-top: 10px; color: var(--text-gray);">
+            سيتم مراجعة طلبك خلال 24 ساعة وسيتم إضافة الروبكس إلى رصيدك في اللعبة
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- قسم العمليات -->
+    <div class="tab-content" id="transactionsTab">
+      <div class="card">
+        <h2>📋 العمليات المعلقة</h2>
+        <div id="transactionsContainer">
           <div class="loading">
             <div class="spinner"></div>
           </div>
@@ -548,7 +686,8 @@
       lastTaskTime: 0,
       lastCompletedTask: 0,
       totalPoints: 0,
-      lastGiftDate: null
+      lastGiftDate: null,
+      transactions: []
     };
     
     // عناصر واجهة المستخدم
@@ -556,11 +695,16 @@
     const userNameEl = document.getElementById("userName");
     const userAvatarEl = document.getElementById("userAvatar");
     const userBalanceEl = document.getElementById("userBalance");
+    const robuxBalanceEl = document.getElementById("robuxBalance");
     const lastCompletedTaskEl = document.getElementById("lastCompletedTask");
     const tasksContainer = document.getElementById("tasksContainer");
     const leaderboardContainer = document.getElementById("leaderboardContainer");
+    const transactionsContainer = document.getElementById("transactionsContainer");
     const dailyGiftBtn = document.getElementById("dailyGiftBtn");
     const giftStatusEl = document.getElementById("giftStatus");
+    const withdrawBtn = document.getElementById("withdrawBtn");
+    const withdrawAmountEl = document.getElementById("withdrawAmount");
+    const channelLinkEl = document.getElementById("channelLink");
     const tabs = document.querySelectorAll(".tab");
     const tabContents = document.querySelectorAll(".tab-content");
     const totalPointsEl = document.getElementById("totalPoints");
@@ -583,6 +727,8 @@
         // إذا كان تبويب الترتيب، قم بتحميل البيانات
         if (tabId === "leaderboard") {
           loadLeaderboard();
+        } else if (tabId === "transactions") {
+          loadTransactions();
         }
       });
     });
@@ -619,6 +765,7 @@
         if (doc.exists) {
           userData = doc.data();
           userBalanceEl.textContent = (userData.balance || 0).toFixed(2);
+          robuxBalanceEl.textContent = Math.floor(userData.balance || 0);
           lastCompletedTaskEl.textContent = userData.lastCompletedTask || 0;
           totalPointsEl.textContent = (userData.totalPoints || 0).toFixed(2);
           
@@ -639,6 +786,7 @@
             lastCompletedTask: 0,
             totalPoints: 0,
             lastGiftDate: null,
+            transactions: [],
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
           };
           
@@ -727,7 +875,7 @@
       }
       
       completedCountEl.textContent = completedCount;
-      remainingCountEl.textContent = 20 - completedCount;
+      remainingCountEl.textContent = 100 - completedCount;
     }
     
     // تحميل المهام
@@ -773,8 +921,8 @@
                 ${isLocked ? '<i class="fas fa-lock"></i> مقفل' : '<i class="fas fa-play-circle"></i> إكمال المهمة'}
               </button>`
             }
-            ${!isCompleted && !isLocked && canStartTask() ? 
-              `<div class="cooldown">يجب الانتظار 40 ثانية بين المهام</div>` : ''
+            ${!isCompleted && !isLocked && !canStartTask() ? 
+              `<div class="cooldown">يجب الانتظار 5 ثواني بين المهام</div>` : ''
             }
           `;
           
@@ -790,7 +938,7 @@
     function createDefaultTasks() {
       const defaultTasks = [];
       
-      for (let i = 1; i <= 20; i++) {
+      for (let i = 1; i <= 100; i++) {
         defaultTasks.push({
           title: "مهمة " + i,
           description: "هذه هي المهمة رقم " + i + ". قم بإكمالها ثم شاهد الإعلان لتحصل على 1 كوين.",
@@ -813,7 +961,7 @@
       const currentTime = Date.now();
       const timeDiff = (currentTime - userData.lastTaskTime) / 1000; // الفارق بالثواني
       
-      return timeDiff < 5; // إذا مر أقل من 40 ثانية
+      return timeDiff >= 5; // إذا مر 5 ثواني أو أكثر
     }
     
     // بدء مهمة مع عرض إعلان
@@ -824,11 +972,22 @@
       if (userData.lastTaskTime) {
         const timeDiff = (currentTime - userData.lastTaskTime) / 1000;
         
-        if (timeDiff < 40) {
-          const remainingTime = Math.ceil(40 - timeDiff);
+        if (timeDiff < 5) {
+          const remainingTime = Math.ceil(5 - timeDiff);
           showNotification(`يجب الانتظار ${remainingTime} ثانية قبل البدء في مهمة جديدة`);
           return;
         }
+      }
+      
+      // التحقق من عدد المهام المكتملة اليوم
+      let completedCount = 0;
+      if (userData.completedTasks) {
+        completedCount = Object.values(userData.completedTasks).filter(status => status === true).length;
+      }
+      
+      if (completedCount >= 100) {
+        showNotification("لقد أكملت الحد الأقصى للمهام اليوم (100 مهمة). عد غدًا!");
+        return;
       }
       
       // عرض إعلان قبل إكمال المهمة
@@ -884,6 +1043,112 @@
           console.error("Error completing task:", error);
           showNotification("حدث خطأ أثناء إكمال المهمة");
         });
+    }
+    
+    // طلب السحب
+    withdrawBtn.addEventListener("click", function() {
+      const amount = parseInt(withdrawAmountEl.value);
+      const channelLink = channelLinkEl.value.trim();
+      
+      // التحقق من صحة البيانات
+      if (!amount || amount < 10) {
+        showNotification("الحد الأدنى للسحب هو 10 روبكس");
+        return;
+      }
+      
+      if (!channelLink || !channelLink.startsWith("https://t.me/")) {
+        showNotification("يجب إدخال رابط قناة Telegram صحيح يبدأ بـ https://t.me/");
+        return;
+      }
+      
+      if (amount > userData.balance) {
+        showNotification("ليس لديك رصيد كافي للسحب");
+        return;
+      }
+      
+      // إنشاء معاملة سحب
+      const transaction = {
+        id: Date.now().toString(),
+        type: "withdraw",
+        amount: amount,
+        channelLink: channelLink,
+        status: "pending",
+        date: new Date(),
+        robuxAmount: amount // 1 كوين = 1 روبكس
+      };
+      
+      // تحديث رصيد المستخدم وإضافة المعاملة
+      const updatedTransactions = [...(userData.transactions || []), transaction];
+      const newBalance = userData.balance - amount;
+      
+      db.collection("users").doc(user.id.toString()).update({
+        balance: newBalance,
+        transactions: updatedTransactions
+      })
+      .then(() => {
+        showNotification("تم تقديم طلب السحب بنجاح وسيتم مراجعته خلال 24 ساعة");
+        withdrawAmountEl.value = "";
+        channelLinkEl.value = "";
+      })
+      .catch((error) => {
+        console.error("Error processing withdrawal:", error);
+        showNotification("حدث خطأ أثناء معالجة طلب السحب");
+      });
+    });
+    
+    // تحميل العمليات
+    function loadTransactions() {
+      transactionsContainer.innerHTML = "";
+      
+      if (!userData.transactions || userData.transactions.length === 0) {
+        transactionsContainer.innerHTML = "<p>لا توجد عمليات سحب حتى الآن</p>";
+        return;
+      }
+      
+      // عرض العمليات بترتيب زمني عكسي (الأحدث أولاً)
+      const sortedTransactions = [...userData.transactions].sort((a, b) => 
+        new Date(b.date) - new Date(a.date)
+      );
+      
+      sortedTransactions.forEach(transaction => {
+        const transactionEl = document.createElement("div");
+        transactionEl.className = "transaction-item";
+        
+        const date = transaction.date.toDate ? transaction.date.toDate() : new Date(transaction.date);
+        const formattedDate = date.toLocaleDateString("ar-EG");
+        
+        let statusClass = "";
+        if (transaction.status === "pending") statusClass = "status-pending";
+        else if (transaction.status === "completed") statusClass = "status-completed";
+        else if (transaction.status === "rejected") statusClass = "status-rejected";
+        
+        transactionEl.innerHTML = `
+          <div>
+            <div>سحب ${transaction.robuxAmount} روبكس</div>
+            <div style="font-size: 12px; color: var(--text-gray);">${formattedDate}</div>
+          </div>
+          <div class="transaction-status ${statusClass}">${getStatusText(transaction.status)}</div>
+        `;
+        
+        transactionsContainer.appendChild(transactionEl);
+      });
+    }
+    
+    // الحصول على نص حالة العملية
+    function getStatusText(status) {
+      switch(status) {
+        case "pending": return "قيد المراجعة";
+        case "completed": return "مكتملة";
+        case "rejected": return "مرفوضة";
+        default: return status;
+      }
+    }
+    
+    // عرض فيديو توضيحي
+    function showVideoTutorial() {
+      // في الواقع، سيتم استبدال هذا برابط فيديو حقيقي
+      showNotification("سيتم فتح فيديو توضيحي لطريقة عمل القنوات");
+      // window.open("https://www.youtube.com/embed/example", "_blank");
     }
     
     // عرض رسالة تأكيد
