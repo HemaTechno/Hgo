@@ -1,15 +1,175 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>لوحة التحكم - عمليات السحب</title>
-  <script type="module">
-    // ✅ استدعاء Firebase SDK
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, getDocs, updateDoc, doc, orderBy, query } 
-      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>لوحة التحكم – عمليات السحب</title>
 
-    // ✅ بيانات مشروعك من Firebase Console
+  <!-- خط عربي لطيف -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#0f172a; /* slate-900 */
+      --bg2:#111827ee; /* gray-900 alpha */
+      --card:#0b1220cc;
+      --muted:#9ca3af;
+      --accent:#22d3ee; /* cyan-400 */
+      --ok:#22c55e;     /* green-500 */
+      --danger:#ef4444; /* red-500 */
+      --pending:#f59e0b;/* amber-500 */
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:'Cairo',system-ui,Arial; color:#fff;
+      background:
+        radial-gradient(1200px 600px at 80% -20%, #1e293b 0%, transparent 60%),
+        radial-gradient(900px 500px at -20% 20%, #0ea5e9 0%, transparent 50%),
+        linear-gradient(180deg, #0b1324 0%, #0b1324 100%);
+      min-height:100vh;
+    }
+    .container{max-width:1100px; margin:40px auto; padding:0 16px}
+    header{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; margin-bottom:18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      padding:12px 16px; background:var(--card); border:1px solid #1f2937;
+      border-radius:var(--radius); backdrop-filter: blur(6px);
+      box-shadow: 0 8px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .brand .dot{width:10px;height:10px;border-radius:999px;background:var(--accent);box-shadow:0 0 12px var(--accent)}
+    .brand h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.3px}
+    .actions{
+      display:flex; gap:10px; flex-wrap:wrap
+    }
+    .chip,select,input{
+      padding:10px 12px; border-radius:12px; border:1px solid #1f2937;
+      background:#0b1220; color:#e5e7eb; outline:none;
+    }
+    .chip{display:inline-flex; align-items:center; gap:8px}
+    .stats{
+      display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px; margin:18px 0 24px;
+    }
+    .stat{
+      background:var(--card); border:1px solid #1f2937; border-radius:var(--radius);
+      padding:16px; text-align:center;
+    }
+    .stat .num{font-size:26px; font-weight:800}
+    .tableWrap{
+      background:rgba(11,18,32,.7); border:1px solid #1f2937; border-radius:var(--radius);
+      overflow:hidden; box-shadow: 0 8px 30px rgba(0,0,0,.35);
+    }
+    table{width:100%; border-collapse:collapse}
+    thead th{
+      background:#0e182b; color:#cbd5e1; font-weight:700; font-size:14px;
+      padding:14px 10px; border-bottom:1px solid #1f2937;
+    }
+    tbody td{
+      padding:14px 10px; border-bottom:1px solid #1f2937; color:#e5e7eb;
+    }
+    tbody tr:hover{background:#0c1527}
+    .pill{
+      padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; display:inline-block
+    }
+    .pill.pending{color:#fff; background:#1f2937; border:1px solid #334155}
+    .pill.approved{color:#06250f; background:#34d399}
+    .pill.rejected{color:#2a0b0b; background:#f87171}
+    .btn{
+      padding:8px 12px; border:none; border-radius:12px; font-weight:700; cursor:pointer;
+      transition:transform .06s ease, opacity .15s ease; margin-inline-start:6px;
+    }
+    .btn:active{transform:scale(.98)}
+    .btn.ok{background:var(--ok); color:#06250f}
+    .btn.no{background:var(--danger); color:#2a0b0b}
+    .btn.link{background:#111827; border:1px solid #1f2937; color:#cbd5e1}
+    .empty{color:var(--muted); text-align:center; padding:40px}
+    .footer{color:#94a3b8; font-size:12px; text-align:center; padding:18px}
+    @media(max-width:820px){
+      .stats{grid-template-columns:1fr}
+      thead{display:none}
+      tbody tr{display:grid; grid-template-columns:1fr; gap:8px; padding:10px}
+      tbody td{border:none; background:#0b1220; border-radius:12px}
+    }
+
+    /* Toast */
+    .toast{
+      position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+      background:#0b1220; border:1px solid #1f2937; color:#e5e7eb;
+      padding:10px 14px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.35);
+      opacity:0; pointer-events:none; transition:opacity .2s ease;
+    }
+    .toast.show{opacity:1}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="dot"></div>
+        <h1>لوحة التحكم – طلبات السحب</h1>
+      </div>
+      <div class="actions">
+        <select id="filter" class="chip" title="تصفية الحالة">
+          <option value="all">كل الحالات</option>
+          <option value="pending">معلّق</option>
+          <option value="approved">موافق عليه</option>
+          <option value="rejected">مرفوض</option>
+        </select>
+        <input id="search" class="chip" placeholder="🔎 بحث: رقم المستخدم/الرابط/المعرف" />
+      </div>
+    </header>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="num" id="stat-total">0</div>
+        <div class="label">إجمالي الطلبات</div>
+      </div>
+      <div class="stat">
+        <div class="num" id="stat-pending">0</div>
+        <div class="label">معلّق</div>
+      </div>
+      <div class="stat">
+        <div class="num" id="stat-approved">0</div>
+        <div class="label">موافق عليه</div>
+      </div>
+    </section>
+
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>المستخدم</th>
+            <th>المبلغ</th>
+            <th>الرابط</th>
+            <th>التاريخ</th>
+            <th>الحالة</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="6" class="empty">⏳ جاري التحميل…</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer">أي حد معاه الرابط يقدر يوافق/يرفض – تأكد من تغيير القواعد لاحقًا لو عايز أمان أعلى.</div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    /* ===== Firebase SDK (v11) ===== */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {
+      getFirestore, collection, query, orderBy, onSnapshot,
+      updateDoc, doc
+    } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    /* === ضع بيانات مشروعك هنا === */
     const firebaseConfig = {
       apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
       authDomain: "hhhhhh-d4fb8.firebaseapp.com",
@@ -19,120 +179,106 @@
       appId: "1:24512338206:web:dfe045db59bd3434a2110f",
       measurementId: "G-HD4R7GNQ5H"
     };
-
-    // 🚀 تهيئة Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // تحميل عمليات السحب
-    async function loadWithdraws() {
-      const q = query(collection(db, "withdraws"), orderBy("createdAt", "desc"));
-      const snapshot = await getDocs(q);
-      const tbody = document.getElementById("withdraws");
-      tbody.innerHTML = "";
-      snapshot.forEach((docSnap) => {
-        const w = docSnap.data();
-        const tr = document.createElement("tr");
+    const tbody = document.getElementById("rows");
+    const filterEl = document.getElementById("filter");
+    const searchEl = document.getElementById("search");
+    const toastEl = document.getElementById("toast");
 
-        let statusColor = w.status === "approved" ? "green" : w.status === "rejected" ? "red" : "orange";
+    let allDocs = [];
 
-        tr.innerHTML = `
-          <td>${w.userId}</td>
-          <td>${w.amount}</td>
-          <td><a href="${w.link}" target="_blank">${w.link}</a></td>
-          <td><span style="color:${statusColor}; font-weight:bold">${w.status}</span></td>
+    // Toast helper
+    const toast = (txt) => {
+      toastEl.textContent = txt;
+      toastEl.classList.add("show");
+      setTimeout(() => toastEl.classList.remove("show"), 1800);
+    };
+
+    // Format date safely
+    const fmt = (ts) => {
+      try {
+        if (!ts) return "—";
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        return new Intl.DateTimeFormat('ar-EG', {
+          dateStyle: 'medium', timeStyle: 'short'
+        }).format(d);
+      } catch { return "—"; }
+    };
+
+    // Render
+    function render() {
+      const term = (searchEl.value || "").toLowerCase().trim();
+      const statusFilter = filterEl.value;
+
+      let rows = allDocs
+        .filter(w => {
+          const matchStatus = statusFilter === "all" ? true : (w.status === statusFilter);
+          const key = `${w.userId} ${w.amount} ${w.link} ${w.id}`.toLowerCase();
+          const matchSearch = term ? key.includes(term) : true;
+          return matchStatus && matchSearch;
+        });
+
+      // Stats
+      document.getElementById("stat-total").textContent = allDocs.length;
+      document.getElementById("stat-pending").textContent = allDocs.filter(w=>w.status==='pending').length;
+      document.getElementById("stat-approved").textContent = allDocs.filter(w=>w.status==='approved').length;
+
+      if (!rows.length) {
+        tbody.innerHTML = `<tr><td class="empty" colspan="6">لا توجد بيانات مطابقة.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = rows.map(w => `
+        <tr>
+          <td title="ID: ${w.id}">@${w.username || '—'}<br><small style="color:#94a3b8">${w.userId}</small></td>
+          <td><b>${w.amount}</b> Roblack</td>
+          <td><a class="btn link" href="${w.link}" target="_blank">فتح الرابط</a></td>
+          <td>${fmt(w.createdAt)}</td>
           <td>
-            <button class="approve" onclick="updateStatus('${docSnap.id}', 'approved')">✅ موافقة</button>
-            <button class="reject" onclick="updateStatus('${docSnap.id}', 'rejected')">❌ رفض</button>
+            <span class="pill ${w.status}">${w.status==='pending'?'معلّق':w.status==='approved'?'موافق عليه':'مرفوض'}</span>
           </td>
-        `;
-        tbody.appendChild(tr);
-      });
+          <td>
+            <button class="btn ok"   ${w.status!=='pending'?'disabled':''} onclick="approve('${w.id}')">✅ موافقة</button>
+            <button class="btn no"   ${w.status!=='pending'?'disabled':''} onclick="reject('${w.id}')">❌ رفض</button>
+          </td>
+        </tr>
+      `).join('');
     }
 
-    // تحديث الحالة
-    async function updateStatus(id, status) {
-      const ref = doc(db, "withdraws", id);
-      await updateDoc(ref, { status });
-      loadWithdraws();
-    }
+    // Live snapshot
+    const q = query(collection(db, "withdraws"), orderBy("createdAt","desc"));
+    onSnapshot(q, (snap) => {
+      allDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      render();
+    }, (err) => {
+      console.error(err);
+      tbody.innerHTML = `<tr><td class="empty" colspan="6">خطأ في التحميل: ${err.message}</td></tr>`;
+    });
 
-    window.updateStatus = updateStatus;
-    window.onload = loadWithdraws;
+    // Actions
+    window.approve = async (id) => {
+      try {
+        await updateDoc(doc(db, "withdraws", id), { status: "approved" });
+        toast("✅ تمّت الموافقة");
+      } catch (e) {
+        console.error(e); toast("❌ فشل التحديث");
+      }
+    };
+    window.reject = async (id) => {
+      try {
+        await updateDoc(doc(db, "withdraws", id), { status: "rejected" });
+        toast("❌ تمّ الرفض");
+      } catch (e) {
+        console.error(e); toast("❌ فشل التحديث");
+      }
+    };
+
+    // Filters
+    filterEl.addEventListener("change", render);
+    searchEl.addEventListener("input", render);
   </script>
-  <style>
-    body {
-      font-family: 'Cairo', sans-serif;
-      background: linear-gradient(135deg, #2c3e50, #34495e);
-      color: #fff;
-      text-align: center;
-      padding: 20px;
-    }
-    h2 {
-      margin: 20px 0;
-      font-size: 28px;
-    }
-    table {
-      width: 90%;
-      margin: 0 auto;
-      border-collapse: collapse;
-      background: #fff;
-      color: #333;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-    }
-    th {
-      background: #2c3e50;
-      color: #fff;
-      padding: 12px;
-      font-size: 16px;
-    }
-    td {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-      font-size: 15px;
-    }
-    tr:hover { background: #f7f7f7; }
-    button {
-      padding: 8px 14px;
-      margin: 2px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      font-size: 14px;
-      transition: 0.3s;
-    }
-    .approve {
-      background: #27ae60;
-      color: #fff;
-    }
-    .approve:hover {
-      background: #2ecc71;
-    }
-    .reject {
-      background: #e74c3c;
-      color: #fff;
-    }
-    .reject:hover {
-      background: #c0392b;
-    }
-  </style>
-</head>
-<body>
-  <h2>📜 لوحة التحكم - عمليات السحب</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>المستخدم</th>
-        <th>الكمية</th>
-        <th>الرابط</th>
-        <th>الحالة</th>
-        <th>الإجراء</th>
-      </tr>
-    </thead>
-    <tbody id="withdraws"></tbody>
-  </table>
 </body>
 </html>
+
