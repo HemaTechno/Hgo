@@ -1095,12 +1095,12 @@
       }
       
       completedCountEl.textContent = completedCount;
-      remainingCountEl.textContent = 100 - completedCount;
+      remainingCountEl.textContent = 50 - completedCount;
       completedTasksCountEl.textContent = completedCount;
-      totalTasksCountEl.textContent = 100;
+      totalTasksCountEl.textContent = 50;
       
       // تحديث شريط التقدم
-      const progressPercentage = (completedCount / 100) * 100;
+      const progressPercentage = (completedCount / 50) * 50;
       tasksProgressBarEl.style.width = `${progressPercentage}%`;
     }
     
@@ -1164,11 +1164,11 @@
     function createDefaultTasks() {
       const defaultTasks = [];
       
-      for (let i = 1; i <= 100; i++) {
+      for (let i = 1; i <= 50; i++) {
         defaultTasks.push({
           title: "مهمة " + i,
           description: "هذه هي المهمة رقم " + i + ". قم بإكمالها ثم شاهد الإعلان لتحصل على 0.1 كوين.",
-          reward: 0.1,  // كل مهمة تعطي 0.1 كوين
+          reward: 0.2,  // كل مهمة تعطي 0.1 كوين
           link: "#",
           order: i
         });
