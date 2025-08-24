@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>لوحة التحكم - عمليات السحب</title>
+  <script type="module">
+    // ✅ استدعاء Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, updateDoc, doc, orderBy, query } 
+      from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    // ✅ بيانات مشروعك من Firebase Console
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+      authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+      projectId: "hhhhhh-d4fb8",
+      storageBucket: "hhhhhh-d4fb8.appspot.com",
+      messagingSenderId: "24512338206",
+      appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+      measurementId: "G-HD4R7GNQ5H"
+    };
+
+    // 🚀 تهيئة Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // تحميل عمليات السحب
+    async function loadWithdraws() {
+      const q = query(collection(db, "withdraws"), orderBy("createdAt", "desc"));
+      const snapshot = await getDocs(q);
+      const tbody = document.getElementById("withdraws");
+      tbody.innerHTML = "";
+      snapshot.forEach((docSnap) => {
+        const w = docSnap.data();
+        const tr = document.createElement("tr");
+
+        let statusColor = w.status === "approved" ? "green" : w.status === "rejected" ? "red" : "orange";
+
+        tr.innerHTML = `
+          <td>${w.userId}</td>
+          <td>${w.amount}</td>
+          <td><a href="${w.link}" target="_blank">${w.link}</a></td>
+          <td><span style="color:${statusColor}; font-weight:bold">${w.status}</span></td>
+          <td>
+            <button class="approve" onclick="updateStatus('${docSnap.id}', 'approved')">✅ موافقة</button>
+            <button class="reject" onclick="updateStatus('${docSnap.id}', 'rejected')">❌ رفض</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // تحديث الحالة
+    async function updateStatus(id, status) {
+      const ref = doc(db, "withdraws", id);
+      await updateDoc(ref, { status });
+      loadWithdraws();
+    }
+
+    window.updateStatus = updateStatus;
+    window.onload = loadWithdraws;
+  </script>
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    h2 {
+      margin: 20px 0;
+      font-size: 28px;
+    }
+    table {
+      width: 90%;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background: #fff;
+      color: #333;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    th {
+      background: #2c3e50;
+      color: #fff;
+      padding: 12px;
+      font-size: 16px;
+    }
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 15px;
+    }
+    tr:hover { background: #f7f7f7; }
+    button {
+      padding: 8px 14px;
+      margin: 2px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+      transition: 0.3s;
+    }
+    .approve {
+      background: #27ae60;
+      color: #fff;
+    }
+    .approve:hover {
+      background: #2ecc71;
+    }
+    .reject {
+      background: #e74c3c;
+      color: #fff;
+    }
+    .reject:hover {
+      background: #c0392b;
+    }
+  </style>
+</head>
+<body>
+  <h2>📜 لوحة التحكم - عمليات السحب</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>المستخدم</th>
+        <th>الكمية</th>
+        <th>الرابط</th>
+        <th>الحالة</th>
+        <th>الإجراء</th>
+      </tr>
+    </thead>
+    <tbody id="withdraws"></tbody>
+  </table>
+</body>
+</html>
