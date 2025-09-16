@@ -6,23 +6,6 @@
   <title>قناتي على YouTube</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            dark: {
-              100: '#1C1C1E',
-              200: '#2C2C2E',
-              300: '#3A3A3C',
-              400: '#48484A',
-            }
-          }
-        }
-      }
-    }
-  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
     
@@ -43,15 +26,29 @@
       color: white;
     }
     
-    .glass-card {
-      background: rgba(44, 44, 46, 0.6);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 24px;
+    .glass-container {
+      background: rgba(44, 44, 46, 0.5);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      border-radius: 28px;
       box-shadow: 
-        0 10px 30px rgba(0, 0, 0, 0.3),
+        0 15px 35px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      width: 95%;
+      max-width: 1000px;
+    }
+    
+    .glass-card {
+      background: rgba(44, 44, 46, 0.4);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 20px;
+      box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       overflow: hidden;
     }
     
@@ -59,13 +56,13 @@
       background: linear-gradient(to bottom, rgba(10, 132, 255, 0.8), rgba(0, 102, 204, 0.8));
       color: white;
       border: none;
-      border-radius: 14px;
-      padding: 14px 24px;
+      border-radius: 16px;
+      padding: 16px 28px;
       font-weight: 600;
-      font-size: 16px;
+      font-size: 17px;
       box-shadow: 
-        0 4px 12px rgba(10, 132, 255, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 6px 15px rgba(10, 132, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
       position: relative;
       overflow: hidden;
       backdrop-filter: blur(10px);
@@ -79,29 +76,29 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(rgba(255, 255, 255, 0.1), transparent);
+      background: linear-gradient(rgba(255, 255, 255, 0.12), transparent);
       pointer-events: none;
     }
     
     .glass-button:hover {
-      transform: translateY(-2px);
+      transform: translateY(-3px) scale(1.02);
       box-shadow: 
-        0 6px 16px rgba(10, 132, 255, 0.4),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 8px 20px rgba(10, 132, 255, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
     
     .glass-button:active {
       transform: translateY(1px);
       box-shadow: 
-        0 2px 8px rgba(10, 132, 255, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        0 3px 10px rgba(10, 132, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
     
     .stat-item {
       display: flex;
       align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
     
     .stat-item:last-child {
@@ -109,22 +106,23 @@
     }
     
     .stat-icon {
-      width: 24px;
-      height: 24px;
-      margin-left: 12px;
+      width: 32px;
+      height: 32px;
+      margin-left: 16px;
       background: linear-gradient(45deg, #007AFF, #00A2FF);
-      border-radius: 6px;
+      border-radius: 9px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 12px;
+      font-size: 14px;
+      box-shadow: 0 4px 10px rgba(0, 122, 255, 0.3);
     }
     
     .video-container {
-      border-radius: 18px;
+      border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
       margin-top: 20px;
     }
     
@@ -148,7 +146,7 @@
     @keyframes slideUp {
       from { 
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(30px);
       }
       to { 
         opacity: 1;
@@ -158,7 +156,7 @@
     
     @keyframes pulse {
       0% { transform: scale(1); }
-      50% { transform: scale(1.03); }
+      50% { transform: scale(1.04); }
       100% { transform: scale(1); }
     }
     
@@ -166,9 +164,9 @@
       background: linear-gradient(90deg, #2C2C2E 25%, #3A3A3C 50%, #2C2C2E 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
-      border-radius: 8px;
-      height: 20px;
-      margin: 8px 0;
+      border-radius: 10px;
+      height: 22px;
+      margin: 10px 0;
     }
     
     @keyframes shimmer {
@@ -178,89 +176,145 @@
     
     .youtube-red {
       background: linear-gradient(to bottom, rgba(255, 0, 0, 0.8), rgba(204, 0, 0, 0.8));
-      box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      box-shadow: 0 6px 15px rgba(255, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    
+    .green-gradient {
+      background: linear-gradient(to bottom, rgba(52, 199, 89, 0.8), rgba(40, 167, 69, 0.8));
+      box-shadow: 0 6px 15px rgba(52, 199, 89, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    
+    .purple-gradient {
+      background: linear-gradient(to bottom, rgba(175, 82, 222, 0.8), rgba(137, 50, 184, 0.8));
+      box-shadow: 0 6px 15px rgba(175, 82, 222, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
     }
     
     .counter {
       font-variant-numeric: tabular-nums;
       font-weight: 700;
+      font-size: 1.2em;
+    }
+    
+    .header-gradient {
+      background: linear-gradient(135deg, #007AFF 0%, #00A2FF 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .floating {
+      animation: floating 6s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
     }
   </style>
 </head>
 <body class="bg-gray-900">
 
-  <!-- الأزرار في الأعلى -->
-  <div class="flex space-x-4 rtl:space-x-reverse slide-up mb-8" style="animation-delay: 0.1s">
+  <!-- الشعار والعنوان -->
+  <div class="text-center mb-8 slide-up">
+    <div class="floating inline-block p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-2xl shadow-blue-500/30">
+      <i class="fab fa-youtube text-white text-5xl"></i>
+    </div>
+    <h1 class="text-5xl font-bold mt-6 text-white header-gradient">
+      قناتي على يوتيوب
+    </h1>
+    <p class="text-gray-400 mt-3 text-lg">استكشف محتوى قناتي وأحدث الفيديوهات</p>
+  </div>
+
+  <!-- المحتوى الرئيسي -->
+  <div class="glass-container p-8 mb-10 slide-up" style="animation-delay: 0.2s">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- قسم الإحصائيات -->
+      <div class="glass-card p-7">
+        <h2 class="text-2xl font-semibold mb-6 text-white flex items-center justify-center">
+          <i class="fas fa-chart-line mr-3 text-blue-400"></i>
+          إحصائيات القناة
+        </h2>
+        
+        <div class="space-y-5">
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-gray-400 text-lg">المشتركين</p>
+              <p class="text-blue-400 font-bold text-xl counter" id="subscribers">0</p>
+            </div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-eye"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-gray-400 text-lg">المشاهدات</p>
+              <p class="text-green-400 font-bold text-xl counter" id="views">0</p>
+            </div>
+          </div>
+          
+          <div class="stat-item">
+            <div class="stat-icon">
+              <i class="fas fa-video"></i>
+            </div>
+            <div class="flex-1">
+              <p class="text-gray-400 text-lg">عدد الفيديوهات</p>
+              <p class="text-purple-400 font-bold text-xl counter" id="videos">0</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- قسم أحدث فيديو -->
+      <div class="glass-card p-7">
+        <h2 class="text-2xl font-semibold mb-6 text-white flex items-center justify-center">
+          <i class="fas fa-play-circle mr-3 text-red-400"></i>
+          أحدث فيديو
+        </h2>
+        
+        <div id="latestVideo" class="h-full flex flex-col justify-center">
+          <div class="loading-shimmer h-48 rounded-xl mb-4"></div>
+          <div class="loading-shimmer h-6 rounded-xl"></div>
+          <div class="loading-shimmer h-4 rounded-xl w-2/3 mt-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- الأزرار -->
+  <div class="flex flex-wrap justify-center gap-5 slide-up" style="animation-delay: 0.4s">
     <a href="hacks.html" class="glass-button flex items-center pulse">
-      <i class="fas fa-code mr-2"></i>
+      <i class="fas fa-code mr-3"></i>
       قسم الهاكات
     </a>
-    <a href="scripts.html" class="glass-button flex items-center pulse" style="background: linear-gradient(to bottom, rgba(52, 199, 89, 0.8), rgba(40, 167, 69, 0.8)); box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);">
-      <i class="fas fa-scroll mr-2"></i>
+    <a href="scripts.html" class="glass-button flex items-center green-gradient pulse">
+      <i class="fas fa-scroll mr-3"></i>
       قسم السكربتات
     </a>
     <a href="https://www.youtube.com/channel/UCk2r8SKirfD-XS7g5m31kKA" target="_blank" class="glass-button flex items-center youtube-red pulse">
-      <i class="fab fa-youtube mr-2"></i>
-      قناتي
+      <i class="fab fa-youtube mr-3"></i>
+      زيارة القناة
+    </a>
+    <a href="#" class="glass-button flex items-center purple-gradient pulse">
+      <i class="fas fa-download mr-3"></i>
+      تحميل التطبيق
     </a>
   </div>
 
-  <!-- عنوان الصفحة مع أنيميشن -->
-  <h1 class="text-4xl font-bold mb-8 text-center text-white fade-in" style="text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-    <i class="fab fa-youtube text-red-500 mr-2"></i>
-    مرحباً بكم في قناتي
-  </h1>
-
-  <!-- معلومات القناة -->
-  <div class="glass-card p-8 w-full max-w-md mb-10 slide-up">
-    <h2 class="text-2xl font-semibold mb-6 text-center text-white flex items-center justify-center">
-      <i class="fas fa-info-circle mr-2 text-blue-400"></i>
-      معلومات القناة
-    </h2>
-    
-    <div class="space-y-4">
-      <div class="stat-item">
-        <div class="stat-icon">
-          <i class="fas fa-users"></i>
-        </div>
-        <p class="text-gray-300 text-lg">
-          المشتركين: <span id="subscribers" class="counter text-blue-400 font-semibold">0</span>
-        </p>
-      </div>
-      
-      <div class="stat-item">
-        <div class="stat-icon">
-          <i class="fas fa-eye"></i>
-        </div>
-        <p class="text-gray-300 text-lg">
-          المشاهدات: <span id="views" class="counter text-green-400 font-semibold">0</span>
-        </p>
-      </div>
-      
-      <div class="stat-item">
-        <div class="stat-icon">
-          <i class="fas fa-video"></i>
-        </div>
-        <p class="text-gray-300 text-lg">
-          عدد الفيديوهات: <span id="videos" class="counter text-purple-400 font-semibold">0</span>
-        </p>
-      </div>
-    </div>
-
-    <!-- أحدث فيديو -->
-    <div id="latestVideo" class="mt-8 pt-6 border-t border-gray-700">
-      <h3 class="font-semibold mb-4 text-lg text-white flex items-center">
-        <i class="fas fa-play-circle mr-2 text-red-400"></i>
-        أحدث فيديو:
-      </h3>
-      <div class="loading-shimmer h-40 rounded-xl"></div>
-    </div>
+  <!-- الفوتر -->
+  <div class="mt-10 text-center text-gray-500 text-sm">
+    <p>© 2023 قناتي على يوتيوب. جميع الحقوق محفوظة</p>
   </div>
 
   <!-- موجات الخلفية -->
-  <div class="fixed bottom-0 left-0 w-full -z-10">
+  <div class="fixed bottom-0 left-0 w-full -z-10 opacity-30">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" class="wave-animation">
-      <path fill="#0A84FF" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,165.3C960,160,1056,192,1152,192C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+      <path fill="#0A84FF" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,224C672,213,768,171,864,165.3C960,160,1056,192,1152,192C1248,192,1344,160,1392,144L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
     </svg>
   </div>
 
@@ -270,8 +324,8 @@
 
     // دالة لتحريك العداد
     function animateCounter(element, target) {
-      const duration = 2000; // مدة التحريك بالميلي ثانية
-      const frameRate = 30; // عدد الأطر في الثانية
+      const duration = 2000;
+      const frameRate = 30;
       const totalFrames = Math.floor(duration / (1000 / frameRate));
       let currentFrame = 0;
       
@@ -319,21 +373,20 @@
         const latestVideo = videoData.items[0];
 
         document.getElementById('latestVideo').innerHTML = `
-          <h3 class="font-semibold mb-4 text-lg text-white flex items-center">
-            <i class="fas fa-play-circle mr-2 text-red-400"></i>
-            أحدث فيديو:
-          </h3>
           <div class="video-container">
             <iframe width="100%" height="215" src="https://www.youtube.com/embed/${latestVideo.id.videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="rounded-xl"></iframe>
           </div>
-          <p class="mt-2 text-gray-300">${latestVideo.snippet.title}</p>
+          <div class="mt-4">
+            <h3 class="text-white font-semibold text-lg">${latestVideo.snippet.title}</h3>
+            <p class="text-gray-400 mt-2">${latestVideo.snippet.description.substring(0, 100)}...</p>
+          </div>
         `;
       } catch (error) {
         console.error("خطأ في جلب البيانات:", error);
         document.getElementById('subscribers').innerText = '0';
         document.getElementById('views').innerText = '0';
         document.getElementById('videos').innerText = '0';
-        document.getElementById('latestVideo').innerHTML = '<p class="text-red-400">خطأ في تحميل الفيديو</p>';
+        document.getElementById('latestVideo').innerHTML = '<p class="text-red-400 text-center py-10">خطأ في تحميل الفيديو</p>';
       }
     }
 
