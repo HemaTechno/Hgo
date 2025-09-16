@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>صفحة ترحيب</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+
+  <!-- عنوان الصفحة -->
+  <h1 class="text-3xl font-bold mb-4 text-center">مرحباً بكم في قناتي</h1>
+
+  <!-- معلومات القناة -->
+  <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
+    <h2 class="text-xl font-semibold mb-2">معلومات القناة</h2>
+    <p id="subscribers" class="text-gray-700 mb-1">المشتركين: ...</p>
+    <p id="views" class="text-gray-700 mb-1">المشاهدات: ...</p>
+    <p id="videos" class="text-gray-700 mb-4">عدد الفيديوهات: ...</p>
+
+    <!-- أحدث فيديو -->
+    <div id="latestVideo" class="mt-4"></div>
+  </div>
+
+  <!-- الأزرار -->
+  <div class="mt-6 flex space-x-4 rtl:space-x-reverse">
+    <a href="hacks.html" class="bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700">قسم الهاكات</a>
+    <a href="scripts.html" class="bg-green-600 text-white px-6 py-2 rounded-xl hover:bg-green-700">قسم السكربتات</a>
+  </div>
+
+  <script>
+    const API_KEY = "AIzaSyBzMQ4xojy1F3NVM1fxd2YHxO1EC_aaDtE";  // ضع مفتاح API هنا
+    const CHANNEL_ID = "UCk2r8SKirfD-XS7g5m31kKA";  // ضع Channel ID هنا
+
+    // جلب بيانات القناة
+    async function getChannelData() {
+      try {
+        const channelResponse = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${CHANNEL_ID}&key=${API_KEY}`);
+        const channelData = await channelResponse.json();
+        const stats = channelData.items[0].statistics;
+
+        document.getElementById('subscribers').innerText = `المشتركين: ${stats.subscriberCount}`;
+        document.getElementById('views').innerText = `المشاهدات: ${stats.viewCount}`;
+        document.getElementById('videos').innerText = `عدد الفيديوهات: ${stats.videoCount}`;
+
+        // جلب أحدث فيديو
+        const videoResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&order=date&part=snippet&type=video&maxResults=1`);
+        const videoData = await videoResponse.json();
+        const latestVideo = videoData.items[0];
+
+        document.getElementById('latestVideo').innerHTML = `
+          <h3 class="font-semibold mb-2">أحدث فيديو:</h3>
+          <iframe width="100%" height="215" src="https://www.youtube.com/embed/${latestVideo.id.videoId}" frameborder="0" allowfullscreen class="rounded-xl"></iframe>
+        `;
+      } catch (error) {
+        console.error("خطأ في جلب البيانات:", error);
+      }
+    }
+
+    getChannelData();
+  </script>
+</body>
+</html>
