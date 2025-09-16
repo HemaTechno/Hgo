@@ -1,63 +1,182 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>صفحة ترحيب</title>
+  <title>قناتي على اليوتيوب</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background-attachment: fixed;
+    }
+    .counter {
+      font-variant-numeric: tabular-nums;
+      transition: all 0.3s ease;
+    }
+    .card {
+      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .floating {
+      animation: floating 3s ease-in-out infinite;
+    }
+    @keyframes floating {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+  </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+<body class="flex flex-col items-center justify-center min-h-screen p-4 text-white">
+  <!-- شعار متحرك -->
+  <div class="floating mb-6">
+    <div class="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-2xl">
+      <i class="fab fa-youtube text-red-600 text-5xl"></i>
+    </div>
+  </div>
 
   <!-- عنوان الصفحة -->
-  <h1 class="text-3xl font-bold mb-4 text-center">مرحباً بكم في قناتي</h1>
+  <h1 class="text-4xl font-bold mb-2 text-center">مرحباً بكم في قناتي</h1>
+  <p class="text-xl mb-8 text-center opacity-90">إحصائيات القناة مباشرة من يوتيوب</p>
 
   <!-- معلومات القناة -->
-  <div class="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md text-center">
-    <h2 class="text-xl font-semibold mb-2">معلومات القناة</h2>
-    <p id="subscribers" class="text-gray-700 mb-1">المشتركين: ...</p>
-    <p id="views" class="text-gray-700 mb-1">المشاهدات: ...</p>
-    <p id="videos" class="text-gray-700 mb-4">عدد الفيديوهات: ...</p>
+  <div class="card rounded-2xl shadow-2xl p-8 w-full max-w-2xl text-center mb-10">
+    <h2 class="text-2xl font-semibold mb-6 border-b border-white/30 pb-3">معلومات القناة</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white/10 rounded-xl p-4">
+        <i class="fas fa-users text-3xl mb-3 text-blue-300"></i>
+        <h3 class="text-lg font-medium mb-2">المشتركين</h3>
+        <div id="subscribers" class="text-3xl font-bold counter">0</div>
+      </div>
+      
+      <div class="bg-white/10 rounded-xl p-4">
+        <i class="fas fa-eye text-3xl mb-3 text-green-300"></i>
+        <h3 class="text-lg font-medium mb-2">المشاهدات</h3>
+        <div id="views" class="text-3xl font-bold counter">0</div>
+      </div>
+      
+      <div class="bg-white/10 rounded-xl p-4">
+        <i class="fas fa-video text-3xl mb-3 text-purple-300"></i>
+        <h3 class="text-lg font-medium mb-2">الفيديوهات</h3>
+        <div id="videos" class="text-3xl font-bold counter">0</div>
+      </div>
+    </div>
 
     <!-- أحدث فيديو -->
-    <div id="latestVideo" class="mt-4"></div>
+    <div class="mt-8">
+      <h3 class="text-xl font-semibold mb-4 flex items-center justify-center">
+        <i class="fas fa-play-circle mr-2 text-red-400"></i>أحدث فيديو
+      </h3>
+      <div id="latestVideo" class="rounded-2xl overflow-hidden shadow-xl"></div>
+    </div>
   </div>
 
   <!-- الأزرار -->
-  <div class="mt-6 flex space-x-4 rtl:space-x-reverse">
-    <a href="hacks.html" class="bg-blue-600 text-white px-6 py-2 rounded-xl hover:bg-blue-700">قسم الهاكات</a>
-    <a href="scripts.html" class="bg-green-600 text-white px-6 py-2 rounded-xl hover:bg-green-700">قسم السكربتات</a>
+  <div class="flex flex-col sm:flex-row gap-4 mb-10">
+    <a href="hacks.html" class="pulse bg-gradient-to-r from-blue-600 to-blue-500 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-blue-600 transition-all duration-300 flex items-center justify-center text-lg font-medium shadow-lg">
+      <i class="fas fa-code mr-2"></i> قسم الهاكات
+    </a>
+    <a href="scripts.html" class="pulse bg-gradient-to-r from-green-600 to-green-500 text-white px-8 py-4 rounded-xl hover:from-green-700 hover:to-green-600 transition-all duration-300 flex items-center justify-center text-lg font-medium shadow-lg">
+      <i class="fas fa-scroll mr-2"></i> قسم السكربتات
+    </a>
   </div>
 
+  <!-- تذييل الصفحة -->
+  <footer class="text-center text-white/70 text-sm mt-8">
+    <p>© 2023 قناتي على اليوتيوب. جميع الحقوق محفوظة</p>
+  </footer>
+
   <script>
-    const API_KEY = "AIzaSyBzMQ4xojy1F3NVM1fxd2YHxO1EC_aaDtE";  // ضع مفتاح API هنا
-    const CHANNEL_ID = "UCk2r8SKirfD-XS7g5m31kKA";  // ضع Channel ID هنا
+    const API_KEY = "AIzaSyBzMQ4xojy1F3NVM1fxd2YHxO1EC_aaDtE";
+    const CHANNEL_ID = "UCk2r8SKirfD-XS7g5m31kKA";
+
+    // دالة لعرض الأرقام بشكل عداد
+    function animateValue(element, start, end, duration) {
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        element.innerText = value.toLocaleString();
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
 
     // جلب بيانات القناة
     async function getChannelData() {
       try {
+        // إظهار حالة التحميل
+        document.getElementById('subscribers').innerText = '...';
+        document.getElementById('views').innerText = '...';
+        document.getElementById('videos').innerText = '...';
+
         const channelResponse = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${CHANNEL_ID}&key=${API_KEY}`);
         const channelData = await channelResponse.json();
+        
+        if (!channelData.items || channelData.items.length === 0) {
+          throw new Error("لم يتم العثور على القناة");
+        }
+        
         const stats = channelData.items[0].statistics;
 
-        document.getElementById('subscribers').innerText = `المشتركين: ${stats.subscriberCount}`;
-        document.getElementById('views').innerText = `المشاهدات: ${stats.viewCount}`;
-        document.getElementById('videos').innerText = `عدد الفيديوهات: ${stats.videoCount}`;
+        // عرض الأرقام بشكل عداد
+        animateValue(document.getElementById('subscribers'), 0, parseInt(stats.subscriberCount), 2000);
+        animateValue(document.getElementById('views'), 0, parseInt(stats.viewCount), 2000);
+        animateValue(document.getElementById('videos'), 0, parseInt(stats.videoCount), 1500);
 
         // جلب أحدث فيديو
         const videoResponse = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&channelId=${CHANNEL_ID}&order=date&part=snippet&type=video&maxResults=1`);
         const videoData = await videoResponse.json();
-        const latestVideo = videoData.items[0];
-
-        document.getElementById('latestVideo').innerHTML = `
-          <h3 class="font-semibold mb-2">أحدث فيديو:</h3>
-          <iframe width="100%" height="215" src="https://www.youtube.com/embed/${latestVideo.id.videoId}" frameborder="0" allowfullscreen class="rounded-xl"></iframe>
-        `;
+        
+        if (videoData.items && videoData.items.length > 0) {
+          const latestVideo = videoData.items[0];
+          document.getElementById('latestVideo').innerHTML = `
+            <iframe width="100%" height="315" src="https://www.youtube.com/embed/${latestVideo.id.videoId}" 
+            frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen class="rounded-xl"></iframe>
+          `;
+        } else {
+          document.getElementById('latestVideo').innerHTML = `
+            <div class="bg-white/10 rounded-xl p-8 text-center">
+              <i class="fas fa-video-slash text-4xl mb-4 text-gray-400"></i>
+              <p>لا تتوفر فيديوهات حالياً</p>
+            </div>
+          `;
+        }
       } catch (error) {
         console.error("خطأ في جلب البيانات:", error);
+        document.getElementById('subscribers').innerText = 'خطأ في التحميل';
+        document.getElementById('views').innerText = 'خطأ في التحميل';
+        document.getElementById('videos').innerText = 'خطأ في التحميل';
+        document.getElementById('latestVideo').innerHTML = `
+          <div class="bg-red-500/20 rounded-xl p-8 text-center border border-red-500/30">
+            <i class="fas fa-exclamation-triangle text-4xl mb-4 text-red-400"></i>
+            <p>حدث خطأ في تحميل بيانات القناة</p>
+            <p class="text-sm mt-2">${error.message}</p>
+          </div>
+        `;
       }
     }
 
-    getChannelData();
+    // بدء تحميل البيانات عند فتح الصفحة
+    document.addEventListener('DOMContentLoaded', getChannelData);
   </script>
 </body>
 </html>
