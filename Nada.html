@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بحبك يا ندوشتي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+        
+        .container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* الخطوط المتحركة في الخلفية */
+        .lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .line {
+            position: absolute;
+            background: linear-gradient(to right, rgba(255,0,128,0.7), rgba(255,105,180,0.7));
+            box-shadow: 0 0 15px rgba(255, 20, 147, 0.6);
+            border-radius: 10px;
+            opacity: 0.7;
+            animation: lineMove 10s infinite ease-in-out;
+        }
+        
+        .line1 {
+            width: 500px;
+            height: 4px;
+            top: 50px;
+            left: -100px;
+            transform: rotate(45deg);
+            animation-delay: 0s;
+        }
+        
+        .line2 {
+            width: 400px;
+            height: 3px;
+            bottom: 100px;
+            right: -100px;
+            transform: rotate(-30deg);
+            animation-delay: 1s;
+        }
+        
+        .line3 {
+            width: 600px;
+            height: 2px;
+            top: 200px;
+            left: -150px;
+            transform: rotate(10deg);
+            animation-delay: 2s;
+        }
+        
+        .line4 {
+            width: 300px;
+            height: 3px;
+            bottom: 150px;
+            right: -50px;
+            transform: rotate(-60deg);
+            animation-delay: 3s;
+        }
+        
+        .line5 {
+            width: 450px;
+            height: 2px;
+            top: 100px;
+            right: -100px;
+            transform: rotate(80deg);
+            animation-delay: 4s;
+        }
+        
+        /* القلب */
+        .heart-container {
+            position: relative;
+            width: 300px;
+            height: 280px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            margin-bottom: 30px;
+        }
+        
+        .heart {
+            position: relative;
+            width: 200px;
+            height: 180px;
+            opacity: 0;
+            transform: scale(0.1);
+            animation: drawHeart 3s forwards, heartbeat 1.5s infinite 3s;
+        }
+        
+        .heart:before,
+        .heart:after {
+            content: "";
+            position: absolute;
+            left: 100px;
+            top: 0;
+            width: 100px;
+            height: 160px;
+            background: linear-gradient(45deg, #ff6b6b, #ff4b8b);
+            border-radius: 100px 100px 0 0;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+            box-shadow: 0 0 40px rgba(255, 0, 128, 0.8);
+        }
+        
+        .heart:after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+        
+        /* النص */
+        .text {
+            position: relative;
+            color: white;
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 3;
+            text-shadow: 2px 2px 10px rgba(255, 105, 180, 0.8);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInText 2s forwards 2.5s;
+            padding: 15px 40px;
+            border-radius: 30px;
+            background: rgba(255, 105, 180, 0.2);
+            backdrop-filter: blur(5px);
+            box-shadow: 0 0 25px rgba(255, 20, 147, 0.4);
+        }
+        
+        /* الجزيئات المتحركة */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .particle {
+            position: absolute;
+            background-color: rgba(255, 105, 180, 0.7);
+            border-radius: 50%;
+            animation: float 8s infinite ease-in-out;
+        }
+        
+        /* الرسالة */
+        .message {
+            position: absolute;
+            bottom: 30px;
+            text-align: center;
+            font-size: 14px;
+            opacity: 0.7;
+            z-index: 2;
+        }
+        
+        /* الأنيميشن */
+        @keyframes drawHeart {
+            0% {
+                opacity: 0;
+                transform: scale(0.1) rotate(-180deg);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2) rotate(10deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+        
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeInText {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes lineMove {
+            0%, 100% {
+                transform: rotate(45deg) translateX(-100px);
+                opacity: 0.2;
+            }
+            50% {
+                transform: rotate(45deg) translateX(100px);
+                opacity: 0.7;
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0.3;
+            }
+            25% {
+                transform: translateY(-40px) translateX(30px);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-20px) translateX(-40px);
+                opacity: 0.4;
+            }
+            75% {
+                transform: translateY(30px) translateX(20px);
+                opacity: 0.8;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- الخطوط المتحركة -->
+        <div class="lines">
+            <div class="line line1"></div>
+            <div class="line line2"></div>
+            <div class="line line3"></div>
+            <div class="line line4"></div>
+            <div class="line line5"></div>
+        </div>
+        
+        <!-- الجزيئات -->
+        <div class="particles" id="particles"></div>
+        
+        <!-- القلب -->
+        <div class="heart-container">
+            <div class="heart"></div>
+        </div>
+        
+        <!-- النص -->
+        <div class="text">بحبك يا ندوشتي</div>
+        
+        <!-- الرسالة -->
+        <div class="message">منذ اليوم الأول.. وإلى الأبد</div>
+    </div>
+
+    <script>
+        // إنشاء الجزيئات المتحركة
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesContainer = document.getElementById('particles');
+            const colors = ['#ff1493', '#ff69b4', '#ff6b6b', '#ff4b8b'];
+            
+            for (let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // تحديد خصائص عشوائية لكل جزيء
+                const size = Math.random() * 10 + 2;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const delay = Math.random() * 8;
+                const duration = Math.random() * 10 + 8;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.background = color;
+                particle.style.animationDelay = `${delay}s`;
+                particle.style.animationDuration = `${duration}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        });
+    </script>
+</body>
+</html>
