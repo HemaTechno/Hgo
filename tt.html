@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tasks- Hema Tech</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #e74c3c;
+      --primary-dark: #c0392b;
+      --secondary: #3498db;
+      --accent: #9b59b6;
+      --dark: #2c3e50;
+      --light: #ecf0f1;
+      --gray: #95a5a6;
+      --success: #2ecc71;
+      --gold: #f1c40f;
+      --gradient: linear-gradient(135deg, #e74c3c 0%, #9b59b6 50%, #3498db 100%);
+      --gradient-gold: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%);
+      --shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Cairo", sans-serif;
+      background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
+      color: var(--light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(155, 89, 182, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(52, 152, 219, 0.1) 0%, transparent 50%);
+      z-index: -1;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .logo i {
+      font-size: 2rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(231, 76, 60, 0.3));
+    }
+
+    .logo-text {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .tagline {
+      color: var(--light);
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 5px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      padding: 25px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: var(--gradient);
+    }
+
+    .image-container {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      transition: var(--transition);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .image-container:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    img {
+      width: 100%;
+      display: block;
+      transition: var(--transition);
+    }
+
+    .image-container:hover img {
+      transform: scale(1.05);
+    }
+
+    h2 {
+      color: var(--light);
+      margin: 15px 0;
+      font-weight: 700;
+      font-size: 1.6rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--gradient);
+      border-radius: 3px;
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+
+    .progress-section {
+      margin: 25px 0;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    #progressContainer {
+      width: 100%;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      height: 14px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    #progressBar {
+      width: 0%;
+      height: 100%;
+      background: var(--gradient);
+      transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #progressBar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background-image: linear-gradient(
+        -45deg,
+        rgba(255, 255, 255, 0.3) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0.3) 75%,
+        transparent 75%,
+        transparent
+      );
+      background-size: 50px 50px;
+      animation: move 2s linear infinite;
+      border-radius: 10px;
+    }
+
+    .task {
+      margin-top: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: var(--transition);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .task:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .task::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--gradient);
+    }
+
+    .task span {
+      font-weight: 600;
+      color: var(--light);
+      flex: 1;
+      text-align: right;
+      padding-right: 10px;
+    }
+
+    .task button {
+      background: var(--gradient);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .task button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transition: var(--transition);
+      z-index: -1;
+    }
+
+    .task button:hover {
+      transform: scale(1.15);
+      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.6);
+    }
+
+    .task button:hover::before {
+      opacity: 1;
+    }
+
+    .task.completed {
+      background: rgba(46, 204, 113, 0.1);
+      border-left-color: var(--success);
+    }
+
+    .task.completed span {
+      color: var(--success);
+    }
+
+    .circle {
+      border: 3px solid rgba(52, 152, 219, 0.2);
+      border-top: 3px solid var(--secondary);
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    #unlockBtn {
+      display: none;
+      margin-top: 25px;
+      background: var(--gradient);
+      color: #fff;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      letter-spacing: 1px;
+    }
+
+    #unlockBtn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.5s ease;
+      z-index: -1;
+    }
+
+    #unlockBtn:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(231, 76, 60, 0.7);
+      letter-spacing: 2px;
+    }
+
+    #unlockBtn:hover::before {
+      width: 100%;
+    }
+
+    #unlockBtn:disabled {
+      background: var(--gray);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      letter-spacing: 1px;
+    }
+
+    #unlockBtn:disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    #countView {
+      margin-top: 15px;
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.9rem;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 12px 24px;
+      border-radius: 50px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #countView::before {
+      content: '👥';
+      font-size: 1.1rem;
+    }
+
+    .footer {
+      width: 100%;
+      max-width: 480px;
+      margin-top: 30px;
+      text-align: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 1s ease-out 0.5s both;
+    }
+
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .copyright {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .youtube-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.08);
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .youtube-link:hover {
+      background: rgba(255, 0, 0, 0.1);
+      color: #fff;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(255, 0, 0, 0.2);
+    }
+
+    .youtube-link i {
+      color: #ff0000;
+      font-size: 1.3rem;
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes move {
+      0% { background-position: 0 0; }
+      100% { background-position: 50px 50px; }
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+    }
+
+    /* تأثيرات للهواتف */
+    @media (max-width: 480px) {
+      .card {
+        padding: 20px;
+        border-radius: 20px;
+      }
+      
+      h2 {
+        font-size: 1.4rem;
+      }
+      
+      .logo-text {
+        font-size: 1.5rem;
+      }
+      
+      .task {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-rocket"></i>
+        <div class="logo-text">Hema Tech</div>
+      </div>
+      <div class="tagline">Ibrahim Mansour</div>
+    </div>
+
+    <div class="card">
+      <div class="image-container">
+        <img id="linkImage" src="https://via.placeholder.com/400x200/2c3e50/ffffff?text=Hema+Tech" alt="صورة">
+      </div>
+      <h2 id="linkTitle">Titel</h2>
+      <p id="linkDesc">وصف المهمة سيكون هنا. هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة.</p>
+
+      <div class="progress-section">
+        <div class="progress-info">
+          <span>Progress</span>
+          <span id="progressText">0%</span>
+        </div>
+        <div id="progressContainer">
+          <div id="progressBar"></div>
+        </div>
+      </div>
+
+      <div id="taskList">
+        <!-- المهام سيتم إضافتها هنا -->
+      </div>
+      <button id="unlockBtn" class="pulse">Unlock 🔓</button>
+    </div>
+
+    <div id="countView">0 Unlock </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="copyright">All copyright for Hema Tech © 2025-2026</div>
+      <div class="brand">
+        <i class="fas fa-crown"></i>
+        <span>Hema Tech</span>
+      </div>
+      <a href="https://youtube.com/@hema_tech1?si=UqCsC50yMsxuftwX" target="_blank" class="youtube-link">
+        <i class="fab fa-youtube"></i>
+        <span>Hema Tech</span>
+      </a>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+      authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+      databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+      projectId: "hhhhhh-d4fb8",
+      storageBucket: "hhhhhh-d4fb8.appspot.com",
+      messagingSenderId: "24512338206",
+      appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+      measurementId: "G-HD4R7GNQ5H"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const linkId = urlParams.get("id");
+
+    const linkImage = document.getElementById("linkImage");
+    const linkTitle = document.getElementById("linkTitle");
+    const linkDesc = document.getElementById("linkDesc");
+    const taskList = document.getElementById("taskList");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const countView = document.getElementById("countView");
+
+    let tasks = [];
+    let completed = 0;
+    let destination = "";
+    let docId = "";
+    let unlockCount = 0;
+    let canClickUnlock = true; // متغير للتحقق من إمكانية الضغط على الزر
+
+    // بيانات تجريبية للعرض
+    const demoData = {
+      coverUrl: "https://via.placeholder.com/400x200/2c3e50/ffffff?text=Hema+Tech",
+      title: "مهمة خاصة بتقنية Hema",
+      description: "هذه مهمة تجريبية لعرض إمكانيات التصميم المتقدم في Hema Tech",
+      destination: "https://www.example.com",
+      tasks: [
+        { typeLabel: "اشترك في القناة", link: "https://youtube.com/@hema_tech1", done: false },
+        { typeLabel: "شاهد الفيديو", link: "https://www.example.com/video1", done: false },
+        { typeLabel: "انضم للمجموعة", link: "https://www.example.com/group", done: false }
+      ],
+      unlockCount: 42
+    };
+
+    // استخدام البيانات التجريبية إذا لم يكن هناك رابط
+    if (!linkId) {
+      linkImage.src = demoData.coverUrl;
+      linkTitle.textContent = demoData.title;
+      linkDesc.textContent = demoData.description;
+      destination = demoData.destination;
+      tasks = demoData.tasks;
+      unlockCount = demoData.unlockCount;
+
+      countView.textContent = `${unlockCount} Unlocks`;
+      renderTasks();
+    } else if (linkId) {
+      const q = query(collection(db, "links"), where("idField", "==", linkId));
+      getDocs(q).then(snapshot => {
+        if (!snapshot.empty) {
+          const docSnap = snapshot.docs[0];
+          const data = docSnap.data();
+          docId = docSnap.id;
+
+          linkImage.src = data.coverUrl;
+          linkTitle.textContent = data.title;
+          linkDesc.textContent = data.description;
+          destination = data.destination;
+          tasks = data.tasks || [];
+          unlockCount = data.unlockCount || 0;
+
+          countView.textContent = `${unlockCount} Unlocks`;
+          renderTasks();
+        } else {
+          linkTitle.textContent = "The link does not exist";
+        }
+      });
+    }
+
+    function renderTasks() {
+      taskList.innerHTML = "";
+      completed = tasks.filter(t => t.done).length;
+
+      const progress = (completed / tasks.length) * 100;
+      progressBar.style.width = progress + "%";
+      progressText.textContent = `${Math.round(progress)}%`;
+
+      tasks.forEach((task, index) => {
+        const div = document.createElement("div");
+        div.className = `task ${task.done ? 'completed' : ''} fade-in`;
+        
+        // إخفاء المهام القادمة
+        if (index > completed) {
+          div.style.display = "none";
+        }
+
+        div.innerHTML = `
+          <span>${task.typeLabel || "Task"}</span>
+          ${task.done ? 
+            '<div style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">✅</div>' : 
+            `<button onclick="startTask(${index})">▶️</button>`
+          }
+        `;
+        taskList.appendChild(div);
+      });
+
+      if (completed === tasks.length && tasks.length > 0) {
+        unlockBtn.style.display = "block";
+      } else {
+        unlockBtn.style.display = "none";
+      }
+    }
+
+    window.startTask = function(index) {
+      const div = taskList.children[index];
+      const button = div.querySelector("button");
+      
+      if (button) {
+        button.outerHTML = `<div class='circle'></div>`;
+      }
+
+      // فتح رابط المهمة
+      if (tasks[index] && tasks[index].link) {
+        window.open(tasks[index].link, "_blank");
+      }
+
+      // بعد 10 ثواني يعتبر المهمة تمت
+      setTimeout(() => {
+        if (tasks[index]) {
+          tasks[index].done = true;
+          renderTasks();
+        }
+      }, 10000);
+    };
+
+    // دالة لمنع الـ Spam على زر Unlock
+    function handleUnlockClick() {
+      if (!canClickUnlock) {
+        return; // إذا كان الزر معطل، لا تفعل شيئًا
+      }
+      
+      // تعطيل الزر لمدة 10 ثواني
+      canClickUnlock = false;
+      unlockBtn.disabled = true;
+      unlockBtn.textContent = "⏳ يرجى الانتظار 10 ثواني";
+      
+      // فتح الرابط
+      if (destination) {
+        window.open(destination, "_blank");
+      }
+      
+      // تحديث العداد في قاعدة البيانات
+      if (docId) {
+        const docRef = doc(db, "links", docId);
+        updateDoc(docRef, { unlockCount: increment(1) })
+          .then(() => {
+            unlockCount++;
+            countView.textContent = `${unlockCount} Unlocks`;
+          })
+          .catch(error => {
+            console.error("Error updating unlock count:", error);
+          });
+      } else {
+        // في حالة البيانات التجريبية
+        unlockCount++;
+        countView.textContent = `${unlockCount} شخص فتح الرابط`;
+      }
+      
+      // إعادة تمكين الزر بعد 10 ثواني
+      setTimeout(() => {
+        canClickUnlock = true;
+        unlockBtn.disabled = false;
+        unlockBtn.textContent = "Unlock 🔓";
+      }, 10000);
+    }
+
+    // إضافة مستمع الحدث للزر مع منع الـ Spam
+    unlockBtn.addEventListener("click", handleUnlockClick);
+  </script>
+</body>
+</html>
