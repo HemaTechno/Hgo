@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>عرض المهام</title>
   <style>
     body {
@@ -114,9 +114,8 @@
   </div>
 
   <script type="module">
-    // إعداد Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+    import { getFirestore, collection, query, where, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
@@ -130,9 +129,8 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    const db = getFirestore(app);
 
-    // الحصول على ID من الرابط
     const urlParams = new URLSearchParams(window.location.search);
     const linkId = urlParams.get("id");
 
@@ -145,17 +143,21 @@
 
     let tasks = [];
     let completed = 0;
-    let unlockUrl = "";
+    let destination = "";
+    let docId = "";
 
     if (linkId) {
-      const linkRef = ref(db, "links/" + linkId);
-      get(linkRef).then((snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          linkImage.src = data.image;
+      const q = query(collection(db, "links"), where("idField", "==", linkId));
+      getDocs(q).then(snapshot => {
+        if (!snapshot.empty) {
+          const docSnap = snapshot.docs[0];
+          const data = docSnap.data();
+          docId = docSnap.id;
+
+          linkImage.src = data.coverUrl;
           linkTitle.textContent = data.title;
           linkDesc.textContent = data.description;
-          unlockUrl = data.finalLink;
+          destination = data.destination;
           tasks = data.tasks || [];
 
           renderTasks();
@@ -175,7 +177,7 @@
         const div = document.createElement("div");
         div.className = "task";
         div.innerHTML = `
-          <span>${task.name}</span>
+          <span>${task.typeLabel || "مهمة"}</span>
           ${task.done ? "✅" : `<button onclick="startTask(${index})">▶️</button>`}
         `;
         taskList.appendChild(div);
@@ -197,13 +199,13 @@
     };
 
     unlockBtn.addEventListener("click", async () => {
-      window.open(unlockUrl, "_blank");
-      const unlockRef = ref(db, "links/" + linkId + "/unlockCount");
-      get(unlockRef).then(snapshot => {
-        const current = snapshot.val() || 0;
-        update(ref(db, "links/" + linkId), { unlockCount: current + 1 });
-      });
+      window.open(destination, "_blank");
+      if (docId) {
+        const docRef = doc(db, "links", docId);
+        await updateDoc(docRef, { unlockCount: increment(1) });
+      }
     });
   </script>
 </body>
 </html>
+
