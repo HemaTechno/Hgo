@@ -633,7 +633,7 @@
       tasks = demoData.tasks;
       unlockCount = demoData.unlockCount;
 
-      countView.textContent = `${unlockCount} شخص فتح الرابط`;
+      countView.textContent = `${unlockCount} Unlocks`;
       renderTasks();
     } else if (linkId) {
       const q = query(collection(db, "links"), where("idField", "==", linkId));
@@ -650,10 +650,10 @@
           tasks = data.tasks || [];
           unlockCount = data.unlockCount || 0;
 
-          countView.textContent = `${unlockCount} شخص فتح الرابط`;
+          countView.textContent = `${unlockCount} Unlocks`;
           renderTasks();
         } else {
-          linkTitle.textContent = "الرابط غير موجود ❌";
+          linkTitle.textContent = "The link does not exist";
         }
       });
     }
@@ -676,7 +676,7 @@
         }
 
         div.innerHTML = `
-          <span>${task.typeLabel || "مهمة"}</span>
+          <span>${task.typeLabel || "Task"}</span>
           ${task.done ? 
             '<div style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">✅</div>' : 
             `<button onclick="startTask(${index})">▶️</button>`
@@ -723,7 +723,7 @@
         const docRef = doc(db, "links", docId);
         await updateDoc(docRef, { unlockCount: increment(1) });
         unlockCount++;
-        countView.textContent = `${unlockCount} شخص فتح الرابط`;
+        countView.textContent = `${unlockCount} Unlocks`;
       } else {
         // في حالة البيانات التجريبية
         unlockCount++;
