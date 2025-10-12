@@ -435,7 +435,7 @@
         const docRef = await db.collection('links').add(docData);
         const docId = docRef.id;
         // construct friendly short link (tweak as needed)
-        const publicLink = `${location.origin}/open.html?id=${docId}`;
+        const publicLink = `${location.origin}/yt.html?id=${idField}`;
         resultBox.innerHTML = `<div>Created: <a href="${publicLink}" target="_blank">${publicLink}</a><div class="small">Document ID: ${docId}</div></div>`;
       }catch(err){
         console.error(err);
