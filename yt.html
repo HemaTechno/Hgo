@@ -131,22 +131,6 @@
       background: var(--gradient);
     }
 
-    .card::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-      opacity: 0;
-      transition: var(--transition);
-    }
-
-    .card:hover::after {
-      opacity: 1;
-    }
-
     .image-container {
       position: relative;
       border-radius: 16px;
@@ -155,23 +139,6 @@
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
       transition: var(--transition);
       border: 2px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .image-container::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: var(--gradient);
-      opacity: 0;
-      transition: var(--transition);
-      z-index: 1;
-    }
-
-    .image-container:hover::before {
-      opacity: 0.2;
     }
 
     .image-container:hover {
@@ -303,6 +270,9 @@
     .task span {
       font-weight: 600;
       color: var(--light);
+      flex: 1;
+      text-align: right;
+      padding-right: 10px;
     }
 
     .task button {
@@ -322,6 +292,7 @@
       position: relative;
       overflow: hidden;
       z-index: 1;
+      flex-shrink: 0;
     }
 
     .task button::before {
@@ -359,10 +330,11 @@
       border: 3px solid rgba(52, 152, 219, 0.2);
       border-top: 3px solid var(--secondary);
       border-radius: 50%;
-      width: 35px;
-      height: 35px;
+      width: 42px;
+      height: 42px;
       animation: spin 1s linear infinite;
       display: inline-block;
+      flex-shrink: 0;
     }
 
     #unlockBtn {
@@ -545,6 +517,10 @@
       .logo-text {
         font-size: 1.5rem;
       }
+      
+      .task {
+        padding: 12px;
+      }
     }
   </style>
 </head>
@@ -560,10 +536,10 @@
 
     <div class="card">
       <div class="image-container">
-        <img id="linkImage" src="" alt="صورة">
+        <img id="linkImage" src="https://via.placeholder.com/400x200/2c3e50/ffffff?text=Hema+Tech" alt="صورة">
       </div>
-      <h2 id="linkTitle"></h2>
-      <p id="linkDesc"></p>
+      <h2 id="linkTitle">عنوان المهمة</h2>
+      <p id="linkDesc">وصف المهمة سيكون هنا. هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة.</p>
 
       <div class="progress-section">
         <div class="progress-info">
@@ -575,7 +551,9 @@
         </div>
       </div>
 
-      <div id="taskList"></div>
+      <div id="taskList">
+        <!-- المهام سيتم إضافتها هنا -->
+      </div>
       <button id="unlockBtn" class="pulse">🔓 فتح الرابط</button>
     </div>
 
@@ -632,7 +610,32 @@
     let docId = "";
     let unlockCount = 0;
 
-    if (linkId) {
+    // بيانات تجريبية للعرض
+    const demoData = {
+      coverUrl: "https://via.placeholder.com/400x200/2c3e50/ffffff?text=Hema+Tech",
+      title: "مهمة خاصة بتقنية Hema",
+      description: "هذه مهمة تجريبية لعرض إمكانيات التصميم المتقدم في Hema Tech",
+      destination: "https://www.example.com",
+      tasks: [
+        { typeLabel: "اشترك في القناة", link: "https://youtube.com/@hema_tech1", done: false },
+        { typeLabel: "شاهد الفيديو", link: "https://www.example.com/video1", done: false },
+        { typeLabel: "انضم للمجموعة", link: "https://www.example.com/group", done: false }
+      ],
+      unlockCount: 42
+    };
+
+    // استخدام البيانات التجريبية إذا لم يكن هناك رابط
+    if (!linkId) {
+      linkImage.src = demoData.coverUrl;
+      linkTitle.textContent = demoData.title;
+      linkDesc.textContent = demoData.description;
+      destination = demoData.destination;
+      tasks = demoData.tasks;
+      unlockCount = demoData.unlockCount;
+
+      countView.textContent = `${unlockCount} شخص فتح الرابط`;
+      renderTasks();
+    } else if (linkId) {
       const q = query(collection(db, "links"), where("idField", "==", linkId));
       getDocs(q).then(snapshot => {
         if (!snapshot.empty) {
@@ -667,13 +670,17 @@
         const div = document.createElement("div");
         div.className = `task ${task.done ? 'completed' : ''} fade-in`;
         
+        // إخفاء المهام القادمة
         if (index > completed) {
-          div.style.display = "none"; // إخفاء المهام القادمة
+          div.style.display = "none";
         }
 
         div.innerHTML = `
           <span>${task.typeLabel || "مهمة"}</span>
-          ${task.done ? "✅" : `<button onclick="startTask(${index})">▶️</button>`}
+          ${task.done ? 
+            '<div style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">✅</div>' : 
+            `<button onclick="startTask(${index})">▶️</button>`
+          }
         `;
         taskList.appendChild(div);
       });
@@ -687,23 +694,38 @@
 
     window.startTask = function(index) {
       const div = taskList.children[index];
-      div.querySelector("button").outerHTML = `<div class='circle'></div>`;
+      const button = div.querySelector("button");
+      
+      if (button) {
+        button.outerHTML = `<div class='circle'></div>`;
+      }
 
-      // فتح لينك المهمة
-      window.open(tasks[index].link, "_blank");
+      // فتح رابط المهمة
+      if (tasks[index] && tasks[index].link) {
+        window.open(tasks[index].link, "_blank");
+      }
 
       // بعد 10 ثواني يعتبر المهمة تمت
       setTimeout(() => {
-        tasks[index].done = true;
-        renderTasks();
+        if (tasks[index]) {
+          tasks[index].done = true;
+          renderTasks();
+        }
       }, 10000);
     };
 
     unlockBtn.addEventListener("click", async () => {
-      window.open(destination, "_blank");
+      if (destination) {
+        window.open(destination, "_blank");
+      }
+      
       if (docId) {
         const docRef = doc(db, "links", docId);
         await updateDoc(docRef, { unlockCount: increment(1) });
+        unlockCount++;
+        countView.textContent = `${unlockCount} شخص فتح الرابط`;
+      } else {
+        // في حالة البيانات التجريبية
         unlockCount++;
         countView.textContent = `${unlockCount} شخص فتح الرابط`;
       }
