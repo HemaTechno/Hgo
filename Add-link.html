@@ -4,114 +4,519 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Link Tasks Creator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg:#ffffff; --card:#f6f6f6; --muted:#6b6b6b; --red:#e23b3b; --accent:#2b2b2b;
+      --bg: #ffffff; 
+      --card: #f8fafc; 
+      --muted: #64748b; 
+      --red: #ef4444; 
+      --red-dark: #dc2626;
+      --accent: #1e293b;
+      --primary: #3b82f6;
+      --primary-light: #60a5fa;
+      --border: #e2e8f0;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+      --radius: 12px;
+      --transition: all 0.3s ease;
     }
-    *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
-    body{margin:0;background:linear-gradient(180deg,#fff,#f3f3f5);color:var(--accent);padding:24px;direction:rtl}
-    .container{max-width:820px;margin:0 auto}
-    .card{background:var(--card);border-radius:12px;padding:20px;box-shadow:0 6px 18px rgba(20,20,20,0.06);border:1px solid rgba(0,0,0,0.04)}
-    h1{margin:0 0 12px;font-size:20px}
-    label{display:block;margin:12px 0 6px;font-size:13px;color:var(--muted)}
+    
+    *{
+      box-sizing:border-box;
+      font-family: 'Tajawal', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    
+    body{
+      margin:0;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      color:var(--accent);
+      padding:24px;
+      direction:rtl;
+      min-height: 100vh;
+    }
+    
+    .container{
+      max-width:820px;
+      margin:0 auto;
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:28px;
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+      transition: var(--transition);
+    }
+    
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+    
+    h1{
+      margin:0 0 20px;
+      font-size:24px;
+      font-weight:700;
+      color: var(--accent);
+      position: relative;
+      padding-bottom: 10px;
+    }
+    
+    h1:after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 60px;
+      height: 4px;
+      background: linear-gradient(to left, var(--red), var(--primary));
+      border-radius: 2px;
+    }
+    
+    label{
+      display:block;
+      margin:16px 0 8px;
+      font-size:14px;
+      font-weight:500;
+      color:var(--muted);
+    }
+    
     input[type="text"], input[type="url"], textarea, select{
-      width:100%;padding:12px;border-radius:8px;border:1px solid #ddd;background:white;font-size:15px;
+      width:100%;
+      padding:14px;
+      border-radius:8px;
+      border:1.5px solid var(--border);
+      background:white;
+      font-size:15px;
+      transition: var(--transition);
     }
-    textarea{min-height:80px;resize:vertical}
-    .row{display:flex;gap:12px;align-items:center}
-    .row .flex{flex:1}
-    .cover-box{height:160px;border:2px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;overflow:hidden;position:relative}
-    .cover-box img{width:100%;height:100%;object-fit:cover}
-    .small{font-size:13px;color:var(--muted)}
-    .btn{display:inline-block;padding:10px 16px;border-radius:10px;background:var(--red);color:white;text-decoration:none;cursor:pointer;border:none}
-    .btn.ghost{background:transparent;color:var(--red);border:1px solid var(--red)}
-    .tasks-list{margin-top:12px}
-    .task-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid #eee;margin:6px 6px 0 0}
-    .task-pill .x{cursor:pointer;color:var(--muted);font-weight:700;padding:2px 6px}
-    .meta{display:flex;gap:8px;align-items:center;margin-top:12px}
-    .left{margin-left:auto}
-    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
-    .link-result{background:#fff;padding:10px;border-radius:8px;border:1px dashed #ddd}
+    
+    input[type="text"]:focus, input[type="url"]:focus, textarea:focus, select:focus{
+      outline:none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+    
+    textarea{
+      min-height:100px;
+      resize:vertical;
+      line-height:1.5;
+    }
+    
+    .row{
+      display:flex;
+      gap:16px;
+      align-items:center;
+    }
+    
+    .row .flex{
+      flex:1;
+    }
+    
+    .cover-box{
+      height:180px;
+      border:2px dashed var(--border);
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--muted);
+      cursor:pointer;
+      overflow:hidden;
+      position:relative;
+      transition: var(--transition);
+      background: rgba(255, 255, 255, 0.7);
+    }
+    
+    .cover-box:hover{
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .cover-box img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    
+    .small{
+      font-size:13px;
+      color:var(--muted);
+    }
+    
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 8px;
+      padding:12px 20px;
+      border-radius:10px;
+      background:var(--red);
+      color:white;
+      text-decoration:none;
+      cursor:pointer;
+      border:none;
+      font-weight:500;
+      font-size:14px;
+      transition: var(--transition);
+      box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2);
+    }
+    
+    .btn:hover{
+      background: var(--red-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 10px -1px rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn.ghost{
+      background:transparent;
+      color:var(--red);
+      border:1.5px solid var(--red);
+      box-shadow: none;
+    }
+    
+    .btn.ghost:hover{
+      background: rgba(239, 68, 68, 0.05);
+      transform: translateY(-1px);
+    }
+    
+    .btn.secondary {
+      background: var(--primary);
+      box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+    }
+    
+    .btn.secondary:hover {
+      background: var(--primary-light);
+      box-shadow: 0 6px 10px -1px rgba(59, 130, 246, 0.3);
+    }
+    
+    .tasks-list{
+      margin-top:16px;
+    }
+    
+    .task-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 16px;
+      border-radius:999px;
+      background:#fff;
+      border:1.5px solid var(--border);
+      margin:8px 8px 0 0;
+      transition: var(--transition);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+    }
+    
+    .task-pill:hover {
+      border-color: var(--primary-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+    }
+    
+    .task-pill .x{
+      cursor:pointer;
+      color:var(--muted);
+      font-weight:700;
+      padding:4px 8px;
+      border-radius: 50%;
+      transition: var(--transition);
+    }
+    
+    .task-pill .x:hover{
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--red);
+    }
+    
+    .meta{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      margin-top:16px;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 8px;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .left{
+      margin-left:auto;
+    }
+    
+    .footer{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-top:24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .link-result{
+      background:#fff;
+      padding:14px;
+      border-radius:8px;
+      border:1.5px dashed var(--border);
+      transition: var(--transition);
+      min-height: 54px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .link-result.active {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.03);
+    }
+    
     /* modal */
-    .modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:60}
-    .modal{width:100%;max-width:520px;background:white;border-radius:12px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,0.3)}
-    .platform-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;cursor:pointer}
-    .platform-item:hover{background:#f7f7f7}
-    .platform-icon{width:42px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
-    .platform-y{background:#ff2b2b}
-    .platform-f{background:#1877f2}
-    .platform-i{background:#d6249f}
-    .platform-d{background:#5865f2}
-    .platform-t{background:#0088cc}
-    .actions{margin-top:12px}
-    .action-btn{display:block;padding:10px;border-radius:10px;background:var(--red);color:white;text-align:right;margin-bottom:8px;border:none;cursor:pointer}
-    .add-step{display:flex;gap:8px;align-items:center;margin-top:10px}
-    .hint{font-size:13px;color:var(--muted);margin-top:6px}
-    .id-input {max-width:260px}
-    .muted-ghost{color:#999;font-size:13px}
-    @media (max-width:600px){.row{flex-direction:column}.footer{flex-direction:column;gap:10px}}
+    .modal-back{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.5);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:60;
+      animation: fadeIn 0.3s ease-out;
+    }
+    
+    .modal{
+      width:100%;
+      max-width:520px;
+      background:white;
+      border-radius:16px;
+      padding:24px;
+      box-shadow:var(--shadow-lg);
+      animation: slideUp 0.3s ease-out;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .platform-item{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      padding:14px;
+      border-radius:10px;
+      cursor:pointer;
+      transition: var(--transition);
+      margin-bottom: 8px;
+      border: 1.5px solid transparent;
+    }
+    
+    .platform-item:hover{
+      background:#f7f7f7;
+      transform: translateX(-4px);
+      border-color: var(--border);
+    }
+    
+    .platform-icon{
+      width:48px;
+      height:48px;
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:700;
+      font-size: 18px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .platform-y{background:linear-gradient(135deg, #ff2b2b, #cc0000)}
+    .platform-f{background:linear-gradient(135deg, #1877f2, #0e5cb8)}
+    .platform-i{background:linear-gradient(135deg, #d6249f, #a81c7c)}
+    .platform-d{background:linear-gradient(135deg, #5865f2, #3c45a5)}
+    .platform-t{background:linear-gradient(135deg, #0088cc, #006699)}
+    
+    .actions{
+      margin-top:16px;
+    }
+    
+    .action-btn{
+      display:block;
+      padding:12px;
+      border-radius:10px;
+      background:var(--red);
+      color:white;
+      text-align:right;
+      margin-bottom:10px;
+      border:none;
+      cursor:pointer;
+      transition: var(--transition);
+    }
+    
+    .add-step{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-top:16px;
+    }
+    
+    .hint{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:6px;
+      padding: 8px 12px;
+      background: rgba(100, 116, 139, 0.05);
+      border-radius: 6px;
+      border-right: 3px solid var(--muted);
+    }
+    
+    .id-input {
+      max-width:260px;
+    }
+    
+    .muted-ghost{
+      color:#94a3b8;
+      font-size:13px;
+      line-height: 1.5;
+    }
+    
+    .form-section {
+      margin-bottom: 24px;
+    }
+    
+    .form-section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .form-section-title:before {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 3px;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+    
+    @media (max-width:600px){
+      .row{flex-direction:column}
+      .footer{flex-direction:column;gap:16px}
+      .id-input {max-width: 100%}
+      .card {padding: 20px;}
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="card">
       <h1>إنشاء رابط مهام (Link + Tasks)</h1>
+      
+      <div class="form-section">
+        <div class="form-section-title">المعلومات الأساسية</div>
+        
+        <label>صورة الغلاف</label>
+        <div class="cover-box" id="coverBox">
+          <div style="text-align: center;">
+            <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
+            <div>أضغط لاختيار صورة (JPG, PNG)</div>
+            <div class="small" style="margin-top: 4px;">نسبة مقترحة 16:9</div>
+          </div>
+          <input type="file" id="coverInput" accept="image/*" style="display:none" />
+        </div>
 
-      <label>صورة الغلاف</label>
-      <div class="cover-box" id="coverBox">أضغط لاختيار صورة (JPG, PNG) — نسبة مقترحة 16:9
-        <input type="file" id="coverInput" accept="image/*" style="display:none" />
+        <label>الاسم (العنوان)</label>
+        <input id="title" type="text" placeholder="أدخل عنوان..." />
+
+        <label>الوصف المختصر</label>
+        <textarea id="description" placeholder="وصف مختصر..."></textarea>
+      </div>
+      
+      <div class="form-section">
+        <div class="form-section-title">إعدادات المنصة</div>
+        
+        <div class="row" style="margin-top:10px">
+          <div class="flex">
+            <label>I'd</label>
+            <input id="idField" class="id-input" type="text" placeholder="مثال: myChannel123 (حقل I'd)" />
+          </div>
+          <div style="width:160px">
+            <label>المنصة</label>
+            <select id="platformSelect">
+              <option value="">اختر منصة أو اضغط Manage</option>
+              <option value="youtube">YouTube</option>
+              <option value="facebook">Facebook</option>
+              <option value="instagram">Instagram</option>
+              <option value="discord">Discord</option>
+              <option value="telegram">Telegram</option>
+            </select>
+          </div>
+          <div style="width:120px;align-self:end">
+            <button class="btn ghost" id="openPlatformBtn">ادارة المنصات</button>
+          </div>
+        </div>
+
+        <label style="margin-top:12px">اللينك النهائي (URL) - يفتح بعد تنفيذ المهام</label>
+        <input id="destination" type="url" placeholder="https://example.com" />
       </div>
 
-      <label>الاسم (العنوان)</label>
-      <input id="title" type="text" placeholder="أدخل عنوان..." />
-
-      <label>الوصف المختصر</label>
-      <textarea id="description" placeholder="وصف مختصر..."></textarea>
-
-      <div class="row" style="margin-top:10px">
-        <div class="flex">
-          <label>I'd</label>
-          <input id="idField" class="id-input" type="text" placeholder="مثال: myChannel123 (حقل I'd)" />
-        </div>
-        <div style="width:160px">
-          <label>المنصة</label>
-          <select id="platformSelect">
-            <option value="">اختر منصة أو اضغط Manage</option>
-            <option value="youtube">YouTube</option>
-            <option value="facebook">Facebook</option>
-            <option value="instagram">Instagram</option>
-            <option value="discord">Discord</option>
-            <option value="telegram">Telegram</option>
-          </select>
-        </div>
-        <div style="width:120px;align-self:end">
-          <button class="btn ghost" id="openPlatformBtn">ادارة المنصات</button>
-        </div>
-      </div>
-
-      <label style="margin-top:12px">اللينك النهائي (URL) - يفتح بعد تنفيذ المهام</label>
-      <input id="destination" type="url" placeholder="https://example.com" />
-
-      <div style="margin-top:12px">
+      <div class="form-section">
+        <div class="form-section-title">المهام</div>
+        
         <label>المهام المضافة</label>
         <div id="tasksContainer" class="tasks-list">
           <div class="hint">لم يتم إضافة مهام بعد — اختر منصة واضغط "Manage" أو اضغط إضافة مهمة.</div>
         </div>
 
         <div class="add-step">
-          <button class="btn" id="openTaskModalBtn">+ إضافة مهمة</button>
+          <button class="btn secondary" id="openTaskModalBtn">
+            <span style="font-size: 18px;">+</span> إضافة مهمة
+          </button>
           <button class="btn ghost" id="clearTasks">مسح المهام</button>
         </div>
       </div>
 
       <div class="meta">
         <div class="muted-ghost">يمكن إضافة أكثر من مهمة، و لكل مهمة منصة ونوع (مثل: اشترك، لايك، تعليق)</div>
-        <div class="left"><span class="small">Saved to Firebase</span></div>
+        <div class="left">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 8px; height: 8px; background: #10b981; border-radius: 50%;"></div>
+            <span class="small">Saved to Firebase</span>
+          </div>
+        </div>
       </div>
 
       <div class="footer">
-        <div>
-          <button class="btn" id="createBtn">Create Link</button>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn pulse" id="createBtn">Create Link</button>
           <button class="btn ghost" id="previewBtn">معاينة</button>
         </div>
         <div style="min-width:260px">
@@ -125,12 +530,12 @@
   <!-- Modal: منصات -->
   <div class="modal-back" id="platformModal">
     <div class="modal" role="dialog" aria-modal="true">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <strong>اختر منصة</strong>
+      <div style="display:flex;justify-content:space-between;align-items:center; margin-bottom: 16px;">
+        <strong style="font-size: 18px;">اختر منصة</strong>
         <button id="closePlatform" class="btn ghost">إغلاق</button>
       </div>
 
-      <div style="margin-top:10px">
+      <div>
         <div class="platform-item" data-platform="youtube">
           <div class="platform-icon platform-y">YT</div>
           <div>
@@ -177,12 +582,12 @@
   <!-- Modal: إضافة مهمة -->
   <div class="modal-back" id="taskModal">
     <div class="modal">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <strong id="taskModalTitle">إضافة مهمة</strong>
+      <div style="display:flex;justify-content:space-between;align-items:center; margin-bottom: 16px;">
+        <strong id="taskModalTitle" style="font-size: 18px;">إضافة مهمة</strong>
         <button id="closeTaskModal" class="btn ghost">إغلاق</button>
       </div>
 
-      <div style="margin-top:12px">
+      <div>
         <label>المنصة</label>
         <select id="taskPlatform">
           <option value="youtube">YouTube</option>
@@ -201,7 +606,7 @@
         <label>تعليمات إضافية (اختياري)</label>
         <input id="taskNote" type="text" placeholder="مثال: اكتب 'جربت' في التعليقات" />
 
-        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:flex-end">
           <button id="addTaskBtn" class="btn">حفظ المهمة</button>
         </div>
       </div>
@@ -217,15 +622,15 @@
     // ====== ضع إعدادات Firebase هنا ======
     // أنشئ مشروع في Firebase ثم انسخ config هنا:
     const firebaseConfig = {
-  apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
-  authDomain: "hhhhhh-d4fb8.firebaseapp.com",
-  databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
-  projectId: "hhhhhh-d4fb8",
-  storageBucket: "hhhhhh-d4fb8.appspot.com",
-  messagingSenderId: "24512338206",
-  appId: "1:24512338206:web:dfe045db59bd3434a2110f",
-  measurementId: "G-HD4R7GNQ5H"
-};
+      apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+      authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+      databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+      projectId: "hhhhhh-d4fb8",
+      storageBucket: "hhhhhh-d4fb8.appspot.com",
+      messagingSenderId: "24512338206",
+      appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+      measurementId: "G-HD4R7GNQ5H"
+    };
     // =====================================
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -401,6 +806,7 @@
         tasks
       };
       resultBox.innerHTML = `<pre style="white-space:pre-wrap;font-size:13px">${JSON.stringify(preview,null,2)}</pre>`;
+      resultBox.classList.add('active');
     });
 
     // create link (save to Firebase)
@@ -437,6 +843,7 @@
         // construct friendly short link (tweak as needed)
         const publicLink = `${location.origin}/yt.html?id=${idField}`;
         resultBox.innerHTML = `<div>Created: <a href="${publicLink}" target="_blank">${publicLink}</a><div class="small">Document ID: ${docId}</div></div>`;
+        resultBox.classList.add('active');
       }catch(err){
         console.error(err);
         alert('حدث خطأ أثناء الحفظ: ' + (err.message || err));
