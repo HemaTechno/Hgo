@@ -1,147 +1,473 @@
-
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ar">
 <head>
-<script src="https://cdn.work.ink/js/redirect.js?id=1407" data-url="https://work.ink/direct/1407" data-max="2"></script>
-
-  
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Task Manager</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Link Tasks Creator</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      padding: 0;
-      background-color: #f4f4f9;
+    :root{
+      --bg:#ffffff; --card:#f6f6f6; --muted:#6b6b6b; --red:#e23b3b; --accent:#2b2b2b;
     }
-    h1 {
-      text-align: center;
+    *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+    body{margin:0;background:linear-gradient(180deg,#fff,#f3f3f5);color:var(--accent);padding:24px;direction:rtl}
+    .container{max-width:820px;margin:0 auto}
+    .card{background:var(--card);border-radius:12px;padding:20px;box-shadow:0 6px 18px rgba(20,20,20,0.06);border:1px solid rgba(0,0,0,0.04)}
+    h1{margin:0 0 12px;font-size:20px}
+    label{display:block;margin:12px 0 6px;font-size:13px;color:var(--muted)}
+    input[type="text"], input[type="url"], textarea, select{
+      width:100%;padding:12px;border-radius:8px;border:1px solid #ddd;background:white;font-size:15px;
     }
-    input, textarea, select, button {
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 10px;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
+    textarea{min-height:80px;resize:vertical}
+    .row{display:flex;gap:12px;align-items:center}
+    .row .flex{flex:1}
+    .cover-box{height:160px;border:2px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;overflow:hidden;position:relative}
+    .cover-box img{width:100%;height:100%;object-fit:cover}
+    .small{font-size:13px;color:var(--muted)}
+    .btn{display:inline-block;padding:10px 16px;border-radius:10px;background:var(--red);color:white;text-decoration:none;cursor:pointer;border:none}
+    .btn.ghost{background:transparent;color:var(--red);border:1px solid var(--red)}
+    .tasks-list{margin-top:12px}
+    .task-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid #eee;margin:6px 6px 0 0}
+    .task-pill .x{cursor:pointer;color:var(--muted);font-weight:700;padding:2px 6px}
+    .meta{display:flex;gap:8px;align-items:center;margin-top:12px}
+    .left{margin-left:auto}
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px}
+    .link-result{background:#fff;padding:10px;border-radius:8px;border:1px dashed #ddd}
+    /* modal */
+    .modal-back{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:60}
+    .modal{width:100%;max-width:520px;background:white;border-radius:12px;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,0.3)}
+    .platform-item{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;cursor:pointer}
+    .platform-item:hover{background:#f7f7f7}
+    .platform-icon{width:42px;height:42px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    .platform-y{background:#ff2b2b}
+    .platform-f{background:#1877f2}
+    .platform-i{background:#d6249f}
+    .platform-d{background:#5865f2}
+    .platform-t{background:#0088cc}
+    .actions{margin-top:12px}
+    .action-btn{display:block;padding:10px;border-radius:10px;background:var(--red);color:white;text-align:right;margin-bottom:8px;border:none;cursor:pointer}
+    .add-step{display:flex;gap:8px;align-items:center;margin-top:10px}
+    .hint{font-size:13px;color:var(--muted);margin-top:6px}
+    .id-input {max-width:260px}
+    .muted-ghost{color:#999;font-size:13px}
+    @media (max-width:600px){.row{flex-direction:column}.footer{flex-direction:column;gap:10px}}
   </style>
 </head>
 <body>
-  <h1>Add New Task</h1>
-  <input type="text" id="title" placeholder="Title" /><br>
-  <textarea id="description" placeholder="Description"></textarea><br>
-  <input type="file" id="imageUpload" /><br>
-  <select id="platform" onchange="updateActions()">
-    <option value="">Select Platform</option>
-    <option value="YouTube">YouTube</option>
-    <option value="Facebook">Facebook</option>
-    <option value="WhatsApp">WhatsApp</option>
-    <option value="Telegram">Telegram</option>
-    <option value="Discord">Discord</option>
-  </select><br>
-  <select id="action">
-    <option value="">Select Action</option>
-  </select><br>
-  <button onclick="addAction()">Add Action</button><br>
-  <ul id="actionList"></ul>
-  <input type="text" id="redirectUrl" placeholder="Redirect URL" /><br>
-  <button onclick="addTask()">Add Task</button>
+  <div class="container">
+    <div class="card">
+      <h1>إنشاء رابط مهام (Link + Tasks)</h1>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+      <label>صورة الغلاف</label>
+      <div class="cover-box" id="coverBox">أضغط لاختيار صورة (JPG, PNG) — نسبة مقترحة 16:9
+        <input type="file" id="coverInput" accept="image/*" style="display:none" />
+      </div>
 
+      <label>الاسم (العنوان)</label>
+      <input id="title" type="text" placeholder="أدخل عنوان..." />
+
+      <label>الوصف المختصر</label>
+      <textarea id="description" placeholder="وصف مختصر..."></textarea>
+
+      <div class="row" style="margin-top:10px">
+        <div class="flex">
+          <label>I'd</label>
+          <input id="idField" class="id-input" type="text" placeholder="مثال: myChannel123 (حقل I'd)" />
+        </div>
+        <div style="width:160px">
+          <label>المنصة</label>
+          <select id="platformSelect">
+            <option value="">اختر منصة أو اضغط Manage</option>
+            <option value="youtube">YouTube</option>
+            <option value="facebook">Facebook</option>
+            <option value="instagram">Instagram</option>
+            <option value="discord">Discord</option>
+            <option value="telegram">Telegram</option>
+          </select>
+        </div>
+        <div style="width:120px;align-self:end">
+          <button class="btn ghost" id="openPlatformBtn">ادارة المنصات</button>
+        </div>
+      </div>
+
+      <label style="margin-top:12px">اللينك النهائي (URL) - يفتح بعد تنفيذ المهام</label>
+      <input id="destination" type="url" placeholder="https://example.com" />
+
+      <div style="margin-top:12px">
+        <label>المهام المضافة</label>
+        <div id="tasksContainer" class="tasks-list">
+          <div class="hint">لم يتم إضافة مهام بعد — اختر منصة واضغط "Manage" أو اضغط إضافة مهمة.</div>
+        </div>
+
+        <div class="add-step">
+          <button class="btn" id="openTaskModalBtn">+ إضافة مهمة</button>
+          <button class="btn ghost" id="clearTasks">مسح المهام</button>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="muted-ghost">يمكن إضافة أكثر من مهمة، و لكل مهمة منصة ونوع (مثل: اشترك، لايك، تعليق)</div>
+        <div class="left"><span class="small">Saved to Firebase</span></div>
+      </div>
+
+      <div class="footer">
+        <div>
+          <button class="btn" id="createBtn">Create Link</button>
+          <button class="btn ghost" id="previewBtn">معاينة</button>
+        </div>
+        <div style="min-width:260px">
+          <label class="small">الرابط الناتج</label>
+          <div id="resultBox" class="link-result">لم يتم الإنشاء بعد</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: منصات -->
+  <div class="modal-back" id="platformModal">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong>اختر منصة</strong>
+        <button id="closePlatform" class="btn ghost">إغلاق</button>
+      </div>
+
+      <div style="margin-top:10px">
+        <div class="platform-item" data-platform="youtube">
+          <div class="platform-icon platform-y">YT</div>
+          <div>
+            <div><strong>YouTube</strong></div>
+            <div class="small">مهام: Subscribe, Like, Comment, Share, etc.</div>
+          </div>
+        </div>
+
+        <div class="platform-item" data-platform="facebook">
+          <div class="platform-icon platform-f">F</div>
+          <div>
+            <div><strong>Facebook</strong></div>
+            <div class="small">Like page / Share / Comment</div>
+          </div>
+        </div>
+
+        <div class="platform-item" data-platform="instagram">
+          <div class="platform-icon platform-i">IG</div>
+          <div>
+            <div><strong>Instagram</strong></div>
+            <div class="small">Follow / Like / Comment / DM</div>
+          </div>
+        </div>
+
+        <div class="platform-item" data-platform="discord">
+          <div class="platform-icon platform-d">DC</div>
+          <div>
+            <div><strong>Discord</strong></div>
+            <div class="small">Join server / Send message</div>
+          </div>
+        </div>
+
+        <div class="platform-item" data-platform="telegram">
+          <div class="platform-icon platform-t">TG</div>
+          <div>
+            <div><strong>Telegram</strong></div>
+            <div class="small">Join channel / Send message</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: إضافة مهمة -->
+  <div class="modal-back" id="taskModal">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <strong id="taskModalTitle">إضافة مهمة</strong>
+        <button id="closeTaskModal" class="btn ghost">إغلاق</button>
+      </div>
+
+      <div style="margin-top:12px">
+        <label>المنصة</label>
+        <select id="taskPlatform">
+          <option value="youtube">YouTube</option>
+          <option value="facebook">Facebook</option>
+          <option value="instagram">Instagram</option>
+          <option value="discord">Discord</option>
+          <option value="telegram">Telegram</option>
+        </select>
+
+        <label>نوع المهمة</label>
+        <select id="taskType"></select>
+
+        <label>رابط (مثال: فيديو يوتيوب أو صفحة فيسبوك) - اختياري</label>
+        <input id="taskLink" type="url" placeholder="https://..." />
+
+        <label>تعليمات إضافية (اختياري)</label>
+        <input id="taskNote" type="text" placeholder="مثال: اكتب 'جربت' في التعليقات" />
+
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+          <button id="addTaskBtn" class="btn">حفظ المهمة</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDKs (compat for simplicity) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <script>
+    // ====== ضع إعدادات Firebase هنا ======
+    // أنشئ مشروع في Firebase ثم انسخ config هنا:
     const firebaseConfig = {
-      apiKey: "AIzaSyAKPlddXSZl25p9SI9H0CcPK4XSTNQXxAM",
-      authDomain: "t-shirt-94ff7.firebaseapp.com",
-      projectId: "t-shirt-94ff7",
-      storageBucket: "t-shirt-94ff7.appspot.com",
-      messagingSenderId: "367396012881",
-      appId: "1:367396012881:web:3127607d5ced7678e64970"
+  apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+  authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+  databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+  projectId: "hhhhhh-d4fb8",
+  storageBucket: "hhhhhh-d4fb8.appspot.com",
+  messagingSenderId: "24512338206",
+  appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+  measurementId: "G-HD4R7GNQ5H"
+};
+    // =====================================
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // عناصر الواجهة
+    const coverBox = document.getElementById('coverBox');
+    const coverInput = document.getElementById('coverInput');
+    const titleInput = document.getElementById('title');
+    const descInput = document.getElementById('description');
+    const idInput = document.getElementById('idField');
+    const destinationInput = document.getElementById('destination');
+    const tasksContainer = document.getElementById('tasksContainer');
+    const createBtn = document.getElementById('createBtn');
+    const resultBox = document.getElementById('resultBox');
+    const openPlatformBtn = document.getElementById('openPlatformBtn');
+    const platformModal = document.getElementById('platformModal');
+    const closePlatform = document.getElementById('closePlatform');
+    const platformItems = document.querySelectorAll('.platform-item');
+    const platformSelect = document.getElementById('platformSelect');
+
+    const openTaskModalBtn = document.getElementById('openTaskModalBtn');
+    const taskModal = document.getElementById('taskModal');
+    const closeTaskModal = document.getElementById('closeTaskModal');
+    const taskPlatform = document.getElementById('taskPlatform');
+    const taskType = document.getElementById('taskType');
+    const taskLink = document.getElementById('taskLink');
+    const taskNote = document.getElementById('taskNote');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    const clearTasks = document.getElementById('clearTasks');
+    const previewBtn = document.getElementById('previewBtn');
+
+    // تهيئة بيانات المهام المتاحة لكل منصة
+    const platformActions = {
+      youtube: [
+        {key:'subscribe', label:'Subscribe to channel'},
+        {key:'subscribe_notify', label:'Subscribe & enable notifications'},
+        {key:'like', label:'Like video'},
+        {key:'comment', label:'Comment on video'},
+        {key:'like_comment', label:'Like & Comment video'},
+        {key:'vote', label:'Vote on community post'},
+        {key:'share', label:'Share video'}
+      ],
+      facebook: [
+        {key:'like_page', label:'Like page'},
+        {key:'share_post', label:'Share post'},
+        {key:'comment', label:'Comment'}
+      ],
+      instagram: [
+        {key:'follow', label:'Follow account'},
+        {key:'like', label:'Like post'},
+        {key:'comment', label:'Comment'}
+      ],
+      discord: [
+        {key:'join', label:'Join server'},
+        {key:'message', label:'Send message in channel'}
+      ],
+      telegram: [
+        {key:'join', label:'Join channel/group'},
+        {key:'message', label:'Send message'}
+      ]
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    // state
+    let coverFile = null;
+    let tasks = []; // each: {platform, typeKey, typeLabel, link, note}
 
-    const actionsMap = {
-      YouTube: ["اشترك في القناة", "أعجب بالفيديو", "علق على الفيديو"],
-      Facebook: ["أعجب بالصفحة", "شارك المنشور", "علق على المنشور"],
-      WhatsApp: ["انضم للجروب", "ارسل رسالة"],
-      Telegram: ["انضم للقناة", "انضم للجروب"],
-      Discord: ["انضم للسيرفر", "تفاعل في قناة"]
-    };
+    // helpers
+    function renderTasks(){
+      tasksContainer.innerHTML = '';
+      if(tasks.length === 0){
+        tasksContainer.innerHTML = '<div class="hint">لم يتم إضافة مهام بعد — اختر منصة واضغط "Manage" أو اضغط إضافة مهمة.</div>';
+        return;
+      }
+      tasks.forEach((t, idx) => {
+        const pill = document.createElement('div');
+        pill.className = 'task-pill';
+        pill.innerHTML = `
+          <div style="text-align:right">
+            <div style="font-weight:600">${t.typeLabel}</div>
+            <div class="small" style="color:var(--muted)">${t.platform} ${t.link? '• '+t.link : ''} ${t.note? '• '+t.note : ''}</div>
+          </div>
+          <div style="margin-inline-start:8px;display:flex;align-items:center">
+            <button class="x" data-idx="${idx}">×</button>
+          </div>
+        `;
+        tasksContainer.appendChild(pill);
+      });
 
-    let actions = [];
-
-    window.updateActions = function() {
-      const platform = document.getElementById('platform').value;
-      const actionSelect = document.getElementById('action');
-      actionSelect.innerHTML = '<option value="">Select Action</option>';
-
-      if (actionsMap[platform]) {
-        actionsMap[platform].forEach(action => {
-          const option = document.createElement('option');
-          option.value = action;
-          option.textContent = action;
-          actionSelect.appendChild(option);
+      // attach remove handlers
+      document.querySelectorAll('.task-pill .x').forEach(btn=>{
+        btn.addEventListener('click',e=>{
+          const i = parseInt(e.target.dataset.idx);
+          tasks.splice(i,1);
+          renderTasks();
         });
-      }
+      });
     }
 
-    window.addAction = function() {
-      const platform = document.getElementById('platform').value;
-      const action = document.getElementById('action').value;
+    // cover box click
+    coverBox.addEventListener('click',()=> coverInput.click());
+    coverInput.addEventListener('change',(e)=>{
+      const f = e.target.files[0];
+      if(!f) return;
+      coverFile = f;
+      const url = URL.createObjectURL(f);
+      coverBox.innerHTML = `<img src="${url}" alt="cover" />`;
+    });
 
-      if (platform && action) {
-        actions.push({ platform, action });
-        const actionList = document.getElementById('actionList');
-        const li = document.createElement('li');
-        li.textContent = `${platform}: ${action}`;
-        actionList.appendChild(li);
-      }
+    // platform modal open/close
+    openPlatformBtn.addEventListener('click',()=>{ platformModal.style.display='flex'; });
+    closePlatform.addEventListener('click',()=>{ platformModal.style.display='none'; });
+
+    platformItems.forEach(it=>{
+      it.addEventListener('click',()=>{
+        const platform = it.dataset.platform;
+        platformSelect.value = platform;
+        platformModal.style.display='none';
+        // open task modal preselected
+        taskPlatform.value = platform;
+        populateTaskTypes(platform);
+        taskModal.style.display='flex';
+      });
+    });
+
+    // open task modal direct
+    openTaskModalBtn.addEventListener('click',()=>{
+      taskPlatform.value = platformSelect.value || 'youtube';
+      populateTaskTypes(taskPlatform.value);
+      taskModal.style.display='flex';
+    });
+    closeTaskModal.addEventListener('click',()=> taskModal.style.display='none');
+
+    // change taskPlatform -> update types
+    taskPlatform.addEventListener('change', (e)=> populateTaskTypes(e.target.value));
+
+    function populateTaskTypes(platform){
+      taskType.innerHTML = '';
+      const arr = platformActions[platform] || [];
+      arr.forEach(a=>{
+        const o = document.createElement('option');
+        o.value = a.key; o.textContent = a.label;
+        taskType.appendChild(o);
+      });
     }
+    // init populate
+    populateTaskTypes('youtube');
 
-    window.addTask = async function() {
-      const title = document.getElementById('title').value;
-      const description = document.getElementById('description').value;
-      const imageFile = document.getElementById('imageUpload').files[0];
-      const redirectUrl = document.getElementById('redirectUrl').value;
+    addTaskBtn.addEventListener('click', ()=>{
+      const p = taskPlatform.value;
+      const key = taskType.value;
+      const label = (platformActions[p].find(x=>x.key===key)||{}).label || key;
+      const link = taskLink.value.trim();
+      const note = taskNote.value.trim();
+      tasks.push({platform:p, typeKey:key, typeLabel:label, link, note});
+      taskLink.value=''; taskNote.value='';
+      taskModal.style.display='none';
+      renderTasks();
+    });
 
-      const reader = new FileReader();
-      reader.onloadend = async function() {
-        const imageUrl = reader.result;
-        const taskData = {
+    clearTasks.addEventListener('click',()=>{
+      if(!confirm('مسح كل المهام؟')) return;
+      tasks = [];
+      renderTasks();
+    });
+
+    previewBtn.addEventListener('click',()=>{
+      const preview = {
+        title: titleInput.value,
+        description: descInput.value,
+        idField: idInput.value,
+        destination: destinationInput.value,
+        tasks
+      };
+      resultBox.innerHTML = `<pre style="white-space:pre-wrap;font-size:13px">${JSON.stringify(preview,null,2)}</pre>`;
+    });
+
+    // create link (save to Firebase)
+    createBtn.addEventListener('click', async ()=>{
+      createBtn.disabled = true;
+      createBtn.textContent = 'جاري الإنشاء...';
+      try{
+        // basic validation
+        const title = titleInput.value.trim();
+        const destination = destinationInput.value.trim();
+        if(!title){ alert('الرجاء إدخال عنوان'); createBtn.disabled=false; createBtn.textContent='Create Link'; return; }
+        if(!destination){ alert('الرجاء إدخال رابط الوجهة النهائي'); createBtn.disabled=false; createBtn.textContent='Create Link'; return; }
+        // upload cover if exists
+        let coverUrl = '';
+        if(coverFile){
+          const path = `covers/${Date.now()}_${coverFile.name.replace(/\s/g,'_')}`;
+          const ref = storage.ref().child(path);
+          const snap = await ref.put(coverFile);
+          coverUrl = await snap.ref.getDownloadURL();
+        }
+
+        // build doc
+        const docData = {
           title,
-          description,
-          imageUrl,
-          actions,
-          redirectUrl,
-          createdAt: new Date()
+          description: descInput.value.trim(),
+          idField: idInput.value.trim(),
+          destination,
+          coverUrl,
+          tasks,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-
-        const docRef = await addDoc(collection(db, 'tasks'), taskData);
-        const link = `${window.location.origin}/task.html?id=${docRef.id}`;
-        alert(`تمت إضافة المهمة! انسخ الرابط: ${link}`);
-        actions = [];
-        document.getElementById('actionList').innerHTML = '';
+        const docRef = await db.collection('links').add(docData);
+        const docId = docRef.id;
+        // construct friendly short link (tweak as needed)
+        const publicLink = `${location.origin}/open.html?id=${docId}`;
+        resultBox.innerHTML = `<div>Created: <a href="${publicLink}" target="_blank">${publicLink}</a><div class="small">Document ID: ${docId}</div></div>`;
+      }catch(err){
+        console.error(err);
+        alert('حدث خطأ أثناء الحفظ: ' + (err.message || err));
+      }finally{
+        createBtn.disabled=false;
+        createBtn.textContent='Create Link';
       }
+    });
 
-      if (imageFile) {
-        reader.readAsDataURL(imageFile);
-      }
-    }
+    // close modals clicking outside
+    document.querySelectorAll('.modal-back').forEach(m=>{
+      m.addEventListener('click',(e)=>{
+        if(e.target === m) m.style.display='none';
+      });
+    });
+
+    // show platform-select change quick info
+    platformSelect.addEventListener('change',(e)=>{
+      const v = e.target.value;
+      if(!v) return;
+      // prefill task modal type
+      taskPlatform.value = v;
+      populateTaskTypes(v);
+    });
+
+    // initial render
+    renderTasks();
   </script>
 </body>
 </html>
+
 
 
 
