@@ -1,27 +1,32 @@
+ 
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tasks- Hema Tech</title>
+  <title>Hema Tech - Tasks</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
-      --primary: #e74c3c;
-      --primary-dark: #c0392b;
-      --secondary: #3498db;
-      --accent: #9b59b6;
-      --dark: #2c3e50;
-      --light: #ecf0f1;
-      --gray: #95a5a6;
-      --success: #2ecc71;
-      --gold: #f1c40f;
-      --gradient: linear-gradient(135deg, #e74c3c 0%, #9b59b6 50%, #3498db 100%);
-      --gradient-gold: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%);
-      --shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      --primary: #1a1a2e;
+      --primary-dark: #16213e;
+      --secondary: #0f3460;
+      --accent: #e94560;
+      --accent-light: #ff6b81;
+      --dark: #0d0d1a;
+      --light: #f0f0f0;
+      --gray: #8a8a9e;
+      --success: #00d26a;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      --gradient: linear-gradient(135deg, #0f3460 0%, #e94560 50%, #1a1a2e 100%);
+      --gradient-accent: linear-gradient(135deg, #e94560 0%, #ff6b81 100%);
+      --gradient-dark: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #0f3460 100%);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
@@ -32,13 +37,13 @@
     }
 
     body {
-      font-family: "Cairo", sans-serif;
-      background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
+      font-family: "Inter", sans-serif;
+      background: var(--gradient-dark);
       color: var(--light);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       min-height: 100vh;
       padding: 20px;
       line-height: 1.6;
@@ -54,15 +59,15 @@
       right: 0;
       bottom: 0;
       background: 
-        radial-gradient(circle at 20% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(155, 89, 182, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(52, 152, 219, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 20% 80%, rgba(233, 69, 96, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(15, 52, 96, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(26, 26, 46, 0.1) 0%, transparent 50%);
       z-index: -1;
     }
 
     .container {
       width: 100%;
-      max-width: 480px;
+      max-width: 420px;
       margin: 0 auto;
       z-index: 1;
     }
@@ -73,42 +78,52 @@
       animation: fadeInDown 0.8s ease-out;
     }
 
-    .logo {
+    .profile {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      gap: 12px;
+      margin-bottom: 15px;
     }
 
-    .logo i {
-      font-size: 2rem;
+    .avatar {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
       background: var(--gradient);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 10px rgba(231, 76, 60, 0.3));
-    }
-
-    .logo-text {
+      display: flex;
+      align-items: center;
+      justify-content: center;
       font-size: 1.8rem;
-      font-weight: 800;
-      background: var(--gradient);
+      color: white;
+      box-shadow: var(--glass-shadow);
+      border: 2px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .user-info {
+      text-align: left;
+    }
+
+    .username {
+      font-size: 1.4rem;
+      font-weight: 700;
+      background: var(--gradient-accent);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      margin-bottom: 5px;
     }
 
     .tagline {
-      color: var(--light);
+      color: var(--gray);
       font-size: 0.9rem;
-      opacity: 0.8;
-      margin-top: 5px;
     }
 
     .card {
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--glass-bg);
       border-radius: 24px;
-      box-shadow: var(--shadow);
+      box-shadow: var(--glass-shadow);
       width: 100%;
       padding: 25px;
       text-align: center;
@@ -116,9 +131,9 @@
       overflow: hidden;
       margin-bottom: 20px;
       animation: fadeInUp 0.8s ease-out 0.2s both;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
     .card::before {
@@ -128,22 +143,24 @@
       left: 0;
       right: 0;
       height: 5px;
-      background: var(--gradient);
+      background: var(--gradient-accent);
     }
 
     .image-container {
       position: relative;
-      border-radius: 16px;
+      border-radius: 18px;
       overflow: hidden;
       margin-bottom: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--glass-shadow);
       transition: var(--transition);
-      border: 2px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .image-container:hover {
       transform: translateY(-8px);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     }
 
     img {
@@ -156,7 +173,7 @@
       transform: scale(1.05);
     }
 
-    h2 {
+    .content-title {
       color: var(--light);
       margin: 15px 0;
       font-weight: 700;
@@ -165,7 +182,7 @@
       display: inline-block;
     }
 
-    h2::after {
+    .content-title::after {
       content: '';
       position: absolute;
       bottom: -8px;
@@ -173,11 +190,11 @@
       transform: translateX(-50%);
       width: 60px;
       height: 3px;
-      background: var(--gradient);
+      background: var(--gradient-accent);
       border-radius: 3px;
     }
 
-    p {
+    .content-desc {
       color: rgba(255, 255, 255, 0.7);
       margin-bottom: 20px;
       font-size: 0.95rem;
@@ -200,14 +217,16 @@
       background-color: rgba(255, 255, 255, 0.1);
       border-radius: 10px;
       overflow: hidden;
-      height: 14px;
+      height: 12px;
       box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     #progressBar {
       width: 0%;
       height: 100%;
-      background: var(--gradient);
+      background: var(--gradient-accent);
       transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
       border-radius: 10px;
       position: relative;
@@ -231,30 +250,32 @@
         transparent 75%,
         transparent
       );
-      background-size: 50px 50px;
-      animation: move 2s linear infinite;
+      background-size: 20px 20px;
+      animation: move 1s linear infinite;
       border-radius: 10px;
     }
 
     .task {
       margin-top: 15px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
-      padding: 15px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       transition: var(--transition);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: var(--glass-shadow);
+      border: 1px solid var(--glass-border);
       overflow: hidden;
       position: relative;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
     }
 
     .task:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.12);
     }
 
     .task::before {
@@ -264,35 +285,68 @@
       left: 0;
       width: 4px;
       height: 100%;
-      background: var(--gradient);
+      background: var(--gradient-accent);
     }
 
-    .task span {
-      font-weight: 600;
-      color: var(--light);
+    .task-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
       flex: 1;
-      text-align: right;
-      padding-right: 10px;
     }
 
-    .task button {
-      background: var(--gradient);
-      color: #fff;
-      border: none;
-      border-radius: 50%;
-      width: 42px;
-      height: 42px;
-      cursor: pointer;
-      transition: var(--transition);
-      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+    .task-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      background: rgba(233, 69, 96, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.1rem;
+      color: var(--accent);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
+    }
+
+    .task-text {
+      text-align: left;
+      flex: 1;
+    }
+
+    .task-title {
+      font-weight: 600;
+      color: var(--light);
+      margin-bottom: 3px;
+    }
+
+    .task-desc {
+      font-size: 0.8rem;
+      color: var(--gray);
+    }
+
+    .task button {
+      background: var(--gradient-accent);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 18px;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      font-weight: 600;
       position: relative;
       overflow: hidden;
       z-index: 1;
       flex-shrink: 0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .task button::before {
@@ -309,8 +363,8 @@
     }
 
     .task button:hover {
-      transform: scale(1.15);
-      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.6);
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(233, 69, 96, 0.6);
     }
 
     .task button:hover::before {
@@ -318,17 +372,18 @@
     }
 
     .task.completed {
-      background: rgba(46, 204, 113, 0.1);
+      background: rgba(0, 210, 106, 0.1);
       border-left-color: var(--success);
     }
 
-    .task.completed span {
+    .task.completed .task-icon {
+      background: rgba(0, 210, 106, 0.2);
       color: var(--success);
     }
 
     .circle {
-      border: 3px solid rgba(52, 152, 219, 0.2);
-      border-top: 3px solid var(--secondary);
+      border: 3px solid rgba(233, 69, 96, 0.2);
+      border-top: 3px solid var(--accent);
       border-radius: 50%;
       width: 42px;
       height: 42px;
@@ -340,7 +395,7 @@
     #unlockBtn {
       display: none;
       margin-top: 25px;
-      background: var(--gradient);
+      background: var(--gradient-accent);
       color: #fff;
       border: none;
       padding: 16px 32px;
@@ -349,12 +404,15 @@
       font-weight: 700;
       cursor: pointer;
       transition: var(--transition);
-      box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
+      box-shadow: 0 8px 25px rgba(233, 69, 96, 0.5);
       width: 100%;
       position: relative;
       overflow: hidden;
       z-index: 1;
       letter-spacing: 1px;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
     }
 
     #unlockBtn::before {
@@ -371,7 +429,7 @@
 
     #unlockBtn:hover {
       transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(231, 76, 60, 0.7);
+      box-shadow: 0 12px 30px rgba(233, 69, 96, 0.7);
       letter-spacing: 2px;
     }
 
@@ -379,21 +437,34 @@
       width: 100%;
     }
 
+    #unlockBtn:disabled {
+      background: var(--gray);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      letter-spacing: 1px;
+    }
+
+    #unlockBtn:disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
     #countView {
       margin-top: 15px;
       color: rgba(255, 255, 255, 0.8);
       font-size: 0.9rem;
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--glass-bg);
       padding: 12px 24px;
       border-radius: 50px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
     }
 
     #countView::before {
@@ -403,16 +474,16 @@
 
     .footer {
       width: 100%;
-      max-width: 480px;
+      max-width: 420px;
       margin-top: 30px;
       text-align: center;
       padding: 20px;
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--glass-bg);
       border-radius: 20px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
       animation: fadeIn 1s ease-out 0.5s both;
     }
 
@@ -434,7 +505,7 @@
       gap: 8px;
       font-weight: 700;
       font-size: 1.2rem;
-      background: var(--gradient);
+      background: var(--gradient-accent);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -447,9 +518,11 @@
       text-decoration: none;
       padding: 10px 20px;
       border-radius: 50px;
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--glass-bg);
       transition: var(--transition);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .youtube-link:hover {
@@ -494,32 +567,28 @@
 
     @keyframes move {
       0% { background-position: 0 0; }
-      100% { background-position: 50px 50px; }
+      100% { background-position: 20px 20px; }
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
-      70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(233, 69, 96, 0.7); }
+      70% { box-shadow: 0 0 0 15px rgba(233, 69, 96, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(233, 69, 96, 0); }
     }
 
-    /* تأثيرات للهواتف */
+    /* Mobile effects */
     @media (max-width: 480px) {
       .card {
         padding: 20px;
         border-radius: 20px;
       }
       
-      h2 {
+      .content-title {
         font-size: 1.4rem;
       }
       
-      .logo-text {
-        font-size: 1.5rem;
-      }
-      
       .task {
-        padding: 12px;
+        padding: 15px;
       }
     }
   </style>
@@ -527,19 +596,23 @@
 <body>
   <div class="container">
     <div class="header">
-      <div class="logo">
-        <i class="fas fa-rocket"></i>
-        <div class="logo-text">Hema Tech</div>
+      <div class="profile">
+        <div class="avatar">
+          <i class="fas fa-rocket"></i>
+        </div>
+        <div class="user-info">
+          <div class="username">Hema Tech</div>
+          <div class="tagline">Ibrahim Mansour</div>
+        </div>
       </div>
-      <div class="tagline">Ibrahim Mansour</div>
     </div>
 
     <div class="card">
       <div class="image-container">
-        <img id="linkImage" src="https://via.placeholder.com/400x200/2c3e50/ffffff?text=Hema+Tech" alt="صورة">
+        <img id="linkImage" src="https://via.placeholder.com/400x200/1a1a2e/e94560?text=Hema+Tech" alt="Image">
       </div>
-      <h2 id="linkTitle">Titel</h2>
-      <p id="linkDesc">وصف المهمة سيكون هنا. هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة.</p>
+      <h2 class="content-title" id="linkTitle">Title</h2>
+      <p class="content-desc" id="linkDesc">Task description will be here. This text is an example of text that can be replaced in the same space.</p>
 
       <div class="progress-section">
         <div class="progress-info">
@@ -552,12 +625,12 @@
       </div>
 
       <div id="taskList">
-        <!-- المهام سيتم إضافتها هنا -->
+        <!-- Tasks will be added here -->
       </div>
       <button id="unlockBtn" class="pulse">Unlock 🔓</button>
     </div>
 
-    <div id="countView">0 Unlock </div>
+    <div id="countView">0 Unlocks</div>
   </div>
 
   <footer class="footer">
@@ -609,22 +682,41 @@
     let destination = "";
     let docId = "";
     let unlockCount = 0;
+    let canClickUnlock = true; // Variable to check if the button can be clicked
 
-    // بيانات تجريبية للعرض
+    // Demo data for display
     const demoData = {
-      coverUrl: "https://via.placeholder.com/400x200/2c3e50/ffffff?text=Hema+Tech",
-      title: "مهمة خاصة بتقنية Hema",
-      description: "هذه مهمة تجريبية لعرض إمكانيات التصميم المتقدم في Hema Tech",
+      coverUrl: "https://via.placeholder.com/400x200/1a1a2e/e94560?text=Hema+Tech",
+      title: "Hema Tech Special Task",
+      description: "This is a demo task to showcase the advanced design capabilities of Hema Tech",
       destination: "https://www.example.com",
       tasks: [
-        { typeLabel: "اشترك في القناة", link: "https://youtube.com/@hema_tech1", done: false },
-        { typeLabel: "شاهد الفيديو", link: "https://www.example.com/video1", done: false },
-        { typeLabel: "انضم للمجموعة", link: "https://www.example.com/group", done: false }
+        { 
+          typeLabel: "Subscribe to Channel", 
+          link: "https://youtube.com/@hema_tech1", 
+          done: false,
+          icon: "fab fa-youtube",
+          description: "Subscribe to Hema Tech YouTube channel"
+        },
+        { 
+          typeLabel: "Watch Video", 
+          link: "https://www.example.com/video1", 
+          done: false,
+          icon: "fas fa-play",
+          description: "Watch the required video until the end"
+        },
+        { 
+          typeLabel: "Join Group", 
+          link: "https://www.example.com/group", 
+          done: false,
+          icon: "fas fa-users",
+          description: "Join our Telegram group"
+        }
       ],
       unlockCount: 42
     };
 
-    // استخدام البيانات التجريبية إذا لم يكن هناك رابط
+    // Use demo data if there's no link
     if (!linkId) {
       linkImage.src = demoData.coverUrl;
       linkTitle.textContent = demoData.title;
@@ -670,16 +762,24 @@
         const div = document.createElement("div");
         div.className = `task ${task.done ? 'completed' : ''} fade-in`;
         
-        // إخفاء المهام القادمة
+        // Hide upcoming tasks
         if (index > completed) {
           div.style.display = "none";
         }
 
         div.innerHTML = `
-          <span>${task.typeLabel || "Task"}</span>
+          <div class="task-content">
+            <div class="task-icon">
+              <i class="${task.icon || 'fas fa-tasks'}"></i>
+            </div>
+            <div class="task-text">
+              <div class="task-title">${task.typeLabel || "Task"}</div>
+              <div class="task-desc">${task.description || "Complete this task to continue"}</div>
+            </div>
+          </div>
           ${task.done ? 
-            '<div style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">✅</div>' : 
-            `<button onclick="startTask(${index})">▶️</button>`
+            '<div style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #00d26a; font-size: 1.2rem;">✓</div>' : 
+            `<button onclick="startTask(${index})">Start</button>`
           }
         `;
         taskList.appendChild(div);
@@ -700,12 +800,12 @@
         button.outerHTML = `<div class='circle'></div>`;
       }
 
-      // فتح رابط المهمة
+      // Open task link
       if (tasks[index] && tasks[index].link) {
         window.open(tasks[index].link, "_blank");
       }
 
-      // بعد 10 ثواني يعتبر المهمة تمت
+      // After 10 seconds, consider the task completed
       setTimeout(() => {
         if (tasks[index]) {
           tasks[index].done = true;
@@ -714,22 +814,49 @@
       }, 10000);
     };
 
-    unlockBtn.addEventListener("click", async () => {
+    // Function to prevent spam on the Unlock button
+    function handleUnlockClick() {
+      if (!canClickUnlock) {
+        return; // If the button is disabled, do nothing
+      }
+      
+      // Disable the button for 10 seconds
+      canClickUnlock = false;
+      unlockBtn.disabled = true;
+      unlockBtn.textContent = "⏳ Please wait 10 seconds";
+      
+      // Open the link
       if (destination) {
         window.open(destination, "_blank");
       }
       
+      // Update the counter in the database
       if (docId) {
         const docRef = doc(db, "links", docId);
-        await updateDoc(docRef, { unlockCount: increment(1) });
-        unlockCount++;
-        countView.textContent = `${unlockCount} Unlocks`;
+        updateDoc(docRef, { unlockCount: increment(1) })
+          .then(() => {
+            unlockCount++;
+            countView.textContent = `${unlockCount} Unlocks`;
+          })
+          .catch(error => {
+            console.error("Error updating unlock count:", error);
+          });
       } else {
-        // في حالة البيانات التجريبية
+        // In case of demo data
         unlockCount++;
-        countView.textContent = `${unlockCount} شخص فتح الرابط`;
+        countView.textContent = `${unlockCount} people unlocked the link`;
       }
-    });
+      
+      // Re-enable the button after 10 seconds
+      setTimeout(() => {
+        canClickUnlock = true;
+        unlockBtn.disabled = false;
+        unlockBtn.textContent = "Unlock 🔓";
+      }, 10000);
+    }
+
+    // Add event listener for the button with spam prevention
+    unlockBtn.addEventListener("click", handleUnlockClick);
   </script>
 </body>
 </html>
