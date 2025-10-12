@@ -1,74 +1,248 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>عرض المهام</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --primary: #e74c3c;
+      --primary-dark: #c0392b;
+      --secondary: #3498db;
+      --dark: #2c3e50;
+      --light: #ecf0f1;
+      --gray: #95a5a6;
+      --success: #2ecc71;
+      --gradient: linear-gradient(135deg, #e74c3c 0%, #3498db 100%);
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       font-family: "Cairo", sans-serif;
-      background-color: #f5f5f5;
-      color: #333;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--dark);
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
+      min-height: 100vh;
       padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 450px;
+      margin: 0 auto;
     }
 
     .card {
       background-color: #fff;
-      border-radius: 16px;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-      width: 90%;
-      max-width: 400px;
-      padding: 20px;
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      width: 100%;
+      padding: 25px;
       text-align: center;
-      border: 2px solid #e74c3c;
       position: relative;
+      overflow: hidden;
+      margin-bottom: 20px;
+      animation: fadeIn 0.8s ease-out;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: var(--gradient);
+    }
+
+    .image-container {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: var(--transition);
+    }
+
+    .image-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
     }
 
     img {
       width: 100%;
-      border-radius: 12px;
+      display: block;
+      transition: var(--transition);
+    }
+
+    .image-container:hover img {
+      transform: scale(1.05);
     }
 
     h2 {
-      color: #e74c3c;
-      margin: 10px 0;
+      color: var(--dark);
+      margin: 15px 0;
+      font-weight: 700;
+      font-size: 1.5rem;
+      position: relative;
+      display: inline-block;
+    }
+
+    h2::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 3px;
+      background: var(--gradient);
+      border-radius: 3px;
     }
 
     p {
-      color: #555;
+      color: var(--gray);
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+    }
+
+    .progress-section {
+      margin: 25px 0;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+
+    #progressContainer {
+      width: 100%;
+      background-color: #e0e0e0;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 12px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    #progressBar {
+      width: 0%;
+      height: 100%;
+      background: var(--gradient);
+      transition: width 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+      border-radius: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #progressBar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      background-image: linear-gradient(
+        -45deg,
+        rgba(255, 255, 255, 0.2) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0.2) 75%,
+        transparent 75%,
+        transparent
+      );
+      background-size: 50px 50px;
+      animation: move 2s linear infinite;
+      border-radius: 10px;
     }
 
     .task {
       margin-top: 15px;
-      background-color: #eee;
-      border-radius: 12px;
-      padding: 10px;
+      background-color: var(--light);
+      border-radius: 16px;
+      padding: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: var(--transition);
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .task:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .task::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--gradient);
+    }
+
+    .task span {
+      font-weight: 600;
+      color: var(--dark);
     }
 
     .task button {
-      background-color: #e74c3c;
+      background: var(--gradient);
       color: #fff;
       border: none;
       border-radius: 50%;
-      width: 35px;
-      height: 35px;
+      width: 40px;
+      height: 40px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: var(--transition);
+      box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
     }
 
     .task button:hover {
-      background-color: #c0392b;
+      transform: scale(1.1);
+      box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+    }
+
+    .task.completed {
+      background-color: rgba(46, 204, 113, 0.1);
+      border-left-color: var(--success);
+    }
+
+    .task.completed span {
+      color: var(--success);
     }
 
     .circle {
-      border: 4px solid #ccc;
-      border-top: 4px solid #e74c3c;
+      border: 3px solid rgba(52, 152, 219, 0.2);
+      border-top: 3px solid var(--secondary);
       border-radius: 50%;
       width: 35px;
       height: 35px;
@@ -76,64 +250,133 @@
       display: inline-block;
     }
 
+    #unlockBtn {
+      display: none;
+      margin-top: 25px;
+      background: var(--gradient);
+      color: #fff;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    #unlockBtn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: all 0.4s ease;
+      z-index: -1;
+    }
+
+    #unlockBtn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.5);
+    }
+
+    #unlockBtn:hover::before {
+      width: 100%;
+    }
+
+    #countView {
+      margin-top: 15px;
+      color: var(--gray);
+      font-size: 0.9rem;
+      background: rgba(255, 255, 255, 0.7);
+      padding: 10px 20px;
+      border-radius: 50px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    #countView::before {
+      content: '👥';
+      font-size: 1.1rem;
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
 
-    #progressContainer {
-      width: 100%;
-      background-color: #ddd;
-      border-radius: 10px;
-      overflow: hidden;
-      height: 12px;
-      margin-top: 15px;
+    @keyframes move {
+      0% { background-position: 0 0; }
+      100% { background-position: 50px 50px; }
     }
 
-    #progressBar {
-      width: 0%;
-      height: 100%;
-      background-color: #e74c3c;
-      transition: width 0.4s;
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
     }
 
-    #unlockBtn {
-      display: none;
-      margin-top: 20px;
-      background-color: #e74c3c;
-      color: #fff;
-      border: none;
-      padding: 10px 25px;
-      border-radius: 12px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    #unlockBtn:hover {
-      background-color: #c0392b;
-    }
-
-    #countView {
-      margin-top: 15px;
-      color: #777;
-      font-size: 14px;
+    /* تأثيرات للهواتف */
+    @media (max-width: 480px) {
+      .card {
+        padding: 20px;
+        border-radius: 20px;
+      }
+      
+      h2 {
+        font-size: 1.3rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <img id="linkImage" src="" alt="صورة">
-    <h2 id="linkTitle"></h2>
-    <p id="linkDesc"></p>
+  <div class="container">
+    <div class="card">
+      <div class="image-container">
+        <img id="linkImage" src="" alt="صورة">
+      </div>
+      <h2 id="linkTitle"></h2>
+      <p id="linkDesc"></p>
 
-    <div id="progressContainer"><div id="progressBar"></div></div>
+      <div class="progress-section">
+        <div class="progress-info">
+          <span>التقدم</span>
+          <span id="progressText">0%</span>
+        </div>
+        <div id="progressContainer">
+          <div id="progressBar"></div>
+        </div>
+      </div>
 
-    <div id="taskList"></div>
-    <button id="unlockBtn">🔓 فتح الرابط</button>
+      <div id="taskList"></div>
+      <button id="unlockBtn" class="pulse">🔓 فتح الرابط</button>
+    </div>
+
+    <div id="countView">0 شخص فتح الرابط</div>
   </div>
-
-  <div id="countView">0 شخص فتح الرابط</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -161,6 +404,7 @@
     const linkDesc = document.getElementById("linkDesc");
     const taskList = document.getElementById("taskList");
     const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
     const unlockBtn = document.getElementById("unlockBtn");
     const countView = document.getElementById("countView");
 
@@ -199,11 +443,12 @@
 
       const progress = (completed / tasks.length) * 100;
       progressBar.style.width = progress + "%";
+      progressText.textContent = `${Math.round(progress)}%`;
 
       tasks.forEach((task, index) => {
         const div = document.createElement("div");
-        div.className = "task";
-
+        div.className = `task ${task.done ? 'completed' : ''} fade-in`;
+        
         if (index > completed) {
           div.style.display = "none"; // إخفاء المهام القادمة
         }
@@ -217,6 +462,8 @@
 
       if (completed === tasks.length && tasks.length > 0) {
         unlockBtn.style.display = "block";
+      } else {
+        unlockBtn.style.display = "none";
       }
     }
 
