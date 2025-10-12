@@ -3,22 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>عرض المهام</title>
+  <title>عرض المهام - Hema Tech</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
       --primary: #e74c3c;
       --primary-dark: #c0392b;
       --secondary: #3498db;
+      --accent: #9b59b6;
       --dark: #2c3e50;
       --light: #ecf0f1;
       --gray: #95a5a6;
       --success: #2ecc71;
-      --gradient: linear-gradient(135deg, #e74c3c 0%, #3498db 100%);
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      --gold: #f1c40f;
+      --gradient: linear-gradient(135deg, #e74c3c 0%, #9b59b6 50%, #3498db 100%);
+      --gradient-gold: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%);
+      --shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+      --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     * {
@@ -29,25 +33,80 @@
 
     body {
       font-family: "Cairo", sans-serif;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      color: var(--dark);
+      background: linear-gradient(135deg, #1a2a3a 0%, #2c3e50 100%);
+      color: var(--light);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       min-height: 100vh;
       padding: 20px;
       line-height: 1.6;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 80%, rgba(231, 76, 60, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(155, 89, 182, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(52, 152, 219, 0.1) 0%, transparent 50%);
+      z-index: -1;
     }
 
     .container {
       width: 100%;
-      max-width: 450px;
+      max-width: 480px;
       margin: 0 auto;
+      z-index: 1;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .logo i {
+      font-size: 2rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(231, 76, 60, 0.3));
+    }
+
+    .logo-text {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .tagline {
+      color: var(--light);
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 5px;
     }
 
     .card {
-      background-color: #fff;
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 24px;
       box-shadow: var(--shadow);
       width: 100%;
@@ -56,9 +115,10 @@
       position: relative;
       overflow: hidden;
       margin-bottom: 20px;
-      animation: fadeIn 0.8s ease-out;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
     }
 
     .card::before {
@@ -71,18 +131,52 @@
       background: var(--gradient);
     }
 
+    .card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .card:hover::after {
+      opacity: 1;
+    }
+
     .image-container {
       position: relative;
       border-radius: 16px;
       overflow: hidden;
       margin-bottom: 20px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
       transition: var(--transition);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .image-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--gradient);
+      opacity: 0;
+      transition: var(--transition);
+      z-index: 1;
+    }
+
+    .image-container:hover::before {
+      opacity: 0.2;
     }
 
     .image-container:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
     }
 
     img {
@@ -96,10 +190,10 @@
     }
 
     h2 {
-      color: var(--dark);
+      color: var(--light);
       margin: 15px 0;
       font-weight: 700;
-      font-size: 1.5rem;
+      font-size: 1.6rem;
       position: relative;
       display: inline-block;
     }
@@ -107,17 +201,17 @@
     h2::after {
       content: '';
       position: absolute;
-      bottom: -5px;
+      bottom: -8px;
       left: 50%;
       transform: translateX(-50%);
-      width: 50px;
+      width: 60px;
       height: 3px;
       background: var(--gradient);
       border-radius: 3px;
     }
 
     p {
-      color: var(--gray);
+      color: rgba(255, 255, 255, 0.7);
       margin-bottom: 20px;
       font-size: 0.95rem;
     }
@@ -129,18 +223,18 @@
     .progress-info {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       font-size: 0.9rem;
-      color: var(--gray);
+      color: rgba(255, 255, 255, 0.8);
     }
 
     #progressContainer {
       width: 100%;
-      background-color: #e0e0e0;
+      background-color: rgba(255, 255, 255, 0.1);
       border-radius: 10px;
       overflow: hidden;
-      height: 12px;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+      height: 14px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
     }
 
     #progressBar {
@@ -162,11 +256,11 @@
       right: 0;
       background-image: linear-gradient(
         -45deg,
-        rgba(255, 255, 255, 0.2) 25%,
+        rgba(255, 255, 255, 0.3) 25%,
         transparent 25%,
         transparent 50%,
-        rgba(255, 255, 255, 0.2) 50%,
-        rgba(255, 255, 255, 0.2) 75%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0.3) 75%,
         transparent 75%,
         transparent
       );
@@ -177,22 +271,23 @@
 
     .task {
       margin-top: 15px;
-      background-color: var(--light);
+      background: rgba(255, 255, 255, 0.05);
       border-radius: 16px;
       padding: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       transition: var(--transition);
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.05);
       overflow: hidden;
       position: relative;
     }
 
     .task:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .task::before {
@@ -207,7 +302,7 @@
 
     .task span {
       font-weight: 600;
-      color: var(--dark);
+      color: var(--light);
     }
 
     .task button {
@@ -215,24 +310,44 @@
       color: #fff;
       border: none;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      width: 42px;
+      height: 42px;
       cursor: pointer;
       transition: var(--transition);
-      box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
+      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.1rem;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .task button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transition: var(--transition);
+      z-index: -1;
     }
 
     .task button:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+      transform: scale(1.15);
+      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.6);
+    }
+
+    .task button:hover::before {
+      opacity: 1;
     }
 
     .task.completed {
-      background-color: rgba(46, 204, 113, 0.1);
+      background: rgba(46, 204, 113, 0.1);
       border-left-color: var(--success);
     }
 
@@ -256,17 +371,18 @@
       background: var(--gradient);
       color: #fff;
       border: none;
-      padding: 15px 30px;
+      padding: 16px 32px;
       border-radius: 50px;
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 1.1rem;
+      font-weight: 700;
       cursor: pointer;
       transition: var(--transition);
-      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+      box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
       width: 100%;
       position: relative;
       overflow: hidden;
       z-index: 1;
+      letter-spacing: 1px;
     }
 
     #unlockBtn::before {
@@ -277,13 +393,14 @@
       width: 0%;
       height: 100%;
       background: rgba(255, 255, 255, 0.2);
-      transition: all 0.4s ease;
+      transition: all 0.5s ease;
       z-index: -1;
     }
 
     #unlockBtn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(231, 76, 60, 0.5);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(231, 76, 60, 0.7);
+      letter-spacing: 2px;
     }
 
     #unlockBtn:hover::before {
@@ -292,22 +409,87 @@
 
     #countView {
       margin-top: 15px;
-      color: var(--gray);
+      color: rgba(255, 255, 255, 0.8);
       font-size: 0.9rem;
-      background: rgba(255, 255, 255, 0.7);
-      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 12px 24px;
       border-radius: 50px;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-      backdrop-filter: blur(5px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     #countView::before {
       content: '👥';
       font-size: 1.1rem;
+    }
+
+    .footer {
+      width: 100%;
+      max-width: 480px;
+      margin-top: 30px;
+      text-align: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 1s ease-out 0.5s both;
+    }
+
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .copyright {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .youtube-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      background: rgba(255, 255, 255, 0.08);
+      transition: var(--transition);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .youtube-link:hover {
+      background: rgba(255, 0, 0, 0.1);
+      color: #fff;
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(255, 0, 0, 0.2);
+    }
+
+    .youtube-link i {
+      color: #ff0000;
+      font-size: 1.3rem;
     }
 
     .pulse {
@@ -323,6 +505,16 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
@@ -335,7 +527,7 @@
 
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+      70% { box-shadow: 0 0 0 15px rgba(231, 76, 60, 0); }
       100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
     }
 
@@ -347,13 +539,25 @@
       }
       
       h2 {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
+      }
+      
+      .logo-text {
+        font-size: 1.5rem;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="header">
+      <div class="logo">
+        <i class="fas fa-rocket"></i>
+        <div class="logo-text">Hema Tech</div>
+      </div>
+      <div class="tagline">أحدث التقنيات وأجمل التصميمات</div>
+    </div>
+
     <div class="card">
       <div class="image-container">
         <img id="linkImage" src="" alt="صورة">
@@ -377,6 +581,20 @@
 
     <div id="countView">0 شخص فتح الرابط</div>
   </div>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="copyright">جميع الحقوق محفوظة © 2023</div>
+      <div class="brand">
+        <i class="fas fa-crown"></i>
+        <span>Hema Tech</span>
+      </div>
+      <a href="https://youtube.com/@hema_tech1?si=UqCsC50yMsxuftwX" target="_blank" class="youtube-link">
+        <i class="fab fa-youtube"></i>
+        <span>قناة Hema Tech على اليوتيوب</span>
+      </a>
+    </div>
+  </footer>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -493,4 +711,5 @@
   </script>
 </body>
 </html>
+
 
