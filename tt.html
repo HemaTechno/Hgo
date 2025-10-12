@@ -1,12 +1,13 @@
+
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tasks- Hema Tech</title>
+  <title>Hema Tech - Tasks</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root {
@@ -19,6 +20,9 @@
       --light: #f0f0f0;
       --gray: #8a8a9e;
       --success: #00d26a;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       --gradient: linear-gradient(135deg, #0f3460 0%, #e94560 50%, #1a1a2e 100%);
       --gradient-accent: linear-gradient(135deg, #e94560 0%, #ff6b81 100%);
       --gradient-dark: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #0f3460 100%);
@@ -33,7 +37,7 @@
     }
 
     body {
-      font-family: "Cairo", sans-serif;
+      font-family: "Inter", sans-serif;
       background: var(--gradient-dark);
       color: var(--light);
       display: flex;
@@ -83,25 +87,27 @@
     }
 
     .avatar {
-      width: 60px;
-      height: 60px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
       background: var(--gradient);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
+      font-size: 1.8rem;
       color: white;
-      box-shadow: var(--shadow);
-      border: 3px solid rgba(255, 255, 255, 0.2);
+      box-shadow: var(--glass-shadow);
+      border: 2px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
     .user-info {
-      text-align: right;
+      text-align: left;
     }
 
     .username {
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       font-weight: 700;
       background: var(--gradient-accent);
       -webkit-background-clip: text;
@@ -115,9 +121,9 @@
     }
 
     .card {
-      background: rgba(26, 26, 46, 0.7);
+      background: var(--glass-bg);
       border-radius: 24px;
-      box-shadow: var(--shadow);
+      box-shadow: var(--glass-shadow);
       width: 100%;
       padding: 25px;
       text-align: center;
@@ -125,9 +131,9 @@
       overflow: hidden;
       margin-bottom: 20px;
       animation: fadeInUp 0.8s ease-out 0.2s both;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
     .card::before {
@@ -142,17 +148,19 @@
 
     .image-container {
       position: relative;
-      border-radius: 16px;
+      border-radius: 18px;
       overflow: hidden;
       margin-bottom: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--glass-shadow);
       transition: var(--transition);
-      border: 2px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .image-container:hover {
       transform: translateY(-8px);
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     }
 
     img {
@@ -211,6 +219,8 @@
       overflow: hidden;
       height: 12px;
       box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     #progressBar {
@@ -247,23 +257,25 @@
 
     .task {
       margin-top: 15px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
       padding: 18px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       transition: var(--transition);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: var(--glass-shadow);
+      border: 1px solid var(--glass-border);
       overflow: hidden;
       position: relative;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
     }
 
     .task:hover {
       transform: translateY(-5px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-      background: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.12);
     }
 
     .task::before {
@@ -284,20 +296,23 @@
     }
 
     .task-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
       background: rgba(233, 69, 96, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--accent);
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       flex-shrink: 0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--glass-border);
     }
 
     .task-text {
-      text-align: right;
+      text-align: left;
       flex: 1;
     }
 
@@ -330,6 +345,8 @@
       overflow: hidden;
       z-index: 1;
       flex-shrink: 0;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .task button::before {
@@ -393,6 +410,9 @@
       overflow: hidden;
       z-index: 1;
       letter-spacing: 1px;
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--glass-border);
     }
 
     #unlockBtn::before {
@@ -434,17 +454,17 @@
       margin-top: 15px;
       color: rgba(255, 255, 255, 0.8);
       font-size: 0.9rem;
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--glass-bg);
       padding: 12px 24px;
       border-radius: 50px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
     }
 
     #countView::before {
@@ -458,12 +478,12 @@
       margin-top: 30px;
       text-align: center;
       padding: 20px;
-      background: rgba(26, 26, 46, 0.7);
+      background: var(--glass-bg);
       border-radius: 20px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
       animation: fadeIn 1s ease-out 0.5s both;
     }
 
@@ -498,9 +518,11 @@
       text-decoration: none;
       padding: 10px 20px;
       border-radius: 50px;
-      background: rgba(255, 255, 255, 0.08);
+      background: var(--glass-bg);
       transition: var(--transition);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     .youtube-link:hover {
@@ -554,7 +576,7 @@
       100% { box-shadow: 0 0 0 0 rgba(233, 69, 96, 0); }
     }
 
-    /* تأثيرات للهواتف */
+    /* Mobile effects */
     @media (max-width: 480px) {
       .card {
         padding: 20px;
@@ -587,10 +609,10 @@
 
     <div class="card">
       <div class="image-container">
-        <img id="linkImage" src="https://via.placeholder.com/400x200/1a1a2e/e94560?text=Hema+Tech" alt="صورة">
+        <img id="linkImage" src="https://via.placeholder.com/400x200/1a1a2e/e94560?text=Hema+Tech" alt="Image">
       </div>
-      <h2 class="content-title" id="linkTitle">Titel</h2>
-      <p class="content-desc" id="linkDesc">وصف المهمة سيكون هنا. هذا النص هو مثال لنص يمكن أن يستبدل في نفس المساحة.</p>
+      <h2 class="content-title" id="linkTitle">Title</h2>
+      <p class="content-desc" id="linkDesc">Task description will be here. This text is an example of text that can be replaced in the same space.</p>
 
       <div class="progress-section">
         <div class="progress-info">
@@ -603,12 +625,12 @@
       </div>
 
       <div id="taskList">
-        <!-- المهام سيتم إضافتها هنا -->
+        <!-- Tasks will be added here -->
       </div>
       <button id="unlockBtn" class="pulse">Unlock 🔓</button>
     </div>
 
-    <div id="countView">0 Unlock </div>
+    <div id="countView">0 Unlocks</div>
   </div>
 
   <footer class="footer">
@@ -660,41 +682,41 @@
     let destination = "";
     let docId = "";
     let unlockCount = 0;
-    let canClickUnlock = true; // متغير للتحقق من إمكانية الضغط على الزر
+    let canClickUnlock = true; // Variable to check if the button can be clicked
 
-    // بيانات تجريبية للعرض
+    // Demo data for display
     const demoData = {
       coverUrl: "https://via.placeholder.com/400x200/1a1a2e/e94560?text=Hema+Tech",
-      title: "مهمة خاصة بتقنية Hema",
-      description: "هذه مهمة تجريبية لعرض إمكانيات التصميم المتقدم في Hema Tech",
+      title: "Hema Tech Special Task",
+      description: "This is a demo task to showcase the advanced design capabilities of Hema Tech",
       destination: "https://www.example.com",
       tasks: [
         { 
-          typeLabel: "اشترك في القناة", 
+          typeLabel: "Subscribe to Channel", 
           link: "https://youtube.com/@hema_tech1", 
           done: false,
           icon: "fab fa-youtube",
-          description: "اشترك في قناة Hema Tech على يوتيوب"
+          description: "Subscribe to Hema Tech YouTube channel"
         },
         { 
-          typeLabel: "شاهد الفيديو", 
+          typeLabel: "Watch Video", 
           link: "https://www.example.com/video1", 
           done: false,
           icon: "fas fa-play",
-          description: "شاهد الفيديو المطلوب حتى النهاية"
+          description: "Watch the required video until the end"
         },
         { 
-          typeLabel: "انضم للمجموعة", 
+          typeLabel: "Join Group", 
           link: "https://www.example.com/group", 
           done: false,
           icon: "fas fa-users",
-          description: "انضم إلى مجموعة التليجرام الخاصة بنا"
+          description: "Join our Telegram group"
         }
       ],
       unlockCount: 42
     };
 
-    // استخدام البيانات التجريبية إذا لم يكن هناك رابط
+    // Use demo data if there's no link
     if (!linkId) {
       linkImage.src = demoData.coverUrl;
       linkTitle.textContent = demoData.title;
@@ -740,7 +762,7 @@
         const div = document.createElement("div");
         div.className = `task ${task.done ? 'completed' : ''} fade-in`;
         
-        // إخفاء المهام القادمة
+        // Hide upcoming tasks
         if (index > completed) {
           div.style.display = "none";
         }
@@ -752,12 +774,12 @@
             </div>
             <div class="task-text">
               <div class="task-title">${task.typeLabel || "Task"}</div>
-              <div class="task-desc">${task.description || "أكمل هذه المهمة للمتابعة"}</div>
+              <div class="task-desc">${task.description || "Complete this task to continue"}</div>
             </div>
           </div>
           ${task.done ? 
             '<div style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #00d26a; font-size: 1.2rem;">✓</div>' : 
-            `<button onclick="startTask(${index})">ابدأ</button>`
+            `<button onclick="startTask(${index})">Start</button>`
           }
         `;
         taskList.appendChild(div);
@@ -778,12 +800,12 @@
         button.outerHTML = `<div class='circle'></div>`;
       }
 
-      // فتح رابط المهمة
+      // Open task link
       if (tasks[index] && tasks[index].link) {
         window.open(tasks[index].link, "_blank");
       }
 
-      // بعد 10 ثواني يعتبر المهمة تمت
+      // After 10 seconds, consider the task completed
       setTimeout(() => {
         if (tasks[index]) {
           tasks[index].done = true;
@@ -792,23 +814,23 @@
       }, 10000);
     };
 
-    // دالة لمنع الـ Spam على زر Unlock
+    // Function to prevent spam on the Unlock button
     function handleUnlockClick() {
       if (!canClickUnlock) {
-        return; // إذا كان الزر معطل، لا تفعل شيئًا
+        return; // If the button is disabled, do nothing
       }
       
-      // تعطيل الزر لمدة 10 ثواني
+      // Disable the button for 10 seconds
       canClickUnlock = false;
       unlockBtn.disabled = true;
-      unlockBtn.textContent = "⏳ يرجى الانتظار 10 ثواني";
+      unlockBtn.textContent = "⏳ Please wait 10 seconds";
       
-      // فتح الرابط
+      // Open the link
       if (destination) {
         window.open(destination, "_blank");
       }
       
-      // تحديث العداد في قاعدة البيانات
+      // Update the counter in the database
       if (docId) {
         const docRef = doc(db, "links", docId);
         updateDoc(docRef, { unlockCount: increment(1) })
@@ -820,12 +842,12 @@
             console.error("Error updating unlock count:", error);
           });
       } else {
-        // في حالة البيانات التجريبية
+        // In case of demo data
         unlockCount++;
-        countView.textContent = `${unlockCount} شخص فتح الرابط`;
+        countView.textContent = `${unlockCount} people unlocked the link`;
       }
       
-      // إعادة تمكين الزر بعد 10 ثواني
+      // Re-enable the button after 10 seconds
       setTimeout(() => {
         canClickUnlock = true;
         unlockBtn.disabled = false;
@@ -833,7 +855,7 @@
       }, 10000);
     }
 
-    // إضافة مستمع الحدث للزر مع منع الـ Spam
+    // Add event listener for the button with spam prevention
     unlockBtn.addEventListener("click", handleUnlockClick);
   </script>
 </body>
