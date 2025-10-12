@@ -24,6 +24,7 @@
       padding: 20px;
       text-align: center;
       border: 2px solid #e74c3c;
+      position: relative;
     }
 
     img {
@@ -33,6 +34,7 @@
 
     h2 {
       color: #e74c3c;
+      margin: 10px 0;
     }
 
     p {
@@ -64,12 +66,6 @@
       background-color: #c0392b;
     }
 
-    .progress {
-      margin-top: 15px;
-      font-weight: bold;
-      color: #444;
-    }
-
     .circle {
       border: 4px solid #ccc;
       border-top: 4px solid #e74c3c;
@@ -83,6 +79,22 @@
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
+    }
+
+    #progressContainer {
+      width: 100%;
+      background-color: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 12px;
+      margin-top: 15px;
+    }
+
+    #progressBar {
+      width: 0%;
+      height: 100%;
+      background-color: #e74c3c;
+      transition: width 0.4s;
     }
 
     #unlockBtn {
@@ -101,6 +113,12 @@
     #unlockBtn:hover {
       background-color: #c0392b;
     }
+
+    #countView {
+      margin-top: 15px;
+      color: #777;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -108,10 +126,14 @@
     <img id="linkImage" src="" alt="صورة">
     <h2 id="linkTitle"></h2>
     <p id="linkDesc"></p>
-    <div class="progress" id="taskProgress"></div>
+
+    <div id="progressContainer"><div id="progressBar"></div></div>
+
     <div id="taskList"></div>
     <button id="unlockBtn">🔓 فتح الرابط</button>
   </div>
+
+  <div id="countView">0 شخص فتح الرابط</div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
@@ -138,13 +160,15 @@
     const linkTitle = document.getElementById("linkTitle");
     const linkDesc = document.getElementById("linkDesc");
     const taskList = document.getElementById("taskList");
-    const progress = document.getElementById("taskProgress");
+    const progressBar = document.getElementById("progressBar");
     const unlockBtn = document.getElementById("unlockBtn");
+    const countView = document.getElementById("countView");
 
     let tasks = [];
     let completed = 0;
     let destination = "";
     let docId = "";
+    let unlockCount = 0;
 
     if (linkId) {
       const q = query(collection(db, "links"), where("idField", "==", linkId));
@@ -159,7 +183,9 @@
           linkDesc.textContent = data.description;
           destination = data.destination;
           tasks = data.tasks || [];
+          unlockCount = data.unlockCount || 0;
 
+          countView.textContent = `${unlockCount} شخص فتح الرابط`;
           renderTasks();
         } else {
           linkTitle.textContent = "الرابط غير موجود ❌";
@@ -171,11 +197,17 @@
       taskList.innerHTML = "";
       completed = tasks.filter(t => t.done).length;
 
-      progress.textContent = `أنجزت ${completed} من ${tasks.length} مهمة`;
+      const progress = (completed / tasks.length) * 100;
+      progressBar.style.width = progress + "%";
 
       tasks.forEach((task, index) => {
         const div = document.createElement("div");
         div.className = "task";
+
+        if (index > completed) {
+          div.style.display = "none"; // إخفاء المهام القادمة
+        }
+
         div.innerHTML = `
           <span>${task.typeLabel || "مهمة"}</span>
           ${task.done ? "✅" : `<button onclick="startTask(${index})">▶️</button>`}
@@ -192,6 +224,10 @@
       const div = taskList.children[index];
       div.querySelector("button").outerHTML = `<div class='circle'></div>`;
 
+      // فتح لينك المهمة
+      window.open(tasks[index].link, "_blank");
+
+      // بعد 10 ثواني يعتبر المهمة تمت
       setTimeout(() => {
         tasks[index].done = true;
         renderTasks();
@@ -203,6 +239,8 @@
       if (docId) {
         const docRef = doc(db, "links", docId);
         await updateDoc(docRef, { unlockCount: increment(1) });
+        unlockCount++;
+        countView.textContent = `${unlockCount} شخص فتح الرابط`;
       }
     });
   </script>
