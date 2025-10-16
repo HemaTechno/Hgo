@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -912,7 +911,43 @@
     </div>
   </footer>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+      authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+      databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+      projectId: "hhhhhh-d4fb8",
+      storageBucket: "hhhhhh-d4fb8.appspot.com",
+      messagingSenderId: "24512338206",
+      appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+      measurementId: "G-HD4R7GNQ5H"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const linkId = urlParams.get("id");
+
+    const linkImage = document.getElementById("linkImage");
+    const linkTitle = document.getElementById("linkTitle");
+    const linkDesc = document.getElementById("linkDesc");
+    const taskList = document.getElementById("taskList");
+    const progressBar = document.getElementById("progressBar");
+    const progressText = document.getElementById("progressText");
+    const unlockBtn = document.getElementById("unlockBtn");
+    const countView = document.getElementById("countView");
+
+    let tasks = [];
+    let completed = 0;
+    let destination = "";
+    let docId = "";
+    let unlockCount = 0;
+    let canClickUnlock = true;
+
     // Create floating particles
     function createParticles() {
       const particlesContainer = document.getElementById('particles');
@@ -973,31 +1008,39 @@
       unlockCount: 42
     };
 
-    const linkImage = document.getElementById("linkImage");
-    const linkTitle = document.getElementById("linkTitle");
-    const linkDesc = document.getElementById("linkDesc");
-    const taskList = document.getElementById("taskList");
-    const progressBar = document.getElementById("progressBar");
-    const progressText = document.getElementById("progressText");
-    const unlockBtn = document.getElementById("unlockBtn");
-    const countView = document.getElementById("countView");
+    // Use demo data if there's no link
+    if (!linkId) {
+      linkImage.src = demoData.coverUrl;
+      linkTitle.textContent = demoData.title;
+      linkDesc.textContent = demoData.description;
+      destination = demoData.destination;
+      tasks = demoData.tasks;
+      unlockCount = demoData.unlockCount;
 
-    let tasks = [];
-    let completed = 0;
-    let destination = "";
-    let unlockCount = 0;
-    let canClickUnlock = true;
+      countView.textContent = `${unlockCount} Premium Unlocks`;
+      renderTasks();
+    } else if (linkId) {
+      const q = query(collection(db, "links"), where("idField", "==", linkId));
+      getDocs(q).then(snapshot => {
+        if (!snapshot.empty) {
+          const docSnap = snapshot.docs[0];
+          const data = docSnap.data();
+          docId = docSnap.id;
 
-    // Use demo data
-    linkImage.src = demoData.coverUrl;
-    linkTitle.textContent = demoData.title;
-    linkDesc.textContent = demoData.description;
-    destination = demoData.destination;
-    tasks = demoData.tasks;
-    unlockCount = demoData.unlockCount;
+          linkImage.src = data.coverUrl;
+          linkTitle.textContent = data.title;
+          linkDesc.textContent = data.description;
+          destination = data.destination;
+          tasks = data.tasks || [];
+          unlockCount = data.unlockCount || 0;
 
-    countView.textContent = `${unlockCount} Premium Unlocks`;
-    renderTasks();
+          countView.textContent = `${unlockCount} Premium Unlocks`;
+          renderTasks();
+        } else {
+          linkTitle.textContent = "The link does not exist";
+        }
+      });
+    }
 
     function renderTasks() {
       taskList.innerHTML = "";
@@ -1079,9 +1122,22 @@
         window.open(destination, "_blank");
       }
       
-      // Update the counter
-      unlockCount++;
-      countView.textContent = `${unlockCount} Premium Unlocks`;
+      // Update the counter in the database
+      if (docId) {
+        const docRef = doc(db, "links", docId);
+        updateDoc(docRef, { unlockCount: increment(1) })
+          .then(() => {
+            unlockCount++;
+            countView.textContent = `${unlockCount} Premium Unlocks`;
+          })
+          .catch(error => {
+            console.error("Error updating unlock count:", error);
+          });
+      } else {
+        // In case of demo data
+        unlockCount++;
+        countView.textContent = `${unlockCount} Premium Unlocks`;
+      }
       
       // Re-enable the button after 10 seconds
       setTimeout(() => {
