@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script type='text/javascript' src='//pl26208564.effectivegatecpm.com/e2/9e/b2/e29eb2f359a310725dd44866604c469a.js'></script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hema Tech - Tasks</title>
@@ -69,6 +71,87 @@
       max-width: 420px;
       margin: 0 auto;
       z-index: 1;
+    }
+
+    /* Logo Styles */
+    .logo-container {
+      text-align: center;
+      margin-bottom: 20px;
+      animation: logoFloat 6s ease-in-out infinite;
+    }
+
+    .logo {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      box-shadow: var(--glass-shadow);
+      border: 2px solid var(--glass-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .logo::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: rotate(45deg);
+      animation: logoShine 4s linear infinite;
+    }
+
+    .logo-inner {
+      width: 90%;
+      height: 90%;
+      border-radius: 50%;
+      background: var(--gradient-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: white;
+      font-weight: 800;
+      z-index: 1;
+      position: relative;
+    }
+
+    .logo-text {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-top: 15px;
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      position: relative;
+      display: inline-block;
+    }
+
+    .logo-text::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--gradient-accent);
+      border-radius: 2px;
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.5s ease;
+    }
+
+    .logo-text:hover::after {
+      transform: scaleX(1);
+      transform-origin: left;
     }
 
     .header {
@@ -562,6 +645,17 @@
       animation: fadeIn 0.5s ease-out;
     }
 
+    /* New Animations */
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes logoShine {
+      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+      100% { transform: translateX(200%) translateY(200%) rotate(45deg); }
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -593,6 +687,41 @@
       100% { box-shadow: 0 0 0 0 rgba(233, 69, 96, 0); }
     }
 
+    /* Floating particles */
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      animation: floatParticle linear infinite;
+    }
+
+    @keyframes floatParticle {
+      0% {
+        transform: translateY(100vh) translateX(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) translateX(20px);
+        opacity: 0;
+      }
+    }
+
     /* Mobile effects */
     @media (max-width: 480px) {
       .card {
@@ -611,19 +740,43 @@
       .ad-container {
         margin: 15px auto;
       }
+      
+      .logo {
+        width: 100px;
+        height: 100px;
+      }
+      
+      .logo-inner {
+        font-size: 2rem;
+      }
+      
+      .logo-text {
+        font-size: 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Floating particles -->
+  <div class="particles" id="particles"></div>
+
   <div class="container">
+    <!-- Logo Section -->
+    <div class="logo-container">
+      <div class="logo">
+        <div class="logo-inner">HT</div>
+      </div>
+      <div class="logo-text">Hema Tech</div>
+    </div>
+
     <div class="header">
       <div class="profile">
         <div class="avatar">
-          <i class="fas fa-rocket"></i>
+          <i class="fas fa-user"></i>
         </div>
         <div class="user-info">
           <div class="username">Hema Tech</div>
-          <div class="tagline">Ibrahim Mansour</div>
+          <div class="tagline">Click Start or Unlock, pop-ups/ads may show and they can be annoying, but they directly support the creators of this link. </div>
         </div>
       </div>
     </div>
@@ -709,6 +862,34 @@
     let docId = "";
     let unlockCount = 0;
     let canClickUnlock = true; // Variable to check if the button can be clicked
+
+    // Create floating particles
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 15;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        
+        // Random size between 2px and 6px
+        const size = Math.random() * 4 + 2;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random position
+        particle.style.left = `${Math.random() * 100}%`;
+        
+        // Random animation duration between 10s and 20s
+        const duration = Math.random() * 10 + 10;
+        particle.style.animationDuration = `${duration}s`;
+        
+        // Random delay
+        particle.style.animationDelay = `${Math.random() * 5}s`;
+        
+        particlesContainer.appendChild(particle);
+      }
+    }
 
     // Demo data for display
     const demoData = {
@@ -883,6 +1064,9 @@
 
     // Add event listener for the button with spam prevention
     unlockBtn.addEventListener("click", handleUnlockClick);
+
+    // Initialize particles
+    createParticles();
   </script>
 </body>
 </html>
