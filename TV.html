@@ -3,321 +3,109 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mini App - تحقق الاشتراك</title>
-
-  <!-- Tailwind Play CDN (easy setup) -->
+  <title>تحقق الاشتراك — Verify</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    /* small custom tweaks */
-    body { font-family: Inter, 'Cairo', sans-serif; }
-    .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(6px); }
-  </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h1 class="text-xl font-bold text-sky-600 mb-2">🎯 تحقق الاشتراك</h1>
+      <p class="text-sm text-slate-600 mb-4">افتح الرابط من التليجرام وسيُمرر الـ ID تلقائياً. اشترك ثم ارفع صورة إثبات الاشتراك.</p>
 
-  <!-- Single-page container -->
-  <div id="app" class="w-full max-w-3xl">
+      <a id="channelLink" class="block text-center py-3 rounded-xl font-semibold shadow mb-3 glass" target="_blank">📢 الاشتراك في القناة</a>
 
-    <!-- Header -->
-    <header class="mb-6 text-center">
-      <h1 class="text-2xl font-extrabold text-sky-600">نظام تحقق الاشتراك</h1>
-      <p class="text-sm text-slate-600 mt-1">صفحة واحدة: واجهة للمستخدم + لوحة الأدمن — مع تخزين في Firebase</p>
-    </header>
+      <label class="block text-sm text-slate-700 mb-2">رفع دليل الاشتراك (صورة)</label>
+      <input id="fileInput" type="file" accept="image/*" class="block w-full mb-3" />
 
-    <!-- Main Card -->
-    <main class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <button id="uploadBtn" class="w-full py-2 rounded-xl bg-sky-600 text-white font-bold">📤 رفع الدليل</button>
 
-      <!-- Left: User / Info Card -->
-      <section id="userCard" class="glass p-6 rounded-2xl shadow-lg">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-lg font-bold text-slate-800">🎯 تحقق الاشتراك</h2>
-            <p class="text-sm text-slate-600">اشترك في القناة ثم ارفع دليل الاشتراك. كل شيء مسجّل في Firebase.</p>
-          </div>
-          <div class="text-xs text-slate-500">نسخة موبايل جاهزة</div>
-        </div>
-
-        <div class="mt-4 space-y-3">
-          <a id="subscribeLink" class="block w-full text-center py-3 rounded-xl font-semibold shadow-sm glass hover:opacity-95" target="_blank">📢 الاشتراك في القناة</a>
-
-          <label class="block">
-            <span class="text-sm text-slate-700">رفع دليل الاشتراك (صورة)</span>
-            <input id="proofInput" type="file" accept="image/*" class="mt-2 block w-full text-sm text-slate-700" />
-          </label>
-
-          <div class="flex gap-2">
-            <button id="uploadBtn" class="flex-1 py-2 rounded-xl bg-sky-600 text-white font-bold shadow">📤 رفع الدليل</button>
-            <button id="openInTelegramBtn" class="flex-1 py-2 rounded-xl border border-slate-200">🔗 افتح في التليجرام</button>
-          </div>
-
-          <div id="userStatus" class="text-sm text-slate-600 mt-2">حالة الطلب: <span id="statusBadge" class="font-bold">—</span></div>
-
-          <div id="userMessages" class="mt-3 text-sm"></div>
-        </div>
-      </section>
-
-      <!-- Right: Admin panel -->
-      <section id="adminCard" class="glass p-6 rounded-2xl shadow-lg hidden">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-slate-800">🛠 لوحة تحكم الأدمن</h2>
-          <div class="text-xs text-slate-500">عرض الطلبات والردود</div>
-        </div>
-
-        <div class="mt-4">
-          <div class="flex gap-2 mb-3">
-            <input id="adminFilter" placeholder="بحث بالـ userId..." class="flex-1 rounded-xl border px-3 py-2 text-sm" />
-            <button id="reloadBtn" class="px-4 py-2 rounded-xl bg-emerald-500 text-white">تحديث</button>
-          </div>
-
-          <div id="requestsList" class="space-y-3 max-h-[60vh] overflow-auto pr-2"></div>
-        </div>
-      </section>
-
-    </main>
-
-    <!-- Footer / small instructions -->
-    <footer class="mt-6 text-center text-xs text-slate-500">
-      <p>ملاحظة: استبدل إعدادات Firebase و رابط القناة في الكود قبل النشر.</p>
-    </footer>
-
+      <div id="status" class="mt-4 text-sm text-slate-600"></div>
+    </div>
   </div>
 
+  <!-- Firebase SDKs (module-less for simplicity) -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js"></script>
 
-  <!-- Firebase (module) + App logic -->
-  <script type="module">
-    // ---------- IMPORTS ----------
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-    import {
-      getFirestore, collection, doc, setDoc, getDocs, updateDoc, query, orderBy, onSnapshot
-    } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js';
-    import { getStorage, ref, uploadString, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js';
-
-    // ---------- CONFIG: ضع بيانات Firebase الخاصة بك هنا ----------
+  <script>
+    // ======= إعداد Firebase (استبدل إذا احتجت) =======
     const firebaseConfig = {
-  apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
-  authDomain: "hhhhhh-d4fb8.firebaseapp.com",
-  databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
-  projectId: "hhhhhh-d4fb8",
-  storageBucket: "hhhhhh-d4fb8.appspot.com",
-  messagingSenderId: "24512338206",
-  appId: "1:24512338206:web:dfe045db59bd3434a2110f",
-  measurementId: "G-HD4R7GNQ5H"
-};
+      apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+      authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+      databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+      projectId: "hhhhhh-d4fb8",
+      storageBucket: "hhhhhh-d4fb8.appspot.com",
+      messagingSenderId: "24512338206",
+      appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+      measurementId: "G-HD4R7GNQ5H"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const storage = firebase.storage();
 
+    // ======= عناصر الواجهة =======
+    const channelLink = document.getElementById('channelLink');
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const status = document.getElementById('status');
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+    // وضع رابط القناة هنا
+    const CHANNEL_URL = 'https://t.me/YOUR_CHANNEL'; // غيّرها لرابط قناتك
+    channelLink.href = CHANNEL_URL;
 
-    // ---------- Helpers ----------
-    const qs = s => document.querySelector(s);
-    const qsa = s => Array.from(document.querySelectorAll(s));
-
-    // ---------- URL params to decide mode ----------
+    // احصل على id من رابط الصفحة (?id=...)
     const params = new URLSearchParams(window.location.search);
-    const userId = params.get('user');            // ex: ?user=12345
-    const isAdmin = params.get('admin') === 'true'; // ex: ?admin=true
+    const userId = params.get('id'); // مثال: verify.html?id=5307228059
 
-    // ---------- UI elements ----------
-    const adminCard = qs('#adminCard');
-    const userCard = qs('#userCard');
-    const requestsList = qs('#requestsList');
-    const statusBadge = qs('#statusBadge');
-    const userMessages = qs('#userMessages');
-    const subscribeLink = qs('#subscribeLink');
+    if (!userId) {
+      status.innerHTML = '<span class="text-red-500">خطأ: لم يتم تمرير الـ ID في الرابط.</span>';
+      uploadBtn.disabled = true;
+    }
 
-    // افتراضياً ضع رابط القناة هنا
-    const CHANNEL_URL = 'https://t.me/YOUR_CHANNEL';
-    subscribeLink.href = CHANNEL_URL;
+    uploadBtn.addEventListener('click', async () => {
+      if (!userId) return;
+      const file = fileInput.files[0];
+      if (!file) return alert('اختر صورة أولاً');
 
-    // زر فتح داخل التليجرام لو الميني آب
-    qs('#openInTelegramBtn').addEventListener('click', () => {
-      if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.openLink(location.href);
-      } else {
-        alert('ليس داخل بيئة Telegram WebApp — سيتم فتح الرابط عاديًا.');
-        window.open(location.href, '_blank');
-      }
+      status.textContent = '⏳ جاري رفع الصورة...';
+
+      // اقرأ الملف كـ dataURL ثم ارفعه للـ Storage
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const dataUrl = reader.result;
+          const path = `proofs/${userId}_${Date.now()}.jpg`;
+          const storageRef = storage.ref().child(path);
+
+          // uploadString متاح في older SDK via putString
+          await storageRef.putString(dataUrl, 'data_url');
+          const imageUrl = await storageRef.getDownloadURL();
+
+          // انشئ أو حدّث طلب المستخدم في Realtime DB
+          const payload = {
+            id: userId,
+            imageUrl,
+            status: 'pending',
+            timestamp: new Date().toISOString(),
+            message: ''
+          };
+
+          // نكتب تحت /requests/<userId> (لو حبيت تسمح بطلبات متعددة استعمل push بدلاً من set)
+          await db.ref('requests/' + userId).set(payload);
+
+          status.innerHTML = '📩 تم إرسال الدليل! جاري التحقق بواسطة الأدمن — قد تستغرق العملية 24 ساعة.';
+        } catch (err) {
+          console.error(err);
+          status.innerHTML = '<span class="text-red-500">حدث خطأ أثناء الرفع. حاول مرة أخرى.</span>';
+        }
+      };
+      reader.readAsDataURL(file);
     });
 
-    // ---------- Mode handling ----------
-    if (isAdmin) {
-      adminCard.classList.remove('hidden');
-      userCard.classList.add('hidden');
-      initAdmin();
-    } else if (userId) {
-      adminCard.classList.add('hidden');
-      userCard.classList.remove('hidden');
-      initUser();
-      watchUserStatus();
-    } else {
-      // show minimal info
-      userCard.innerHTML = `<div class="glass p-6 rounded-2xl shadow-lg text-center"><h3 class="text-lg font-bold">رابط غير صالح</h3><p class="mt-2 text-sm">أضف ?user=USER_ID للرابط أو ?admin=true للأدمن</p></div>`;
-    }
-
-    // ---------------- USER FLOW ----------------
-    function initUser() {
-      const proofInput = qs('#proofInput');
-      const uploadBtn = qs('#uploadBtn');
-
-      uploadBtn.addEventListener('click', async () => {
-        const file = proofInput.files[0];
-        if (!file) return alert('اختر صورة أولاً');
-
-        // read as dataURL
-        const reader = new FileReader();
-        reader.onload = async () => {
-          try {
-            // upload to storage
-            const base64 = reader.result;
-            const path = `proofs/${userId}_${Date.now()}.jpg`;
-            const storageRef = ref(storage, path);
-            await uploadString(storageRef, base64, 'data_url');
-            const photoURL = await getDownloadURL(storageRef);
-
-            // save request in firestore
-            const payload = {
-              userId,
-              photoURL,
-              status: 'pending',
-              date: Date.now(),
-              reviewedBy: null,
-              message: ''
-            };
-            await setDoc(doc(db, 'verifications', userId), payload);
-
-            statusBadge.textContent = '🕒 pending';
-            userMessages.innerHTML = `<div class="text-sm text-slate-600">📩 تم الإرسال! جاري التحقق من قبل الإدارة (قد تستغرق 24 ساعة).</div>`;
-          } catch (err) {
-            console.error(err);
-            alert('حدث خطأ أثناء الرفع');
-          }
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-
-    // Watch status changes for this user and update UI live
-    function watchUserStatus() {
-      const docRef = doc(db, 'verifications', userId);
-      onSnapshot(docRef, snap => {
-        if (!snap.exists()) return;
-        const data = snap.data();
-        statusBadge.textContent = data.status || '—';
-        if (data.message) {
-          userMessages.innerHTML = `<div class="mt-2 p-3 rounded-lg bg-slate-50 text-sm">✉️ رسالة من الإدارة: ${escapeHtml(data.message)}</div>`;
-        }
-      });
-    }
-
-    // ---------------- ADMIN FLOW ----------------
-    async function initAdmin() {
-      const reloadBtn = qs('#reloadBtn');
-      const adminFilter = qs('#adminFilter');
-
-      reloadBtn.addEventListener('click', loadRequests);
-      adminFilter.addEventListener('input', () => loadRequests(adminFilter.value.trim()));
-
-      // initial load
-      loadRequests();
-
-      // realtime updates (optional): subscribe to collection
-      const q = query(collection(db, 'verifications'), orderBy('date', 'desc'));
-      onSnapshot(q, snap => {
-        // reload visible items only (efficient enough for small datasets)
-        if (!adminFilter.value) renderRequests(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-      });
-    }
-
-    async function loadRequests(filterId = '') {
-      requestsList.innerHTML = `<div class="text-sm text-slate-500">جارٍ التحميل...</div>`;
-      try {
-        const qSnap = await getDocs(query(collection(db, 'verifications'), orderBy('date', 'desc')));
-        const items = [];
-        qSnap.forEach(d => items.push({ id: d.id, ...d.data() }));
-        const filtered = filterId ? items.filter(i => i.userId.includes(filterId)) : items;
-        renderRequests(filtered);
-      } catch (err) {
-        console.error(err);
-        requestsList.innerHTML = `<div class="text-sm text-red-500">خطأ في تحميل الطلبات</div>`;
-      }
-    }
-
-    function renderRequests(items) {
-      if (!items.length) {
-        requestsList.innerHTML = `<div class="text-sm text-slate-500">لا توجد طلبات حالياً.</div>`;
-        return;
-      }
-
-      requestsList.innerHTML = '';
-      items.forEach(item => {
-        const el = document.createElement('div');
-        el.className = 'p-4 rounded-xl border bg-white shadow-sm';
-        el.innerHTML = `
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex-1 text-right">
-              <div class="text-sm text-slate-500">المستخدم</div>
-              <div class="font-medium">${escapeHtml(item.userId)}</div>
-              <div class="text-xs text-slate-400 mt-1">${new Date(item.date).toLocaleString()}</div>
-            </div>
-            <div class="w-32">
-              <img src="${item.photoURL}" alt="proof" class="rounded-md w-full h-24 object-cover border" />
-            </div>
-          </div>
-
-          <textarea id="msg_${item.userId}" placeholder="اكتب رسالة للمستخدم (اختياري)" class="mt-3 w-full p-2 border rounded-md text-sm"></textarea>
-
-          <div class="mt-3 flex gap-2">
-            <button class="px-3 py-2 rounded-xl bg-emerald-500 text-white" data-action="approve" data-id="${item.userId}">✅ قبول</button>
-            <button class="px-3 py-2 rounded-xl bg-red-500 text-white" data-action="reject" data-id="${item.userId}">❌ رفض</button>
-            <button class="px-3 py-2 rounded-xl bg-slate-200" data-action="skip" data-id="${item.userId}">⏭ تجاوز</button>
-          </div>
-        `;
-
-        requestsList.appendChild(el);
-      });
-
-      // attach handlers
-      qsa('[data-action]').forEach(btn => btn.addEventListener('click', async (e) => {
-        const action = btn.getAttribute('data-action');
-        const uid = btn.getAttribute('data-id');
-        if (action === 'skip') return; // do nothing
-
-        const textarea = qs(`#msg_${uid}`);
-        const message = textarea.value.trim();
-
-        const newStatus = action === 'approve' ? 'approved' : 'rejected';
-
-        // update firestore
-        await updateDoc(doc(db, 'verifications', uid), {
-          status: newStatus,
-          reviewedBy: 'admin',
-          message
-        });
-
-        // (Optional) send telegram message via bot backend — see notes below
-        alert('تم تحديث الحالة: ' + newStatus);
-        loadRequests();
-      }));
-    }
-
-    // ---------- small util ----------
-    function escapeHtml(str = '') {
-      return String(str).replace(/[&<>"'`]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;","`":"&#96;"})[s]);
-    }
-
-    // ---------- NOTES for deployment (read & follow) ----------
-    /*
-      1) استبدل firebaseConfig و CHANNEL_URL بقيمك.
-      2) إرسال رسالة تليجرام عند الموافقة/الرفض: هذه الصفحة تحدث Firestore فقط.
-         لتصل رسالة مباشرة للمستخدم في التليجرام تَحتاج دالة backend (Cloud Function أو endpoint)
-         تراقب تغيّر وثيقة verifications/{userId} وتستدعي Telegram Bot API لإرسال رسالة.
-
-      3) عندما تنشر على https يجب تفعيل قواعد CORS و قواعد Firebase المناسبة.
-      4) لتأمين لوحة الأدمن: حاليا الوصول فقط عبر ?admin=true — لحماية حقيقية استعمل
-         نظام تسجيل دخول (Firebase Auth) أو تحقق بسيط عبر رمز سري في query param.
-    */
-
+    // لو صفحة الميني آب داخل التليجرام وتريد استخدام telegram initData لجلب الـ id تلقائياً:
+    // لو حبيت أضيف هذا الدعم قولي — حالياً نستخدم param ?id= فقط.
   </script>
 </body>
 </html>
+
