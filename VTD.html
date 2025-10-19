@@ -2,439 +2,127 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>لوحة مراجعة الطلبات</title>
   <style>
     body {
-      background: #f5f6fa;
-      font-family: "Tahoma", sans-serif;
-      color: #222;
-      padding: 20px;
+      font-family: "Cairo", sans-serif;
+      background: #f2f3f8;
       margin: 0;
-    }
-    h1 { 
-      text-align: center; 
-      margin-bottom: 10px; 
-      color: #2c3e50;
-    }
-    #status {
+      padding: 0;
       text-align: center;
-      font-weight: bold;
-      padding: 10px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      transition: all 0.3s ease;
     }
-    .ok {
-      background: #d4edda;
-      color: #155724;
-      border: 1px solid #c3e6cb;
+
+    h1 {
+      color: #333;
+      margin-top: 20px;
     }
-    .error {
-      background: #f8d7da;
-      color: #721c24;
-      border: 1px solid #f5c6cb;
-    }
-    .warning {
-      background: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeaa7;
-    }
-    #counter {
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 25px;
-      color: #007bff;
-      font-size: 18px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
-    }
+
     .card {
       background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-      padding: 15px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      transition: 0.3s;
-      position: relative;
-    }
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
-    }
-    .card-header {
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-size: 12px;
-      color: #666;
-    }
-    .card-id {
-      background: #f0f2ff;
-      padding: 2px 6px;
-      border-radius: 5px;
-    }
-    .card-date {
-      color: #888;
-    }
-    img {
-      width: 100%;
-      height: 180px;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      object-fit: cover;
-      border: 1px solid #eee;
-    }
-    .info { 
-      text-align: center; 
-      margin-bottom: 12px; 
-      width: 100%;
-    }
-    .info strong {
-      display: block;
-      margin-bottom: 5px;
-      color: #2c3e50;
-    }
-    .info code {
-      background: #f0f2ff;
-      padding: 2px 6px;
-      border-radius: 5px;
-      font-size: 13px;
-      direction: ltr;
-      display: inline-block;
-    }
-    .btns { 
-      display: flex; 
-      justify-content: center; 
-      gap: 10px; 
-      width: 100%;
-    }
-    .btn {
-      border: none;
-      padding: 8px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      color: #fff;
-      font-size: 14px;
-      transition: 0.2s;
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-    }
-    .btn-accept { 
-      background: #28a745; 
-    }
-    .btn-accept:hover { 
-      background: #23923c; 
-    }
-    .btn-reject { 
-      background: #dc3545; 
-    }
-    .btn-reject:hover { 
-      background: #c9303c; 
-    }
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .muted { 
-      text-align: center; 
-      color: #777; 
-      margin-top: 20px; 
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
       padding: 20px;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 500px;
+      text-align: right;
+      transition: 0.3s;
     }
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,.3);
-      border-radius: 50%;
-      border-top-color: #fff;
-      animation: spin 1s ease-in-out infinite;
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: 10px;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      margin: 5px;
+      font-size: 15px;
     }
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      padding: 15px 20px;
-      border-radius: 8px;
-      color: white;
+
+    .accept { background: #4CAF50; }
+    .reject { background: #f44336; }
+    .refresh { background: #2196F3; }
+
+    .status {
       font-weight: bold;
-      z-index: 1000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      transform: translateX(150%);
-      transition: transform 0.3s ease;
+      color: #777;
+      margin-top: 10px;
     }
-    .notification.show {
-      transform: translateX(0);
-    }
-    .notification.success {
-      background: #28a745;
-    }
-    .notification.error {
-      background: #dc3545;
+
+    footer {
+      margin-top: 30px;
+      color: #666;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
-  <h1>لوحة مراجعة الطلبات</h1>
-  <div id="status">⏳ جاري فحص حالة الـ Webhook...</div>
-  <div id="counter">الطلبات قيد المراجعة: <span id="count">0</span></div>
-  <div id="grid" class="grid"></div>
-  <div id="empty" class="muted">جاري تحميل البيانات...</div>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <h1>📋 لوحة مراجعة الطلبات</h1>
+  <button class="btn refresh" onclick="loadRequests()">🔄 تحديث</button>
+
+  <div id="requests"></div>
+
+  <footer>جميع الحقوق محفوظة © HemaTech — 
+    <a href="https://youtube.com/@hema_tech1?si=Vz2E7UjRpTmac6iw" target="_blank">قناتي</a>
+  </footer>
 
   <script>
-    // === إعداد Firebase ===
-    const firebaseConfig = {
-      apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
-      authDomain: "hhhhhh-d4fb8.firebaseapp.com",
-      projectId: "hhhhhh-d4fb8",
-      storageBucket: "hhhhhh-d4fb8.appspot.com",
-      messagingSenderId: "24512338206",
-      appId: "1:24512338206:web:dfe045db59bd3434a2110f"
-    };
-    
-    // تهيئة Firebase
-    try {
-      firebase.initializeApp(firebaseConfig);
-    } catch (error) {
-      console.error("خطأ في تهيئة Firebase:", error);
-    }
-    
-    const db = firebase.firestore();
+    // ✅ بيانات تجريبية (بدلها من Firebase أو JSON)
+    const requestsData = [
+      { id: 1, name: "محمد أحمد", telegramId: "5307228059", desc: "طلب سكربت جديد" },
+      { id: 2, name: "علي إبراهيم", telegramId: "5910000000", desc: "طلب مراجعة ملف" }
+    ];
 
-    // عناصر DOM
-    const grid = document.getElementById('grid');
-    const empty = document.getElementById('empty');
-    const countEl = document.getElementById('count');
-    const statusEl = document.getElementById('status');
-
-    // === رابط Webhook (API) ===
-    const WEBHOOK_URL = "https://hematech.xyz/api/notify";
-
-    // === إظهار الإشعارات ===
-    function showNotification(message, type = 'success') {
-      const notification = document.createElement('div');
-      notification.className = `notification ${type}`;
-      notification.textContent = message;
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.classList.add('show');
-      }, 100);
-      
-      setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => {
-          document.body.removeChild(notification);
-        }, 300);
-      }, 3000);
-    }
-
-    // === فحص حالة الـ Webhook ===
-    async function checkWebhook() {
-      try {
-        statusEl.textContent = "⏳ جاري فحص حالة الـ Webhook...";
-        statusEl.className = "warning";
-        
-        const res = await fetch(WEBHOOK_URL, {
-          method: 'GET',
-          headers: { 
-            'Cache-Control': 'no-cache',
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (res.ok) {
-          const data = await res.json().catch(() => ({}));
-          statusEl.textContent = data.message || "✅ الـ Webhook شغّال بشكل طبيعي";
-          statusEl.className = "ok";
-        } else {
-          const text = await res.text();
-          console.error("Webhook Error Response:", text);
-          statusEl.textContent = `⚠️ الـ Webhook لا يستجيب (${res.status})`;
-          statusEl.className = "error";
-        }
-      } catch (err) {
-        console.error("Webhook Connection Failed:", err);
-        statusEl.textContent = "❌ فشل الاتصال بالـ Webhook، تحقق من السيرفر أو الـ CORS";
-        statusEl.className = "error";
-      }
-    }
-
-    // === تحويل التاريخ ===
-    function formatDate(timestamp) {
-      if (!timestamp) return "غير محدد";
-      
-      let date;
-      if (timestamp.toDate) {
-        date = timestamp.toDate();
-      } else if (timestamp.seconds) {
-        date = new Date(timestamp.seconds * 1000);
-      } else {
-        date = new Date(timestamp);
-      }
-      
-      return date.toLocaleDateString('ar-EG', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+    async function loadRequests() {
+      const container = document.getElementById("requests");
+      container.innerHTML = "";
+      requestsData.forEach(req => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>👤 ${req.name}</h3>
+          <p>🆔 <b>${req.telegramId}</b></p>
+          <p>📄 ${req.desc}</p>
+          <button class="btn accept" onclick="sendNotify('${req.telegramId}', '✅ تم قبول طلبك بنجاح!')">قبول ✅</button>
+          <button class="btn reject" onclick="sendNotify('${req.telegramId}', '❌ تم رفض طلبك، حاول لاحقًا.')">رفض ❌</button>
+          <div class="status" id="status-${req.id}"></div>
+        `;
+        container.appendChild(card);
       });
     }
 
-    // === تحميل الطلبات من فايربيس ===
-    db.collection('subscriptions')
-      .where('status', '==', 'pending')
-      .orderBy('createdAt', 'desc')
-      .onSnapshot(snapshot => {
-        grid.innerHTML = "";
-        countEl.innerText = snapshot.size;
-        
-        if (snapshot.empty) {
-          empty.innerText = "لا توجد طلبات حالياً قيد المراجعة ✅";
-          return;
-        }
-        
-        empty.innerText = "";
-        
-        snapshot.forEach(doc => {
-          const d = doc.data();
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <div class="card-header">
-              <span class="card-id">ID: ${doc.id.substring(0, 8)}</span>
-              <span class="card-date">${formatDate(d.createdAt)}</span>
-            </div>
-            <img src="${d.proofUrl || 'https://via.placeholder.com/300x200?text=No+Image'}" 
-                 alt="دليل الاشتراك" 
-                 onerror="this.src='https://via.placeholder.com/300x200?text=خطأ+في+الصورة'">
-            <div class="info">
-              <strong>${d.name || "مستخدم بدون اسم"}</strong>
-              <code>${d.telegramId || 'بدون ID'}</code>
-            </div>
-            <div class="btns">
-              <button class="btn btn-accept" data-id="${doc.id}">
-                <span class="btn-text">✅ قبول</span>
-              </button>
-              <button class="btn btn-reject" data-id="${doc.id}">
-                <span class="btn-text">❌ رفض</span>
-              </button>
-            </div>
-          `;
-
-          // إضافة مستمعي الأحداث للأزرار
-          card.querySelector('.btn-accept').addEventListener('click', async (e) => {
-            const button = e.currentTarget;
-            const originalText = button.querySelector('.btn-text').textContent;
-            button.querySelector('.btn-text').textContent = 'جاري القبول...';
-            button.disabled = true;
-            
-            try {
-              await db.collection('subscriptions').doc(doc.id).update({ 
-                status: 'approved',
-                reviewedAt: firebase.firestore.FieldValue.serverTimestamp()
-              });
-              
-              await sendNotification(d.telegramId, '✅ تم قبول إثبات اشتراكك! شكرًا لك 🌟');
-              showNotification('تم قبول الطلب بنجاح وإرسال الإشعار');
-            } catch (error) {
-              console.error('خطأ في قبول الطلب:', error);
-              showNotification('حدث خطأ أثناء قبول الطلب', 'error');
-            } finally {
-              button.querySelector('.btn-text').textContent = originalText;
-              button.disabled = false;
-            }
-          });
-
-          card.querySelector('.btn-reject').addEventListener('click', async (e) => {
-            const button = e.currentTarget;
-            const originalText = button.querySelector('.btn-text').textContent;
-            button.querySelector('.btn-text').textContent = 'جاري الرفض...';
-            button.disabled = true;
-            
-            try {
-              await db.collection('subscriptions').doc(doc.id).update({ 
-                status: 'rejected',
-                reviewedAt: firebase.firestore.FieldValue.serverTimestamp()
-              });
-              
-              await sendNotification(d.telegramId, '❌ تم رفض الإثبات. تأكد من أن الصورة واضحة وجديدة وحاول مرة أخرى.');
-              showNotification('تم رفض الطلب بنجاح وإرسال الإشعار');
-            } catch (error) {
-              console.error('خطأ في رفض الطلب:', error);
-              showNotification('حدث خطأ أثناء رفض الطلب', 'error');
-            } finally {
-              button.querySelector('.btn-text').textContent = originalText;
-              button.disabled = false;
-            }
-          });
-
-          grid.appendChild(card);
-        });
-      }, error => {
-        console.error("خطأ في تحميل البيانات:", error);
-        empty.innerText = "حدث خطأ في تحميل البيانات. يرجى تحديث الصفحة.";
-      });
-
-    // === إرسال إشعار عبر Webhook ===
-    async function sendNotification(telegramId, message) {
-      if (!telegramId) {
-        console.warn('لا يوجد معرف تلغرام للإرسال');
-        return;
-      }
-      
+    async function sendNotify(telegramId, message) {
+      const url = "/api/notify"; // أو استخدم رابط كامل لو الموقع في دومين آخر
       try {
-        const res = await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ 
-            telegramId: telegramId.toString(), 
-            message 
-          })
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ telegramId, message })
         });
-        
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error('❌ فشل الإرسال:', errText);
-          throw new Error(`فشل الإرسال: ${res.status}`);
+        const data = await res.json();
+
+        if (data.success) {
+          alert("تم إرسال الإشعار بنجاح ✅");
         } else {
-          console.log('✅ تم إرسال الإشعار بنجاح');
-          return true;
+          alert("فشل الإرسال ❌");
+          console.error(data);
         }
       } catch (err) {
-        console.error('⚠️ حدث خطأ أثناء الإرسال:', err);
-        throw err;
+        alert("حدث خطأ أثناء الإرسال ❌");
+        console.error(err);
       }
     }
 
-    // فحص حالة الـ Webhook عند التحميل
-    document.addEventListener('DOMContentLoaded', () => {
-      checkWebhook();
-      // فحص كل 30 ثانية بدلاً من 15 لتقليل الحمل
-      setInterval(checkWebhook, 30000);
-    });
+    loadRequests();
   </script>
+
 </body>
 </html>
+
