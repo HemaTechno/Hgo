@@ -131,13 +131,13 @@
     const countEl = document.getElementById('count');
     const statusEl = document.getElementById('status');
 
-    // رابط webhook
+    // رابط Webhook (API)
     const WEBHOOK_URL = "https://hematech.xyz/api/notify";
 
     // === فحص حالة الـ Webhook ===
     async function checkWebhook() {
       try {
-        const res = await fetch(WEBHOOK_URL, { method: 'HEAD' });
+        const res = await fetch(WEBHOOK_URL, { method: 'GET' });
         if (res.ok) {
           statusEl.textContent = "✅ الـ Webhook شغّال بشكل طبيعي";
           statusEl.className = "ok";
@@ -151,7 +151,7 @@
       }
     }
     checkWebhook();
-    setInterval(checkWebhook, 15000); // يعيد الفحص كل 15 ثانية
+    setInterval(checkWebhook, 15000);
 
     // === تحميل الطلبات من فايربيس ===
     db.collection('subscriptions')
@@ -181,15 +181,12 @@
             </div>
           `;
 
-          const acceptBtn = card.querySelector('.btn-accept');
-          const rejectBtn = card.querySelector('.btn-reject');
-
-          acceptBtn.addEventListener('click', async () => {
+          card.querySelector('.btn-accept').addEventListener('click', async () => {
             await db.collection('subscriptions').doc(doc.id).update({ status: 'approved' });
             sendNotification(d.telegramId, '✅ تم قبول إثبات اشتراكك! شكرًا لك 🌟');
           });
 
-          rejectBtn.addEventListener('click', async () => {
+          card.querySelector('.btn-reject').addEventListener('click', async () => {
             await db.collection('subscriptions').doc(doc.id).update({ status: 'rejected' });
             sendNotification(d.telegramId, '❌ تم رفض الإثبات. تأكد من أن الصورة واضحة وجديدة وحاول مرة أخرى.');
           });
@@ -198,16 +195,26 @@
         });
       });
 
-    // === إرسال الإشعار عبر الـ Webhook ===
-    function sendNotification(telegramId, message) {
-      fetch(WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ telegramId, message })
-      }).then(res => console.log("تم إرسال الإشعار"))
-      .catch(err => console.error("فشل الإرسال:", err));
+    // === إرسال إشعار عبر Webhook ===
+    async function sendNotification(telegramId, message) {
+      try {
+        const res = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ telegramId, message })
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error('❌ فشل الإرسال:', errText);
+        } else {
+          console.log('✅ تم إرسال الإشعار بنجاح');
+        }
+      } catch (err) {
+        console.error('⚠️ حدث خطأ أثناء الإرسال:', err);
+      }
     }
   </script>
 </body>
 </html>
+
 
