@@ -2,127 +2,216 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>لوحة مراجعة الطلبات</title>
   <style>
     body {
-      font-family: "Cairo", sans-serif;
-      background: #f2f3f8;
-      margin: 0;
-      padding: 0;
-      text-align: center;
+      background:#f5f6fa;
+      font-family:"Cairo", sans-serif;
+      padding:20px;
+      color:#222;
     }
-
     h1 {
-      color: #333;
-      margin-top: 20px;
+      text-align:center;
+      margin-bottom:10px;
     }
-
+    #status {
+      text-align:center;
+      font-weight:bold;
+      padding:10px;
+      border-radius:10px;
+      margin-bottom:20px;
+    }
+    .ok {
+      background:#d4edda;
+      color:#155724;
+      border:1px solid #c3e6cb;
+    }
+    .error {
+      background:#f8d7da;
+      color:#721c24;
+      border:1px solid #f5c6cb;
+    }
+    #counter {
+      text-align:center;
+      font-weight:bold;
+      margin-bottom:25px;
+      color:#007bff;
+      font-size:18px;
+    }
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+      gap:20px;
+    }
     .card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      padding: 20px;
-      margin: 20px auto;
-      width: 90%;
-      max-width: 500px;
-      text-align: right;
-      transition: 0.3s;
+      background:#fff;
+      border-radius:12px;
+      box-shadow:0 3px 10px rgba(0,0,0,0.08);
+      padding:15px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      transition:0.3s;
     }
-
     .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      transform:translateY(-3px);
+      box-shadow:0 6px 14px rgba(0,0,0,0.12);
     }
-
+    img {
+      width:100%;
+      border-radius:10px;
+      margin-bottom:10px;
+      object-fit:cover;
+    }
+    .info {
+      text-align:center;
+      margin-bottom:12px;
+    }
+    .info code {
+      background:#f0f2ff;
+      padding:2px 6px;
+      border-radius:5px;
+      font-size:13px;
+    }
+    .btns {
+      display:flex;
+      justify-content:center;
+      gap:10px;
+    }
     .btn {
-      padding: 10px 18px;
-      border-radius: 10px;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-      margin: 5px;
-      font-size: 15px;
+      border:none;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      color:#fff;
+      font-size:14px;
+      transition:0.2s;
     }
-
-    .accept { background: #4CAF50; }
-    .reject { background: #f44336; }
-    .refresh { background: #2196F3; }
-
-    .status {
-      font-weight: bold;
-      color: #777;
-      margin-top: 10px;
-    }
-
-    footer {
-      margin-top: 30px;
-      color: #666;
-      font-size: 14px;
+    .btn-accept { background:#28a745; }
+    .btn-accept:hover { background:#23923c; }
+    .btn-reject { background:#dc3545; }
+    .btn-reject:hover { background:#c9303c; }
+    .muted {
+      text-align:center;
+      color:#777;
+      margin-top:20px;
     }
   </style>
 </head>
 <body>
+  <h1>لوحة مراجعة الطلبات</h1>
+  <div id="status">جاري فحص حالة الـ Webhook...</div>
+  <div id="counter">الطلبات قيد المراجعة: <span id="count">0</span></div>
+  <div id="grid" class="grid"></div>
+  <div id="empty" class="muted">جاري تحميل البيانات...</div>
 
-  <h1>📋 لوحة مراجعة الطلبات</h1>
-  <button class="btn refresh" onclick="loadRequests()">🔄 تحديث</button>
-
-  <div id="requests"></div>
-
-  <footer>جميع الحقوق محفوظة © HemaTech — 
-    <a href="https://youtube.com/@hema_tech1?si=Vz2E7UjRpTmac6iw" target="_blank">قناتي</a>
-  </footer>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <script>
-    // ✅ بيانات تجريبية (بدلها من Firebase أو JSON)
-    const requestsData = [
-      { id: 1, name: "محمد أحمد", telegramId: "5307228059", desc: "طلب سكربت جديد" },
-      { id: 2, name: "علي إبراهيم", telegramId: "5910000000", desc: "طلب مراجعة ملف" }
-    ];
+    // === إعداد Firebase ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+      authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+      databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+      projectId: "hhhhhh-d4fb8",
+      storageBucket: "hhhhhh-d4fb8.appspot.com",
+      messagingSenderId: "24512338206",
+      appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+      measurementId: "G-HD4R7GNQ5H"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    async function loadRequests() {
-      const container = document.getElementById("requests");
-      container.innerHTML = "";
-      requestsData.forEach(req => {
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <h3>👤 ${req.name}</h3>
-          <p>🆔 <b>${req.telegramId}</b></p>
-          <p>📄 ${req.desc}</p>
-          <button class="btn accept" onclick="sendNotify('${req.telegramId}', '✅ تم قبول طلبك بنجاح!')">قبول ✅</button>
-          <button class="btn reject" onclick="sendNotify('${req.telegramId}', '❌ تم رفض طلبك، حاول لاحقًا.')">رفض ❌</button>
-          <div class="status" id="status-${req.id}"></div>
-        `;
-        container.appendChild(card);
-      });
-    }
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    const countEl = document.getElementById('count');
+    const statusEl = document.getElementById('status');
 
-    async function sendNotify(telegramId, message) {
-      const url = "/api/notify"; // أو استخدم رابط كامل لو الموقع في دومين آخر
+    // رابط Webhook API
+    const WEBHOOK_URL = "https://hematech.xyz/api/notify";
+
+    // === فحص حالة الـ Webhook ===
+    async function checkWebhook() {
       try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch(WEBHOOK_URL, { method: 'OPTIONS' });
+        if (res.ok) {
+          statusEl.textContent = "✅ الـ Webhook شغّال بشكل طبيعي";
+          statusEl.className = "ok";
+        } else {
+          statusEl.textContent = "⚠️ الـ Webhook لا يستجيب (تحقق من الإعدادات)";
+          statusEl.className = "error";
+        }
+      } catch (err) {
+        statusEl.textContent = "❌ فشل الاتصال بالـ Webhook، تحقق من CORS أو السيرفر";
+        statusEl.className = "error";
+      }
+    }
+    checkWebhook();
+    setInterval(checkWebhook, 15000);
+
+    // === تحميل الطلبات ===
+    db.collection('subscriptions')
+      .where('status', '==', 'pending')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(snapshot => {
+        grid.innerHTML = "";
+        countEl.innerText = snapshot.size;
+        if (snapshot.empty) {
+          empty.innerText = "✅ لا توجد طلبات قيد المراجعة الآن";
+          return;
+        }
+        empty.innerText = "";
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${d.proofUrl}" alt="دليل الاشتراك">
+            <div class="info">
+              <strong>${d.name || "بدون اسم"}</strong><br>
+              <code>${d.telegramId}</code>
+            </div>
+            <div class="btns">
+              <button class="btn btn-accept">✅ قبول</button>
+              <button class="btn btn-reject">❌ رفض</button>
+            </div>
+          `;
+
+          card.querySelector('.btn-accept').addEventListener('click', async () => {
+            await db.collection('subscriptions').doc(doc.id).update({ status: 'approved' });
+            sendNotification(d.telegramId, '✅ تم قبول إثبات اشتراكك! شكرًا لك 🌟');
+          });
+
+          card.querySelector('.btn-reject').addEventListener('click', async () => {
+            await db.collection('subscriptions').doc(doc.id).update({ status: 'rejected' });
+            sendNotification(d.telegramId, '❌ تم رفض إثبات الاشتراك. تأكد من أن الصورة واضحة وحاول مجددًا.');
+          });
+
+          grid.appendChild(card);
+        });
+      });
+
+    // === إرسال الإشعار عبر API ===
+    async function sendNotification(telegramId, message) {
+      try {
+        const res = await fetch(WEBHOOK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ telegramId, message })
         });
         const data = await res.json();
-
-        if (data.success) {
-          alert("تم إرسال الإشعار بنجاح ✅");
-        } else {
-          alert("فشل الإرسال ❌");
-          console.error(data);
-        }
+        if (!res.ok) console.error("❌ خطأ في الإرسال:", data);
+        else console.log("✅ تم إرسال الإشعار بنجاح");
       } catch (err) {
-        alert("حدث خطأ أثناء الإرسال ❌");
-        console.error(err);
+        console.error("⚠️ خطأ أثناء الإرسال:", err);
       }
     }
-
-    loadRequests();
   </script>
-
 </body>
 </html>
+
 
