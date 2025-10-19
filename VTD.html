@@ -11,10 +11,7 @@
       color:#222;
       padding:20px;
     }
-    h1 {
-      text-align:center;
-      margin-bottom:10px;
-    }
+    h1 { text-align:center; margin-bottom:10px; }
     #status {
       text-align:center;
       font-weight:bold;
@@ -64,21 +61,14 @@
       margin-bottom:10px;
       object-fit:cover;
     }
-    .info {
-      text-align:center;
-      margin-bottom:12px;
-    }
+    .info { text-align:center; margin-bottom:12px; }
     .info code {
       background:#f0f2ff;
       padding:2px 6px;
       border-radius:5px;
       font-size:13px;
     }
-    .btns {
-      display:flex;
-      justify-content:center;
-      gap:10px;
-    }
+    .btns { display:flex; justify-content:center; gap:10px; }
     .btn {
       border:none;
       padding:8px 12px;
@@ -93,16 +83,12 @@
     .btn-accept:hover { background:#23923c; }
     .btn-reject { background:#dc3545; }
     .btn-reject:hover { background:#c9303c; }
-    .muted {
-      text-align:center;
-      color:#777;
-      margin-top:20px;
-    }
+    .muted { text-align:center; color:#777; margin-top:20px; }
   </style>
 </head>
 <body>
   <h1>لوحة مراجعة الطلبات</h1>
-  <div id="status">جاري فحص حالة الـ Webhook...</div>
+  <div id="status">⏳ جاري فحص حالة الـ Webhook...</div>
   <div id="counter">الطلبات قيد المراجعة: <span id="count">0</span></div>
   <div id="grid" class="grid"></div>
   <div id="empty" class="muted">جاري تحميل البيانات...</div>
@@ -116,12 +102,10 @@
     const firebaseConfig = {
       apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
       authDomain: "hhhhhh-d4fb8.firebaseapp.com",
-      databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
       projectId: "hhhhhh-d4fb8",
       storageBucket: "hhhhhh-d4fb8.appspot.com",
       messagingSenderId: "24512338206",
-      appId: "1:24512338206:web:dfe045db59bd3434a2110f",
-      measurementId: "G-HD4R7GNQ5H"
+      appId: "1:24512338206:web:dfe045db59bd3434a2110f"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -131,25 +115,35 @@
     const countEl = document.getElementById('count');
     const statusEl = document.getElementById('status');
 
-    // رابط Webhook (API)
+    // === رابط Webhook (API) ===
     const WEBHOOK_URL = "https://hematech.xyz/api/notify";
 
     // === فحص حالة الـ Webhook ===
     async function checkWebhook() {
       try {
-        const res = await fetch(WEBHOOK_URL, { method: 'GET' });
+        const res = await fetch(WEBHOOK_URL, {
+          method: 'GET',
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+
+        // نتحقق من نوع الرد
         if (res.ok) {
-          statusEl.textContent = "✅ الـ Webhook شغّال بشكل طبيعي";
+          const data = await res.json().catch(() => ({}));
+          statusEl.textContent = data.message || "✅ الـ Webhook شغّال بشكل طبيعي";
           statusEl.className = "ok";
         } else {
-          statusEl.textContent = "⚠️ الـ Webhook لا يستجيب (تحقق من السيرفر)";
+          const text = await res.text();
+          console.error("Webhook Error Response:", text);
+          statusEl.textContent = `⚠️ الـ Webhook لا يستجيب (${res.status})`;
           statusEl.className = "error";
         }
       } catch (err) {
-        statusEl.textContent = "❌ فشل الاتصال بالـ Webhook، يبدو أنه غير شغّال";
+        console.error("Webhook Connection Failed:", err);
+        statusEl.textContent = "❌ فشل الاتصال بالـ Webhook، تحقق من السيرفر أو الـ CORS";
         statusEl.className = "error";
       }
     }
+
     checkWebhook();
     setInterval(checkWebhook, 15000);
 
@@ -170,10 +164,10 @@
           const card = document.createElement('div');
           card.className = 'card';
           card.innerHTML = `
-            <img src="${d.proofUrl}" alt="دليل الاشتراك">
+            <img src="${d.proofUrl || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="دليل الاشتراك">
             <div class="info">
               <strong>${d.name || "مستخدم بدون اسم"}</strong><br>
-              <code>${d.telegramId}</code>
+              <code>${d.telegramId || 'بدون ID'}</code>
             </div>
             <div class="btns">
               <button class="btn btn-accept">✅ قبول</button>
@@ -206,15 +200,18 @@
         if (!res.ok) {
           const errText = await res.text();
           console.error('❌ فشل الإرسال:', errText);
+          alert('⚠️ فشل إرسال الإشعار للمستخدم.');
         } else {
           console.log('✅ تم إرسال الإشعار بنجاح');
         }
       } catch (err) {
         console.error('⚠️ حدث خطأ أثناء الإرسال:', err);
+        alert('❌ حدث خطأ أثناء إرسال الإشعار.');
       }
     }
   </script>
 </body>
 </html>
+
 
 
