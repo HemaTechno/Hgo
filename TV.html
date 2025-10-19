@@ -3,33 +3,59 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>تحقق الاشتراك — Verify</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>إثبات الاشتراك - MiniApp</title>
+  <style>
+    body { font-family: Tahoma, Arial, sans-serif; background:#f6f7fb; color:#111; padding:18px; }
+    .container { max-width:720px; margin:20px auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 6px 20px rgba(20,20,40,0.06); }
+    h1 { margin-top:0; font-size:20px; }
+    label { display:block; margin:12px 0 6px; font-weight:600; }
+    input[type=file] { padding:8px; }
+    .btn { display:inline-block; padding:10px 16px; border-radius:10px; border:0; cursor:pointer; font-weight:700; }
+    .btn-primary { background:#007bff; color:white; }
+    .btn-link { background:#f1f5ff; color:#007bff; border:1px solid #e0e8ff; }
+    .muted { color:#666; font-size:14px; margin-top:8px; }
+    .status { margin:14px 0; padding:12px; border-radius:8px; background:#fff8e6; color:#7a4b00; }
+    .hidden { display:none; }
+    .center { text-align:center; }
+    .preview { margin-top:10px; max-width:100%; border-radius:8px; }
+  </style>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center p-4">
-  <div class="w-full max-w-md">
-    <div class="bg-white rounded-2xl shadow-lg p-6">
-      <h1 class="text-xl font-bold text-sky-600 mb-2">🎯 تحقق الاشتراك</h1>
-      <p class="text-sm text-slate-600 mb-4">افتح الرابط من التليجرام وسيُمرر الـ ID تلقائياً. اشترك ثم ارفع صورة إثبات الاشتراك.</p>
+<body>
+  <div class="container">
+    <h1>إثبات الاشتراك في قناة اليوتيوب</h1>
+    <div id="user-box" class="muted">جلب بيانات المستخدم...</div>
 
-      <a id="channelLink" class="block text-center py-3 rounded-xl font-semibold shadow mb-3 glass" target="_blank">📢 الاشتراك في القناة</a>
+    <div id="status-box" class="status hidden"></div>
 
-      <label class="block text-sm text-slate-700 mb-2">رفع دليل الاشتراك (صورة)</label>
-      <input id="fileInput" type="file" accept="image/*" class="block w-full mb-3" />
+    <div id="form-box">
+      <p class="muted">اضغط على الزر لتفتح القناة ثم ارفع صورة تُثبت اشتراكك (شاشة توضح أنك مشترك).</p>
 
-      <button id="uploadBtn" class="w-full py-2 rounded-xl bg-sky-600 text-white font-bold">📤 رفع الدليل</button>
+      <div style="margin-bottom:10px;">
+        <button id="open-channel" class="btn btn-link">اذهب للقناة</button>
+      </div>
 
-      <div id="status" class="mt-4 text-sm text-slate-600"></div>
+      <label for="proof">رفع دليل الاشتراك (صورة)</label>
+      <input id="proof" type="file" accept="image/*" />
+
+      <div style="margin-top:12px;">
+        <button id="submit-btn" class="btn btn-primary">أرسل الإثبات</button>
+      </div>
+
+      <div id="progress" class="muted"></div>
+      <img id="img-preview" class="preview hidden" alt="معاينة الصورة" />
     </div>
   </div>
 
-  <!-- Firebase SDKs (module-less for simplicity) -->
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-storage.js"></script>
+  <!-- Telegram Web App -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- Firebase (compat CDN ـ سهل الاستخدام هنا) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
 
   <script>
-    // ======= إعداد Firebase (استبدل إذا احتجت) =======
+    // ======== إعدادات: ضع هنا إعدادات Firebase الخاصة بك ========
     const firebaseConfig = {
       apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
       authDomain: "hhhhhh-d4fb8.firebaseapp.com",
@@ -40,72 +66,141 @@
       appId: "1:24512338206:web:dfe045db59bd3434a2110f",
       measurementId: "G-HD4R7GNQ5H"
     };
+    // رابط قناتك (غيّره)
+    const YT_CHANNEL_URL = "https://www.youtube.com/@hema_tech1?si=Vz2E7UjRpTmac6iw";
+
+    // === تهيئة Firebase ===
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // ======= عناصر الواجهة =======
-    const channelLink = document.getElementById('channelLink');
-    const fileInput = document.getElementById('fileInput');
-    const uploadBtn = document.getElementById('uploadBtn');
-    const status = document.getElementById('status');
+    // === Telegram WebApp ready ===
+    const tg = window.Telegram.WebApp;
+    tg.ready();
 
-    // وضع رابط القناة هنا
-    const CHANNEL_URL = 'https://t.me/YOUR_CHANNEL'; // غيّرها لرابط قناتك
-    channelLink.href = CHANNEL_URL;
+    // محاولة استخراج بيانات المستخدم من initDataUnsafe
+    const initUser = (tg.initDataUnsafe && tg.initDataUnsafe.user) ? tg.initDataUnsafe.user : null;
+    // fallback: ممكن أنك تريد قراءة initData (مشفرة) لكن هنا نستخدم initDataUnsafe لأنها أسهل للعرض داخل الـ Mini App
+    const telegramId = initUser ? String(initUser.id) : null;
+    const telegramName = initUser ? (initUser.first_name || "") + (initUser.last_name ? " " + initUser.last_name : "") : "";
 
-    // احصل على id من رابط الصفحة (?id=...)
-    const params = new URLSearchParams(window.location.search);
-    const userId = params.get('id'); // مثال: verify.html?id=5307228059
+    const userBox = document.getElementById('user-box');
+    const statusBox = document.getElementById('status-box');
+    const formBox = document.getElementById('form-box');
+    const proofInput = document.getElementById('proof');
+    const submitBtn = document.getElementById('submit-btn');
+    const openChannelBtn = document.getElementById('open-channel');
+    const progress = document.getElementById('progress');
+    const imgPreview = document.getElementById('img-preview');
 
-    if (!userId) {
-      status.innerHTML = '<span class="text-red-500">خطأ: لم يتم تمرير الـ ID في الرابط.</span>';
-      uploadBtn.disabled = true;
+    if (!telegramId) {
+      userBox.innerHTML = "لم نتمكن من الحصول على بيانات Telegram. تأكد أن التطبيق مُشغّل داخل Telegram Mini App.";
+      formBox.classList.add('hidden');
+    } else {
+      userBox.innerHTML = `مرحبًا <strong>${telegramName || telegramId}</strong> — رقمك: <code>${telegramId}</code>`;
+      checkExistingRequest();
     }
 
-    uploadBtn.addEventListener('click', async () => {
-      if (!userId) return;
-      const file = fileInput.files[0];
-      if (!file) return alert('اختر صورة أولاً');
-
-      status.textContent = '⏳ جاري رفع الصورة...';
-
-      // اقرأ الملف كـ dataURL ثم ارفعه للـ Storage
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const dataUrl = reader.result;
-          const path = `proofs/${userId}_${Date.now()}.jpg`;
-          const storageRef = storage.ref().child(path);
-
-          // uploadString متاح في older SDK via putString
-          await storageRef.putString(dataUrl, 'data_url');
-          const imageUrl = await storageRef.getDownloadURL();
-
-          // انشئ أو حدّث طلب المستخدم في Realtime DB
-          const payload = {
-            id: userId,
-            imageUrl,
-            status: 'pending',
-            timestamp: new Date().toISOString(),
-            message: ''
-          };
-
-          // نكتب تحت /requests/<userId> (لو حبيت تسمح بطلبات متعددة استعمل push بدلاً من set)
-          await db.ref('requests/' + userId).set(payload);
-
-          status.innerHTML = '📩 تم إرسال الدليل! جاري التحقق بواسطة الأدمن — قد تستغرق العملية 24 ساعة.';
-        } catch (err) {
-          console.error(err);
-          status.innerHTML = '<span class="text-red-500">حدث خطأ أثناء الرفع. حاول مرة أخرى.</span>';
-        }
-      };
-      reader.readAsDataURL(file);
+    // افتح قناة اليوتيوب في تبويب جديد
+    openChannelBtn.addEventListener('click', () => {
+      // افتح في نافذة جديدة (سيعمل داخل WebApp)
+      window.open(YT_CHANNEL_URL, "_blank");
     });
 
-    // لو صفحة الميني آب داخل التليجرام وتريد استخدام telegram initData لجلب الـ id تلقائياً:
-    // لو حبيت أضيف هذا الدعم قولي — حالياً نستخدم param ?id= فقط.
+    // معاينة الصورة
+    proofInput.addEventListener('change', () => {
+      const f = proofInput.files[0];
+      if (!f) { imgPreview.classList.add('hidden'); imgPreview.src = ""; return; }
+      const url = URL.createObjectURL(f);
+      imgPreview.src = url;
+      imgPreview.classList.remove('hidden');
+    });
+
+    // تحقق إذا يوجد سجل سابق للمستخدم
+    function checkExistingRequest() {
+      const docRef = db.collection('subscriptions').doc(telegramId);
+      // استماع مباشر لتحديث الحالة
+      docRef.onSnapshot((doc) => {
+        if (!doc.exists) {
+          statusBox.classList.add('hidden');
+          formBox.classList.remove('hidden');
+        } else {
+          const data = doc.data();
+          const st = data.status || 'pending';
+          formBox.classList.add('hidden');
+          statusBox.classList.remove('hidden');
+
+          if (st === 'pending') {
+            statusBox.innerHTML = "<strong>حالة:</strong> قيد المراجعة — سنراجع طلبك خلال 24 ساعة عادةً.";
+            progress.innerText = "";
+          } else if (st === 'approved') {
+            statusBox.innerHTML = "<strong>حالة:</strong> تم التحقق ✅ — شكرًا لاشتراكك.";
+          } else if (st === 'rejected') {
+            statusBox.innerHTML = "<strong>حالة:</strong> رُفض الإثبات ❌. يمكنك المحاولة مرة أخرى.";
+            // في حالة الرفض نعرض النموذج لإعادة الإرسال
+            formBox.classList.remove('hidden');
+          } else {
+            statusBox.innerHTML = `<strong>حالة:</strong> ${st}`;
+          }
+        }
+      }, (err) => {
+        console.error("Firestore listen error:", err);
+        userBox.innerHTML += " (خطأ بالخدمة)";
+      });
+    }
+
+    // إرسال الإثبات
+    submitBtn.addEventListener('click', async () => {
+      const file = proofInput.files[0];
+      if (!file) {
+        alert("اختر صورة لإثبات الاشتراك أولاً.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      progress.innerText = "جاري رفع الصورة...";
+
+      try {
+        const ts = Date.now();
+        const ext = file.name.split('.').pop();
+        const storagePath = `subscription_proofs/${telegramId}_${ts}.${ext}`;
+
+        // رفع الصورة
+        const uploadTask = storage.ref(storagePath).put(file);
+        uploadTask.on('state_changed', snapshot => {
+          const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
+          progress.innerText = `جارٍ الرفع: ${pct}%`;
+        });
+
+        await uploadTask; // انتظر انتهاء الرفع
+        const downloadURL = await storage.ref(storagePath).getDownloadURL();
+
+        progress.innerText = "جاري تسجيل الطلب في النظام...";
+
+        // أنشئ/حدّث doc للمستخدم
+        const docRef = db.collection('subscriptions').doc(telegramId);
+        await docRef.set({
+          telegramId: telegramId,
+          name: telegramName || null,
+          proofUrl: downloadURL,
+          storagePath: storagePath,
+          status: 'pending',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true });
+
+        progress.innerText = "";
+        // يُظهر الواجهة قيد المراجعة — الاستماع في checkExistingRequest سيحدث الواجهة تلقائيًا
+        alert("تم الإرسال بنجاح — جاري المعالجة، قد تستغرق حتى 24 ساعة.");
+      } catch (e) {
+        console.error(e);
+        alert("حدث خطأ أثناء الرفع. حاول مرة أخرى.");
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
   </script>
 </body>
 </html>
+
 
