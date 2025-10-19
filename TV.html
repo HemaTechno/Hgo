@@ -5,25 +5,387 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>إثبات الاشتراك - MiniApp</title>
   <style>
-    body { font-family: Tahoma, Arial, sans-serif; background:#f6f7fb; color:#111; padding:18px; }
-    .container { max-width:720px; margin:20px auto; background:#fff; padding:20px; border-radius:12px; box-shadow:0 6px 20px rgba(20,20,40,0.06); }
-    h1 { margin-top:0; font-size:20px; }
-    label { display:block; margin:12px 0 6px; font-weight:600; }
-    input[type=file] { padding:8px; }
-    .btn { display:inline-block; padding:10px 16px; border-radius:10px; border:0; cursor:pointer; font-weight:700; }
-    .btn-primary { background:#007bff; color:white; }
-    .btn-link { background:#f1f5ff; color:#007bff; border:1px solid #e0e8ff; }
-    .muted { color:#666; font-size:14px; margin-top:8px; }
-    .status { margin:14px 0; padding:12px; border-radius:8px; background:#fff8e6; color:#7a4b00; }
-    .hidden { display:none; }
-    .center { text-align:center; }
-    .preview { margin-top:10px; max-width:100%; border-radius:8px; }
+    :root {
+      --primary: #007bff;
+      --primary-light: #e6f2ff;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --dark: #343a40;
+      --light: #f8f9fa;
+      --border-radius: 12px;
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body { 
+      font-family: Tahoma, Arial, sans-serif; 
+      background: linear-gradient(135deg, #f6f7fb 0%, #e9ecef 100%);
+      color: #111; 
+      padding: 18px;
+      min-height: 100vh;
+      animation: fadeIn 0.8s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .container { 
+      max-width: 720px; 
+      margin: 20px auto; 
+      background: #fff; 
+      padding: 25px; 
+      border-radius: var(--border-radius); 
+      box-shadow: 0 10px 30px rgba(20,20,40,0.1);
+      transform: translateY(20px);
+      opacity: 0;
+      animation: slideUp 0.6s ease forwards;
+    }
+    
+    @keyframes slideUp {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    h1 { 
+      margin-top: 0; 
+      font-size: 24px; 
+      color: var(--dark);
+      position: relative;
+      padding-bottom: 10px;
+    }
+    
+    h1::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 60px;
+      height: 3px;
+      background: var(--primary);
+      border-radius: 3px;
+    }
+    
+    label { 
+      display: block; 
+      margin: 12px 0 6px; 
+      font-weight: 600; 
+      color: var(--dark);
+    }
+    
+    input[type=file] { 
+      padding: 12px; 
+      width: 100%;
+      border: 2px dashed #dee2e6;
+      border-radius: var(--border-radius);
+      background: var(--light);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    
+    input[type=file]:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    
+    .btn { 
+      display: inline-block; 
+      padding: 12px 20px; 
+      border-radius: var(--border-radius); 
+      border: 0; 
+      cursor: pointer; 
+      font-weight: 700; 
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    
+    .btn:focus:not(:active)::after {
+      animation: ripple 1s ease-out;
+    }
+    
+    @keyframes ripple {
+      0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+      }
+      20% {
+        transform: scale(25, 25);
+        opacity: 0.3;
+      }
+      100% {
+        transform: scale(40, 40);
+        opacity: 0;
+      }
+    }
+    
+    .btn-primary { 
+      background: var(--primary); 
+      color: white;
+      box-shadow: 0 4px 6px rgba(0, 123, 255, 0.2);
+    }
+    
+    .btn-primary:hover {
+      background: #0069d9;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(0, 123, 255, 0.3);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .btn-link { 
+      background: var(--primary-light); 
+      color: var(--primary); 
+      border: 1px solid #e0e8ff;
+      box-shadow: 0 2px 4px rgba(0, 123, 255, 0.1);
+    }
+    
+    .btn-link:hover {
+      background: #d6e6ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0, 123, 255, 0.15);
+    }
+    
+    .btn-link:active {
+      transform: translateY(0);
+    }
+    
+    .muted { 
+      color: #666; 
+      font-size: 14px; 
+      margin-top: 8px; 
+    }
+    
+    .status { 
+      margin: 14px 0; 
+      padding: 16px; 
+      border-radius: var(--border-radius); 
+      background: #fff8e6; 
+      color: #7a4b00;
+      border-right: 4px solid #ffc107;
+      animation: pulse 2s infinite;
+    }
+    
+    .status.approved {
+      background: #e6f4ea;
+      color: #0d6832;
+      border-right-color: var(--success);
+      animation: none;
+    }
+    
+    .status.rejected {
+      background: #fce8e6;
+      color: #c5221f;
+      border-right-color: var(--danger);
+      animation: shake 0.5s;
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .hidden { 
+      display: none; 
+    }
+    
+    .center { 
+      text-align: center; 
+    }
+    
+    .preview { 
+      margin-top: 10px; 
+      max-width: 100%; 
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      transition: var(--transition);
+      opacity: 0;
+      transform: scale(0.9);
+      animation: zoomIn 0.5s ease forwards;
+    }
+    
+    @keyframes zoomIn {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background: #e9ecef;
+      border-radius: 4px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), #5e9eff);
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    .user-box {
+      padding: 12px;
+      background: var(--primary-light);
+      border-radius: var(--border-radius);
+      margin-bottom: 20px;
+      border-right: 4px solid var(--primary);
+      animation: slideInRight 0.5s ease;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        transform: translateX(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(0, 123, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .success-checkmark {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    .check-icon {
+      width: 40px;
+      height: 40px;
+      position: relative;
+      border-radius: 50%;
+      box-sizing: content-box;
+      border: 2px solid var(--success);
+    }
+    
+    .check-icon::before {
+      top: 3px;
+      left: -2px;
+      width: 20px;
+      transform-origin: 100% 50%;
+      border-radius: 100px 0 0 100px;
+    }
+    
+    .check-icon::after {
+      top: 0;
+      left: 10px;
+      width: 20px;
+      transform-origin: 0 50%;
+      border-radius: 0 100px 100px 0;
+      animation: rotate-circle 4.25s ease-in;
+    }
+    
+    .check-icon::before, .check-icon::after {
+      content: '';
+      height: 50px;
+      position: absolute;
+      background: #fff;
+      transform: rotate(-45deg);
+    }
+    
+    .icon-line {
+      height: 2px;
+      background-color: var(--success);
+      display: block;
+      border-radius: 2px;
+      position: absolute;
+      z-index: 10;
+    }
+    
+    .icon-line.line-tip {
+      top: 22px;
+      left: 7px;
+      width: 12px;
+      transform: rotate(45deg);
+      animation: icon-line-tip 0.75s;
+    }
+    
+    .icon-line.line-long {
+      top: 19px;
+      right: 5px;
+      width: 22px;
+      transform: rotate(-45deg);
+      animation: icon-line-long 0.75s;
+    }
+    
+    @keyframes rotate-circle {
+      0% { transform: rotate(-45deg); }
+      5% { transform: rotate(-45deg); }
+      12% { transform: rotate(-405deg); }
+      100% { transform: rotate(-405deg); }
+    }
+    
+    @keyframes icon-line-tip {
+      0% { width: 0; left: 1px; top: 19px; }
+      54% { width: 0; left: 1px; top: 19px; }
+      70% { width: 20px; left: -4px; top: 17px; }
+      84% { width: 12px; left: 10px; top: 20px; }
+      100% { width: 12px; left: 7px; top: 22px; }
+    }
+    
+    @keyframes icon-line-long {
+      0% { width: 0; right: 16px; top: 20px; }
+      65% { width: 0; right: 16px; top: 20px; }
+      84% { width: 25px; right: 0px; top: 15px; }
+      100% { width: 22px; right: 5px; top: 19px; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>إثبات الاشتراك في قناة اليوتيوب</h1>
-    <div id="user-box" class="muted">جلب بيانات المستخدم...</div>
+    <div id="user-box" class="user-box">جلب بيانات المستخدم...</div>
 
     <div id="status-box" class="status hidden"></div>
 
@@ -36,6 +398,10 @@
 
       <label for="proof">رفع دليل الاشتراك (صورة)</label>
       <input id="proof" type="file" accept="image/*" />
+
+      <div class="progress-bar hidden" id="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
 
       <div style="margin-top:12px;">
         <button id="submit-btn" class="btn btn-primary">أرسل الإثبات</button>
@@ -92,6 +458,8 @@
     const openChannelBtn = document.getElementById('open-channel');
     const progress = document.getElementById('progress');
     const imgPreview = document.getElementById('img-preview');
+    const progressBar = document.getElementById('progress-bar');
+    const progressFill = document.getElementById('progress-fill');
 
     if (!telegramId) {
       userBox.innerHTML = "لم نتمكن من الحصول على بيانات Telegram. تأكد أن التطبيق مُشغّل داخل Telegram Mini App.";
@@ -110,7 +478,11 @@
     // معاينة الصورة
     proofInput.addEventListener('change', () => {
       const f = proofInput.files[0];
-      if (!f) { imgPreview.classList.add('hidden'); imgPreview.src = ""; return; }
+      if (!f) { 
+        imgPreview.classList.add('hidden'); 
+        imgPreview.src = ""; 
+        return; 
+      }
       const url = URL.createObjectURL(f);
       imgPreview.src = url;
       imgPreview.classList.remove('hidden');
@@ -130,12 +502,25 @@
           formBox.classList.add('hidden');
           statusBox.classList.remove('hidden');
 
+          // إزالة جميع الفئات السابقة
+          statusBox.classList.remove('approved', 'rejected');
+          
           if (st === 'pending') {
             statusBox.innerHTML = "<strong>حالة:</strong> قيد المراجعة — سنراجع طلبك خلال 24 ساعة عادةً.";
             progress.innerText = "";
           } else if (st === 'approved') {
-            statusBox.innerHTML = "<strong>حالة:</strong> تم التحقق ✅ — شكرًا لاشتراكك.";
+            statusBox.classList.add('approved');
+            statusBox.innerHTML = `
+              <div class="success-checkmark">
+                <div class="check-icon">
+                  <span class="icon-line line-tip"></span>
+                  <span class="icon-line line-long"></span>
+                </div>
+              </div>
+              <strong>حالة:</strong> تم التحقق ✅ — شكرًا لاشتراكك.
+            `;
           } else if (st === 'rejected') {
+            statusBox.classList.add('rejected');
             statusBox.innerHTML = "<strong>حالة:</strong> رُفض الإثبات ❌. يمكنك المحاولة مرة أخرى.";
             // في حالة الرفض نعرض النموذج لإعادة الإرسال
             formBox.classList.remove('hidden');
@@ -153,12 +538,14 @@
     submitBtn.addEventListener('click', async () => {
       const file = proofInput.files[0];
       if (!file) {
-        alert("اختر صورة لإثبات الاشتراك أولاً.");
+        showMessage("اختر صورة لإثبات الاشتراك أولاً.", "error");
         return;
       }
 
       submitBtn.disabled = true;
-      progress.innerText = "جاري رفع الصورة...";
+      submitBtn.innerHTML = "جاري الإرسال <span class='loading'></span>";
+      progressBar.classList.remove('hidden');
+      progressFill.style.width = "0%";
 
       try {
         const ts = Date.now();
@@ -170,12 +557,14 @@
         uploadTask.on('state_changed', snapshot => {
           const pct = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
           progress.innerText = `جارٍ الرفع: ${pct}%`;
+          progressFill.style.width = `${pct}%`;
         });
 
         await uploadTask; // انتظر انتهاء الرفع
         const downloadURL = await storage.ref(storagePath).getDownloadURL();
 
         progress.innerText = "جاري تسجيل الطلب في النظام...";
+        progressFill.style.width = "100%";
 
         // أنشئ/حدّث doc للمستخدم
         const docRef = db.collection('subscriptions').doc(telegramId);
@@ -189,16 +578,54 @@
         }, { merge: true });
 
         progress.innerText = "";
+        progressBar.classList.add('hidden');
+        
         // يُظهر الواجهة قيد المراجعة — الاستماع في checkExistingRequest سيحدث الواجهة تلقائيًا
-        alert("تم الإرسال بنجاح — جاري المعالجة، قد تستغرق حتى 24 ساعة.");
+        showMessage("تم الإرسال بنجاح — جاري المعالجة، قد تستغرق حتى 24 ساعة.", "success");
       } catch (e) {
         console.error(e);
-        alert("حدث خطأ أثناء الرفع. حاول مرة أخرى.");
+        showMessage("حدث خطأ أثناء الرفع. حاول مرة أخرى.", "error");
       } finally {
         submitBtn.disabled = false;
+        submitBtn.innerHTML = "أرسل الإثبات";
       }
     });
 
+    // دالة لعرض الرسائل بشكل مؤقت
+    function showMessage(message, type) {
+      const messageEl = document.createElement('div');
+      messageEl.textContent = message;
+      messageEl.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 12px 20px;
+        border-radius: var(--border-radius);
+        color: white;
+        font-weight: bold;
+        z-index: 1000;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideDown 0.3s ease;
+      `;
+      
+      if (type === 'success') {
+        messageEl.style.background = 'var(--success)';
+      } else if (type === 'error') {
+        messageEl.style.background = 'var(--danger)';
+      } else {
+        messageEl.style.background = 'var(--primary)';
+      }
+      
+      document.body.appendChild(messageEl);
+      
+      setTimeout(() => {
+        messageEl.style.animation = 'slideUp 0.3s ease forwards';
+        setTimeout(() => {
+          document.body.removeChild(messageEl);
+        }, 300);
+      }, 3000);
+    }
   </script>
 </body>
 </html>
