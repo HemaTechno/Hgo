@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>لوحة مراجعة الطلبات</title>
+  <style>
+    body {
+      background:#f5f6fa;
+      font-family:"Tahoma", sans-serif;
+      color:#222;
+      padding:20px;
+    }
+    h1 {
+      text-align:center;
+      margin-bottom:10px;
+    }
+    #counter {
+      text-align:center;
+      font-weight:bold;
+      margin-bottom:25px;
+      color:#007bff;
+      font-size:18px;
+    }
+    .grid {
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));
+      gap:20px;
+    }
+    .card {
+      background:#fff;
+      border-radius:12px;
+      box-shadow:0 3px 10px rgba(0,0,0,0.08);
+      padding:15px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      transition:0.3s;
+    }
+    .card:hover {
+      transform:translateY(-3px);
+      box-shadow:0 6px 14px rgba(0,0,0,0.12);
+    }
+    img {
+      width:100%;
+      border-radius:10px;
+      margin-bottom:10px;
+      object-fit:cover;
+    }
+    .info {
+      text-align:center;
+      margin-bottom:12px;
+    }
+    .info code {
+      background:#f0f2ff;
+      padding:2px 6px;
+      border-radius:5px;
+      font-size:13px;
+    }
+    .btns {
+      display:flex;
+      justify-content:center;
+      gap:10px;
+    }
+    .btn {
+      border:none;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      color:#fff;
+      font-size:14px;
+      transition:0.2s;
+    }
+    .btn-accept { background:#28a745; }
+    .btn-accept:hover { background:#23923c; }
+    .btn-reject { background:#dc3545; }
+    .btn-reject:hover { background:#c9303c; }
+    .muted {
+      text-align:center;
+      color:#777;
+      margin-top:20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>لوحة مراجعة الطلبات</h1>
+  <div id="counter">الطلبات قيد المراجعة: <span id="count">0</span></div>
+  <div id="grid" class="grid"></div>
+  <div id="empty" class="muted">جاري تحميل البيانات...</div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    // === إعداد Firebase ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+      authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+      databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+      projectId: "hhhhhh-d4fb8",
+      storageBucket: "hhhhhh-d4fb8.appspot.com",
+      messagingSenderId: "24512338206",
+      appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+      measurementId: "G-HD4R7GNQ5H"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    const countEl = document.getElementById('count');
+
+    // رابط webhook اللي هيبعت رسالة تيليجرام (هنعمله تحت)
+    const WEBHOOK_URL = "https://your-server.com/notify";
+
+    db.collection('subscriptions')
+      .where('status', '==', 'pending')
+      .orderBy('createdAt', 'desc')
+      .onSnapshot(snapshot => {
+        grid.innerHTML = "";
+        countEl.innerText = snapshot.size;
+        if (snapshot.empty) {
+          empty.innerText = "لا توجد طلبات حالياً قيد المراجعة ✅";
+          return;
+        }
+        empty.innerText = "";
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <img src="${d.proofUrl}" alt="دليل الاشتراك">
+            <div class="info">
+              <strong>${d.name || "مستخدم بدون اسم"}</strong><br>
+              <code>${d.telegramId}</code>
+            </div>
+            <div class="btns">
+              <button class="btn btn-accept">✅ قبول</button>
+              <button class="btn btn-reject">❌ رفض</button>
+            </div>
+          `;
+
+          const acceptBtn = card.querySelector('.btn-accept');
+          const rejectBtn = card.querySelector('.btn-reject');
+
+          acceptBtn.addEventListener('click', async () => {
+            await db.collection('subscriptions').doc(doc.id).update({ status: 'approved' });
+            sendNotification(d.telegramId, '✅ تم قبول إثبات اشتراكك! شكرًا لك 🌟');
+          });
+
+          rejectBtn.addEventListener('click', async () => {
+            await db.collection('subscriptions').doc(doc.id).update({ status: 'rejected' });
+            sendNotification(d.telegramId, '❌ تم رفض الإثبات. تأكد من أن الصورة واضحة وجديدة وحاول مرة أخرى.');
+          });
+
+          grid.appendChild(card);
+        });
+      });
+
+    // دالة إرسال الإشعار عبر السيرفر (Webhook)
+    function sendNotification(telegramId, message) {
+      fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ telegramId, message })
+      }).then(res => console.log("تم إرسال الإشعار"))
+      .catch(err => console.error("فشل الإرسال:", err));
+    }
+  </script>
+</body>
+</html>
