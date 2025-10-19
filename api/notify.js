@@ -1,32 +1,39 @@
-// notify.js
-import express from "express";
-import bodyParser from "body-parser";
+// api/notify.js
 import fetch from "node-fetch";
 
-const app = express();
-app.use(bodyParser.json());
+const BOT_TOKEN = process.env.BOT_TOKEN; // نخليه من متغير بيئة لأمان أكثر
 
-const BOT_TOKEN = "8336985451:AAGV4-7sN0TBiLT4tfoDs9Z-2Y1qrGkQpHQ"; // ضع هنا توكن بوت تيليجرام
+export default async function handler(req, res) {
+  if (req.method !== "POST")
+    return res.status(405).json({ error: "Method not allowed" });
 
-app.post("/notify", async (req, res) => {
   const { telegramId, message } = req.body;
-  if (!telegramId || !message) return res.sendStatus(400);
+  if (!telegramId || !message)
+    return res.status(400).json({ error: "Missing telegramId or message" });
 
   try {
-    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: telegramId,
-        text: message,
-        parse_mode: "HTML"
-      })
-    });
-    res.sendStatus(200);
-  } catch (err) {
-    console.error(err);
-    res.sendStatus(500);
-  }
-});
+    const response = await fetch(
+      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: telegramId,
+          text: message,
+          parse_mode: "HTML",
+        }),
+      }
+    );
 
-app.listen(3000, () => console.log("Notifier running on port 3000"));
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Telegram API Error:", errorText);
+      return res.status(500).json({ error: "Telegram API Error", details: errorText });
+    }
+
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("Notify error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+}
