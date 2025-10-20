@@ -145,7 +145,7 @@
         });
 
         // 🔔 إرسال إشعار للإدارة عن الطلب الجديد
-        await fetch('https://hematech.xyz/api/notify', {
+        await fetch('https://www.hematech.xyz/api/notify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -155,7 +155,7 @@
         });
 
         // 📬 إرسال رسالة للمستخدم أنه تم استلام الصورة
-        await fetch('https://hematech.xyz/api/notify', {
+        await fetch('https://www.hematech.xyz/api/notify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
