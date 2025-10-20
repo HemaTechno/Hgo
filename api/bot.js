@@ -1,8 +1,8 @@
-import { Telegraf, Markup } from "telegraf";
+import { Telegraf } from "telegraf";
 import firebase from "firebase/compat/app";
 import "firebase/compat/database";
 
-// 🔹 إعدادات Firebase
+// 🔹 إعداد Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
   authDomain: "hhhhhh-d4fb8.firebaseapp.com",
@@ -11,72 +11,74 @@ const firebaseConfig = {
   storageBucket: "hhhhhh-d4fb8.appspot.com",
   messagingSenderId: "24512338206",
   appId: "1:24512338206:web:dfe045db59bd3434a2110f",
-  measurementId: "G-HD4R7GNQ5H",
+  measurementId: "G-HD4R7GNQ5H"
 };
 
+// ✅ تأكد إن الفايربيس مبدأش مرتين
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// 🔹 إعداد البوت
-const bot = new Telegraf(process.env.BOT_TOKEN);
+// 🧠 توكن البوت من إعدادات Vercel
+const BOT_TOKEN = process.env.BOT_TOKEN;
+if (!BOT_TOKEN) throw new Error("BOT_TOKEN is missing!");
 
-// 🔸 أمر /start
+// 🤖 إنشاء البوت
+const bot = new Telegraf(BOT_TOKEN);
+
+// 📌 أمر /start
 bot.start(async (ctx) => {
-  const telegramId = ctx.from.id;
+  const id = ctx.from.id;
   const name = ctx.from.first_name || "مستخدم";
+  const ref = db.ref("users/" + id);
 
-  try {
-    const ref = db.ref(`users/${telegramId}`);
-    const snap = await ref.once("value");
+  const snapshot = await ref.once("value");
+  const user = snapshot.val();
 
-    if (!snap.exists()) {
-      await ref.set({
-        id: telegramId,
-        name,
-        status: "معلق",
-        createdAt: Date.now(),
-      });
-      return ctx.reply(`👋 أهلاً ${name}!\nتم تسجيلك بنجاح ✅\nيرجى انتظار المراجعة.`);
-    }
+  if (!user) {
+    await ref.set({ id, name, status: "معلق", createdAt: Date.now() });
+    return ctx.reply(`👋 أهلاً ${name}\nتم تسجيلك بنجاح ✅\nيرجى انتظار المراجعة.`);
+  }
 
-    const user = snap.val();
-
-    if (user.status === "مقبول") {
-      return ctx.reply(`🎉 أهلاً ${name}!\nإليك الأوامر المتاحة:`, {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: "📜 عرض الطلبات", callback_data: "orders" }],
-            [{ text: "🆕 إنشاء طلب جديد", callback_data: "new_order" }],
-          ],
-        },
-      });
-    } else if (user.status === "معلق") {
-      return ctx.reply("⏳ حسابك ما زال قيد المراجعة. يرجى الانتظار 💬");
-    } else if (user.status === "مرفوض") {
-      return ctx.reply("❌ تم رفض حسابك. يرجى التحقق من الإثبات.", {
-        reply_markup: {
-          inline_keyboard: [
-            [{ text: "📱 الدخول للتطبيق", web_app: { url: "https://hematech.xyz/miniapp" } }],
-          ],
-        },
-      });
-    }
-  } catch (err) {
-    console.error("Firebase error:", err);
-    ctx.reply("⚠️ حدث خطأ أثناء التحقق من حالتك.");
+  if (user.status === "مقبول") {
+    return ctx.reply(`🎉 أهلاً ${name}!\nإليك الأوامر المتاحة:`, {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "📜 عرض الطلبات", callback_data: "orders" }],
+          [{ text: "🆕 إنشاء طلب جديد", callback_data: "new_order" }]
+        ]
+      }
+    });
+  } else if (user.status === "معلق") {
+    return ctx.reply("⏳ حسابك قيد المراجعة حالياً، انتظر قليلاً.");
+  } else if (user.status === "مرفوض") {
+    return ctx.reply("❌ تم رفض حسابك. يرجى التحقق من إثبات الاشتراك.", {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "📱 فتح Mini App", web_app: { url: "https://hematech.xyz/miniapp" } }]
+        ]
+      }
+    });
   }
 });
 
-bot.action("orders", (ctx) => ctx.reply("📦 هذه الطلبات الخاصة بك."));
+// 🔧 أفعال الأزرار
+bot.action("orders", (ctx) => ctx.reply("📦 لا توجد طلبات حالياً."));
 bot.action("new_order", (ctx) => ctx.reply("📝 أرسل تفاصيل الطلب الجديد."));
 
-// 🔹 تصدير Webhook handler لـ Vercel
+// ⚙️ إعداد الـ Webhook لـ Vercel
 export const config = { api: { bodyParser: false } };
+
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    await bot.handleUpdate(req.body, res);
-    res.status(200).end();
+    try {
+      await bot.handleUpdate(req.body, res);
+      res.status(200).end();
+    } catch (err) {
+      console.error("Webhook error:", err);
+      res.status(500).send("Error handling update");
+    }
   } else {
-    res.status(200).send("🤖 Bot is running via Webhook!");
+    res.status(200).send("🤖 Bot is running via Webhook");
   }
 }
+
