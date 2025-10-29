@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎡 تسجيل عجلة الحظ</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0d0d0f, #1a1a1d);
+      font-family: "Tajawal", sans-serif;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      color: #e63946;
+      font-size: 28px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    #countBox {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid #e63946;
+      border-radius: 12px;
+      padding: 10px 20px;
+      margin-bottom: 20px;
+      font-size: 18px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(230, 57, 70, 0.3);
+    }
+    .form-box {
+      background: rgba(255,255,255,0.05);
+      border: 2px solid #e63946;
+      border-radius: 20px;
+      padding: 30px;
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 25px rgba(230,57,70,0.4);
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      text-align: center;
+    }
+    button {
+      background: #e63946;
+      color: #fff;
+      font-size: 18px;
+      padding: 12px;
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background: #ff4d5a;
+    }
+    p {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #ccc;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎯 سجل اسمك للدخول في عجلة الحظ</h1>
+
+  <div id="countBox">المشاركين حتى الآن: <span id="playersCount">0</span></div>
+
+  <div class="form-box">
+    <input type="text" id="username" placeholder="اكتب اسمك هنا..." required>
+    <button id="submitBtn">تأكيد</button>
+    <p id="status"></p>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">
+    // استيراد مكتبات فايربيس
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+    // إعدادات مشروعك من Firebase
+    const firebaseConfig = {
+  apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
+  authDomain: "hhhhhh-d4fb8.firebaseapp.com",
+  databaseURL: "https://hhhhhh-d4fb8-default-rtdb.firebaseio.com",
+  projectId: "hhhhhh-d4fb8",
+  storageBucket: "hhhhhh-d4fb8.appspot.com",
+  messagingSenderId: "24512338206",
+  appId: "1:24512338206:web:dfe045db59bd3434a2110f",
+  measurementId: "G-HD4R7GNQ5H"
+};
+
+    // تشغيل Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const usernameInput = document.getElementById("username");
+    const submitBtn = document.getElementById("submitBtn");
+    const statusText = document.getElementById("status");
+    const playersCountEl = document.getElementById("playersCount");
+
+    // إظهار عدد المشاركين بشكل حيّ
+    const usersRef = ref(db, "users");
+    onValue(usersRef, (snapshot) => {
+      const data = snapshot.val();
+      const count = data ? Object.keys(data).length : 0;
+      playersCountEl.textContent = count;
+    });
+
+    // تحقق إن كان المستخدم مسجل من قبل
+    const alreadySubmitted = localStorage.getItem("wheel_user");
+    if (alreadySubmitted) {
+      usernameInput.value = alreadySubmitted;
+      usernameInput.disabled = true;
+      submitBtn.disabled = true;
+      statusText.innerText = "✅ لقد سجلت مسبقًا باسم: " + alreadySubmitted;
+    }
+
+    submitBtn.onclick = async () => {
+      const username = usernameInput.value.trim();
+
+      if (!username) {
+        statusText.innerText = "⚠️ من فضلك أدخل اسمك أولًا.";
+        return;
+      }
+
+      submitBtn.disabled = true;
+      statusText.innerText = "⏳ جاري التحقق...";
+
+      const dbRef = ref(db);
+      const snapshot = await get(child(dbRef, "users/" + username));
+
+      if (snapshot.exists()) {
+        statusText.innerText = "❌ هذا الاسم مسجل بالفعل!";
+        submitBtn.disabled = true;
+      } else {
+        await set(ref(db, "users/" + username), {
+          name: username,
+          date: new Date().toISOString()
+        });
+
+        localStorage.setItem("wheel_user", username);
+        statusText.innerText = "✅ تم تسجيلك بنجاح!";
+        usernameInput.disabled = true;
+        submitBtn.disabled = true;
+      }
+    };
+  </script>
+
+</body>
+</html>
