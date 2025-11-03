@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>منظم مذاكرة الميدتيرم</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f1724;
+      --card: #0b1220;
+      --accent: #e11d48;
+      --accent-light: #ff6b81;
+      --muted: #94a3b8;
+      --glass: rgba(255,255,255,0.03);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --gradient: linear-gradient(135deg, #0f1724 0%, #1e293b 100%);
+      --card-gradient: linear-gradient(145deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%);
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+      --border-radius: 16px;
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Tajawal', 'Segoe UI', Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: var(--gradient);
+      color: #e6eef8;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: var(--card-gradient);
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: var(--shadow);
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: var(--glass);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      font-size: 36px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.lead {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card-gradient);
+      padding: 24px;
+      border-radius: var(--border-radius);
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+      margin-bottom: 20px;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 16px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #f8fafc;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h3:before {
+      content: "";
+      display: block;
+      width: 4px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* tasks list */
+    .task {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.03);
+      margin-bottom: 12px;
+      transition: var(--transition);
+    }
+
+    .task:hover {
+      background: rgba(255,255,255,0.04);
+      border-color: rgba(255,255,255,0.06);
+    }
+
+    .task.completed {
+      opacity: 0.7;
+      text-decoration: line-through;
+    }
+
+    .task .meta {
+      flex: 1;
+    }
+
+    .task .title {
+      font-weight: 500;
+      font-size: 16px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .task .title:hover {
+      color: var(--accent-light);
+    }
+
+    .task .sub {
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    .task .controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    button {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: inherit;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    button:hover {
+      background: rgba(255,255,255,0.05);
+      transform: translateY(-1px);
+    }
+
+    .btn-accent {
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      border-color: transparent;
+      color: white;
+      font-weight: 600;
+    }
+
+    .btn-accent:hover {
+      background: linear-gradient(90deg, var(--accent-light), var(--accent));
+      box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3);
+    }
+
+    .small {
+      font-size: 13px;
+      padding: 8px 12px;
+    }
+
+    /* progress */
+    .progress-wrap {
+      margin-top: 20px;
+    }
+
+    .progress {
+      height: 14px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 8px;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .progress > i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 10px;
+    }
+
+    /* form */
+    form.add {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    input[type=text] {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      color: inherit;
+      font-size: 15px;
+      transition: var(--transition);
+    }
+
+    input[type=text]:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2);
+    }
+
+    select {
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(255,255,255,0.03);
+      color: inherit;
+      font-size: 15px;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.2);
+    }
+
+    /* table style for schedule preview */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      border: 1px solid rgba(255,255,255,0.05);
+      padding: 12px;
+      text-align: center;
+    }
+
+    th {
+      background: rgba(255,255,255,0.03);
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background: rgba(255,255,255,0.01);
+    }
+
+    tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+
+    /* checkbox styling */
+    input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: transparent;
+      cursor: pointer;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    input[type="checkbox"]:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    input[type="checkbox"]:checked:after {
+      content: "✓";
+      position: absolute;
+      color: white;
+      font-size: 14px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    /* progress circle */
+    .progress-circle {
+      width: 120px;
+      height: 120px;
+      margin: 20px auto;
+      position: relative;
+    }
+
+    .progress-circle svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .progress-circle-bg {
+      fill: none;
+      stroke: rgba(255,255,255,0.1);
+      stroke-width: 8;
+    }
+
+    .progress-circle-fill {
+      fill: none;
+      stroke: url(#gradient);
+      stroke-width: 8;
+      stroke-linecap: round;
+      stroke-dasharray: 314;
+      stroke-dashoffset: 314;
+      transition: stroke-dashoffset 0.8s ease;
+    }
+
+    .progress-circle-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+    }
+
+    /* tag badges */
+    .tag-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    .tag-Fundamentals { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .tag-Anatomy { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .tag-Physiology { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .tag-Microbiology { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
+    .tag-English { background: rgba(236, 72, 153, 0.2); color: #f472b6; }
+    .tag-Ethics { background: rgba(6, 182, 212, 0.2); color: #22d3ee; }
+    .tag-Human-Rights { background: rgba(225, 29, 72, 0.2); color: #f87171; }
+
+    /* responsive */
+    @media (max-width: 1024px) {
+      .board {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px;
+      }
+      
+      header {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+      }
+      
+      .logo {
+        width: 70px;
+        height: 70px;
+        font-size: 32px;
+      }
+      
+      form.add {
+        flex-direction: column;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+    }
+
+    footer {
+      margin-top: 40px;
+      color: var(--muted);
+      font-size: 14px;
+      text-align: center;
+      padding: 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .task {
+      animation: fadeIn 0.3s ease;
+    }
+
+    /* scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.03);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255,255,255,0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">📚</div>
+      <div>
+        <h1>منظم مذاكرة الميدتيرم</h1>
+        <p class="lead">علّق على المهمات عندما تنتهي — الحفظ يتم تلقائياً في جهازك (LocalStorage)</p>
+      </div>
+    </header>
+
+    <div class="board">
+      <div>
+        <div class="card">
+          <h3>المهام المقررة (3 - 5 نوفمبر)</h3>
+          <p class="lead">اضغط على ✔️ لتعليم المهمة كمُنتهية. يمكنك أيضاً تعديل أو حذف أي مهمة.</p>
+
+          <form class="add" id="taskForm">
+            <input id="taskText" placeholder="أضف مهمة جديدة (مثال: مراجعة Fundamentals - 1,2)" />
+            <select id="taskTag">
+              <option value="Fundamentals">Fundamentals</option>
+              <option value="Anatomy">Anatomy</option>
+              <option value="Physiology">Physiology</option>
+              <option value="Microbiology">Microbiology</option>
+              <option value="English">English</option>
+              <option value="Ethics">Ethics</option>
+              <option value="Human Rights">Human Rights</option>
+            </select>
+            <button type="submit" class="btn-accent">
+              <span>أضف</span>
+            </button>
+          </form>
+
+          <div id="tasks"></div>
+
+          <div class="progress-wrap">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <small id="stats">0 / 0 completed</small>
+              <div>
+                <button id="clearCompleted" class="small">حذف المُكتمل</button>
+                <button id="resetAll" class="small">إعادة تعيين</button>
+              </div>
+            </div>
+            <div class="progress" aria-hidden>
+              <i id="progressBar"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>جدول المذاكرة (عرض سريع)</h3>
+          <table>
+            <thead><tr><th>اليوم</th><th>الوقت</th><th>المادة</th><th>المحاضرات</th></tr></thead>
+            <tbody>
+              <tr><td>3 Nov</td><td>10:00-12:00</td><td>Fundamentals</td><td>1,2</td></tr>
+              <tr><td>3 Nov</td><td>13:00-15:00</td><td>Fundamentals</td><td>3,4</td></tr>
+              <tr><td>3 Nov</td><td>16:00-17:30</td><td>Anatomy</td><td>3</td></tr>
+              <tr><td>3 Nov</td><td>19:00-20:30</td><td>English</td><td>1,2</td></tr>
+
+              <tr><td>4 Nov</td><td>10:00-12:00</td><td>Anatomy</td><td>4,5</td></tr>
+              <tr><td>4 Nov</td><td>13:00-14:30</td><td>Physiology</td><td>4</td></tr>
+              <tr><td>4 Nov</td><td>15:00-16:30</td><td>Physiology</td><td>5,6</td></tr>
+              <tr><td>4 Nov</td><td>18:00-19:30</td><td>English</td><td>3,4,5</td></tr>
+
+              <tr><td>5 Nov</td><td>10:00-12:00</td><td>Fundamentals</td><td>All</td></tr>
+              <tr><td>5 Nov</td><td>13:00-14:30</td><td>Microbiology</td><td>1,2,3</td></tr>
+              <tr><td>5 Nov</td><td>15:00-16:30</td><td>Ethics</td><td>3,4</td></tr>
+              <tr><td>5 Nov</td><td>18:00-19:30</td><td>Human Rights</td><td>4,5,6</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <aside>
+        <div class="card">
+          <h3>النسبة العامة للتقدّم</h3>
+          <div class="progress-circle">
+            <svg>
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#e11d48" />
+                  <stop offset="100%" stop-color="#ff6b81" />
+                </linearGradient>
+              </defs>
+              <circle class="progress-circle-bg" cx="60" cy="60" r="50"></circle>
+              <circle class="progress-circle-fill" cx="60" cy="60" r="50"></circle>
+            </svg>
+            <div class="progress-circle-text" id="progressPercent">0%</div>
+          </div>
+          <p class="sub" style="text-align:center">المهام المكتملة تظهر بخط مشطوب وسيتم الاحتفاظ بالحالة في جهازك.</p>
+
+          <div style="margin-top:20px; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button id="markAll" class="small">تحديد الكل كمكتمل</button>
+            <button id="exportJSON" class="small">حفظ نسخة (JSON)</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px">
+          <h3>تعليمات سريعة</h3>
+          <ul style="padding-inline-start:18px;color:var(--muted)">
+            <li>اضغط على اسم المهمة لتعديلها.</li>
+            <li>استخدم زر حذف داخل كل مهمة لإزالتها.</li>
+            <li>البيانات محليّة — لا يتم رفعها للسيرفر.</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <footer>بُنيت لك نسخة سريعة لتساعدك على تنظيم المذاكرة — بالتوفيق ❤️</footer>
+  </div>
+
+  <script>
+    // Default tasks based on the schedule and lecture lists the user provided
+    const defaultTasks = [
+      {id: genId(), text: 'مراجعة Fundamentals - محاضرات 1 و 2', tag:'Fundamentals'},
+      {id: genId(), text: 'مراجعة Fundamentals - محاضرات 3 و 4', tag:'Fundamentals'},
+      {id: genId(), text: 'مراجعة Anatomy - محاضرة 3', tag:'Anatomy'},
+      {id: genId(), text: 'مراجعة English - محاضرات 1 و 2', tag:'English'},
+
+      {id: genId(), text: 'مراجعة Anatomy - محاضرات 4 و 5', tag:'Anatomy'},
+      {id: genId(), text: 'مراجعة Physiology - محاضرة 4', tag:'Physiology'},
+      {id: genId(), text: 'مراجعة Physiology - محاضرات 5 و 6', tag:'Physiology'},
+      {id: genId(), text: 'مراجعة English - محاضرات 3 و 4 و 5', tag:'English'},
+
+      {id: genId(), text: 'مراجعة نهائية Fundamentals (كل المحاضرات)', tag:'Fundamentals'},
+      {id: genId(), text: 'مراجعة Microbiology - محاضرات 1 و 2 و 3', tag:'Microbiology'},
+      {id: genId(), text: 'مراجعة Ethics - محاضرات 3 و 4', tag:'Ethics'},
+      {id: genId(), text: 'مراجعة Human Rights - محاضرات 4 و 5 و 6', tag:'Human Rights'},
+    ];
+
+    // utilities
+    function genId(){return 't_'+Math.random().toString(36).slice(2,9)}
+    function qs(sel){return document.querySelector(sel)}
+
+    // localStorage key
+    const KEY = 'midtermTasks_v1';
+
+    // load or init
+    let tasks = loadTasks();
+
+    // DOM refs
+    const tasksEl = qs('#tasks');
+    const statsEl = qs('#stats');
+    const progressBar = qs('#progressBar');
+    const progressPercent = qs('#progressPercent');
+    const progressCircleFill = qs('.progress-circle-fill');
+
+    // render on load
+    render();
+
+    // form add
+    qs('#taskForm').addEventListener('submit', e=>{
+      e.preventDefault();
+      const txt = qs('#taskText').value.trim();
+      const tag = qs('#taskTag').value;
+      if(!txt) return alert('اكتب اسم المهمة أولاً');
+      const t = {id: genId(), text: txt, tag, done:false};
+      tasks.push(t); saveTasks(); render();
+      qs('#taskText').value='';
+    })
+
+    // actions
+    qs('#clearCompleted').addEventListener('click', ()=>{
+      tasks = tasks.filter(t=>!t.done); saveTasks(); render();
+    })
+    qs('#resetAll').addEventListener('click', ()=>{
+      if(!confirm('هل تريد إعادة تعيين كل المهام وحذف التعديلات؟')) return;
+      tasks = [...defaultTasks].map(t=>({...t, done:false})); saveTasks(); render();
+    })
+    qs('#markAll').addEventListener('click', ()=>{
+      tasks = tasks.map(t=>({...t, done:true})); saveTasks(); render();
+    })
+    qs('#exportJSON').addEventListener('click', ()=>{
+      const dataStr = JSON.stringify(tasks, null, 2);
+      const blob = new Blob([dataStr], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='midterm_tasks.json'; a.click(); URL.revokeObjectURL(url);
+    })
+
+    // functions
+    function render(){
+      tasksEl.innerHTML='';
+      if(tasks.length===0) tasksEl.innerHTML = '<p style="color:var(--muted); text-align:center; padding:20px">لا توجد مهام. أضف مهمة جديدة أعلاه.</p>';
+      tasks.forEach(t=>{
+        const div = document.createElement('div'); div.className='task'+(t.done?' completed':'');
+        div.style.animationDelay = `${tasks.indexOf(t) * 0.05}s`;
+
+        const chk = document.createElement('input'); chk.type='checkbox'; chk.checked = !!t.done;
+        chk.addEventListener('change', ()=>{ t.done = chk.checked; saveTasks(); render(); });
+
+        const meta = document.createElement('div'); meta.className='meta';
+        const title = document.createElement('div'); title.className='title'; title.textContent = t.text; title.title='انقر لتعديل';
+        const sub = document.createElement('div'); sub.className='sub'; 
+        sub.innerHTML = `<span class="tag-badge tag-${t.tag.replace(' ', '-')}">${t.tag}</span>`;
+        meta.appendChild(title); meta.appendChild(sub);
+
+        // edit on click
+        title.addEventListener('click', ()=>{
+          const newTxt = prompt('عدل نص المهمة:', t.text);
+          if(newTxt===null) return;
+          t.text = newTxt.trim()||t.text; saveTasks(); render();
+        })
+
+        const controls = document.createElement('div'); controls.className='controls';
+        const del = document.createElement('button'); del.textContent='حذف'; del.className='small';
+        del.addEventListener('click', ()=>{ if(confirm('هل تريد حذف هذه المهمة؟')){ tasks = tasks.filter(x=>x.id!==t.id); saveTasks(); render(); }} )
+        controls.appendChild(del);
+
+        div.appendChild(chk); div.appendChild(meta); div.appendChild(controls);
+        tasksEl.appendChild(div);
+      })
+
+      // stats
+      const total = tasks.length; const done = tasks.filter(t=>t.done).length;
+      statsEl.textContent = `${done} / ${total} completed`;
+      const pct = total? Math.round((done/total)*100) : 0;
+      progressBar.style.width = pct + '%';
+      progressPercent.textContent = pct + '%';
+      
+      // Update circular progress
+      if (progressCircleFill) {
+        const circumference = 314; // 2 * π * r = 2 * 3.14 * 50 ≈ 314
+        const offset = circumference - (pct / 100) * circumference;
+        progressCircleFill.style.strokeDashoffset = offset;
+      }
+    }
+
+    function saveTasks(){
+      localStorage.setItem(KEY, JSON.stringify(tasks));
+    }
+
+    function loadTasks(){
+      try{
+        const raw = localStorage.getItem(KEY);
+        if(!raw){ const init = defaultTasks.map(t=>({...t, done:false})); localStorage.setItem(KEY, JSON.stringify(init)); return init}
+        return JSON.parse(raw);
+      }catch(e){console.error(e); const init = defaultTasks.map(t=>({...t, done:false})); return init}
+    }
+  </script>
+</body>
+</html>
