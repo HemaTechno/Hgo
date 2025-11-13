@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
@@ -187,7 +187,6 @@
       margin: 20px 0;
       display: flex;
       justify-content: center;
-      position: relative;
     }
 
     canvas {
@@ -198,30 +197,10 @@
       transition: var(--transition);
       max-width: 100%;
       height: auto;
-      background: white; /* خلفية بيضاء احتياطية */
     }
 
     canvas.active {
       display: block;
-    }
-
-    .fallback-frame {
-      display: none;
-      width: 100%;
-      max-width: 400px;
-      height: 400px;
-      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-      border-radius: 15px;
-      border: 3px dashed var(--primary);
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    .fallback-frame.active {
-      display: flex;
     }
 
     .quality-controls {
@@ -362,20 +341,6 @@
       animation: dots 1.5s steps(4, end) infinite;
     }
 
-    .error-message {
-      display: none;
-      background: rgba(255, 0, 0, 0.1);
-      color: #d63031;
-      padding: 10px 15px;
-      border-radius: 8px;
-      margin: 10px 0;
-      border-right: 3px solid #d63031;
-    }
-
-    .error-message.active {
-      display: block;
-    }
-
     @keyframes dots {
       0%, 20% { color: rgba(10, 78, 163, 0); text-shadow: .25em 0 0 rgba(10, 78, 163, 0), .5em 0 0 rgba(10, 78, 163, 0); }
       40% { color: var(--primary); text-shadow: .25em 0 0 rgba(10, 78, 163, 0), .5em 0 0 rgba(10, 78, 163, 0); }
@@ -473,7 +438,6 @@
         </label>
       </div>
       <div class="loading" id="loading">جاري التحميل</div>
-      <div class="error-message" id="errorMessage">حدث خطأ في تحميل الإطار. جاري استخدام إطار بديل.</div>
       
       <div class="quality-controls" id="qualityControls">
         <button class="quality-btn" data-quality="1">جودة عالية</button>
@@ -483,11 +447,6 @@
       
       <div class="preview-container">
         <canvas id="canvas"></canvas>
-        <div class="fallback-frame" id="fallbackFrame">
-          <span>🖼️</span>
-          <p>الإطار غير متوفر حالياً</p>
-          <p>سيتم تطبيق الإطار الافتراضي</p>
-        </div>
       </div>
       
       <div class="controls" id="controls">
@@ -506,12 +465,12 @@
       </button>
       
       <div class="instructions">
-        <h3>في حالة ظهور خلفية سوداء:</h3>
+        <h3>للحصول على أفضل جودة:</h3>
         <ul>
-          <li>جرب تحميل صورة مختلفة</li>
-          <li>تأكد من اتصال الإنترنت</li>
-          <li>جرب استخدام متصفح مختلف</li>
-          <li>الصور من الكاميرا تعمل أفضل من الشاشات</li>
+          <li>اختر صورة عالية الدقة من البداية</li>
+          <li>استخدم خيار "جودة عالية" للتحميل</li>
+          <li>تجنب تكبير الصورة أكثر من حجمها الأصلي</li>
+          <li>استخدم الصور ذات الخلفية الواضحة</li>
         </ul>
       </div>
     </div>
@@ -526,15 +485,7 @@
     const controls = document.getElementById("controls");
     const loading = document.getElementById("loading");
     const qualityControls = document.getElementById("qualityControls");
-    const errorMessage = document.getElementById("errorMessage");
-    const fallbackFrame = document.getElementById("fallbackFrame");
-    
-    // روابط احتياطية للإطار في حالة فشل الرابط الأساسي
-    const frameUrls = [
-      "https://www.hematech.xyz/FS1.png",
-      "https://via.placeholder.com/400/0a4ea3/ffffff?text=إطار+سامي+العطار",
-      "https://i.imgur.com/1Ye5o1b.png" // رابط احتياطي
-    ];
+    const frameUrl = "https://www.hematech.xyz/FS1.png";
 
     let img = new Image();
     let frame = new Image();
@@ -543,50 +494,17 @@
     let imgLoaded = false;
     let frameLoaded = false;
     let applied = false;
-    let currentQuality = 0.9;
+    let currentQuality = 0.9; // جودة افتراضية
     let originalImageWidth = 0;
     let originalImageHeight = 0;
-    let currentFrameIndex = 0;
 
-    // دالة لتحميل الإطار مع محاولات متعددة
-    function loadFrame(frameIndex = 0) {
-      return new Promise((resolve, reject) => {
-        if (frameIndex >= frameUrls.length) {
-          reject(new Error("فشل تحميل جميع الإطارات"));
-          return;
-        }
-
-        frame = new Image();
-        frame.crossOrigin = "anonymous";
-        
-        frame.onload = function() {
-          frameLoaded = true;
-          errorMessage.classList.remove("active");
-          fallbackFrame.classList.remove("active");
-          resolve();
-        };
-        
-        frame.onerror = function() {
-          console.log(`فشل تحميل الإطار ${frameIndex + 1}، جاري المحاولة بالإطار البديل...`);
-          if (frameIndex === 0) {
-            errorMessage.classList.add("active");
-            fallbackFrame.classList.add("active");
-          }
-          loadFrame(frameIndex + 1).then(resolve).catch(reject);
-        };
-        
-        frame.src = frameUrls[frameIndex];
-        currentFrameIndex = frameIndex;
-      });
-    }
-
-    // ضبط حجم الكانفاس
+    // ضبط حجم الكانفاس بناءً على حجم الشاشة وجودة الصورة
     function setupCanvas() {
-      const maxWidth = Math.min(400, window.innerWidth - 40);
-      canvas.width = maxWidth;
-      canvas.height = maxWidth;
+      const maxWidth = Math.min(500, window.innerWidth - 40);
+      canvas.width = maxWidth * (currentQuality === 1 ? 1.5 : 1);
+      canvas.height = maxWidth * (currentQuality === 1 ? 1.5 : 1);
       
-      // تحسين جودة الرسم
+      // تحسين جودة الرسم على الكانفاس
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
     }
@@ -594,7 +512,7 @@
     function drawPreview() {
       if (!imgLoaded) return;
       
-      // مسح الكانفاس بخلفية بيضاء
+      // مسح الكانفاس بخلفية بيضاء لتحسين الجودة
       ctx.fillStyle = 'white';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
@@ -613,36 +531,18 @@
       const x = -((drawWidth - canvas.width) / 2) + offsetX;
       const y = -((drawHeight - canvas.height) / 2) + offsetY;
 
-      // رسم الصورة
+      // استخدام drawImage مع المعلمات الكاملة للحصول على أفضل جودة
       ctx.drawImage(img, 0, 0, originalImageWidth, originalImageHeight, 
                    x, y, drawWidth, drawHeight);
 
-      // رسم الإطار إذا كان محملاً ومطبقاً
       if (applied && frameLoaded) {
+        // رسم الإطار بأعلى جودة
         ctx.drawImage(frame, 0, 0, frame.width, frame.height, 
                      0, 0, canvas.width, canvas.height);
-      } else if (applied && !frameLoaded) {
-        // رسم إطار افتراضي إذا فشل تحميل الإطار
-        drawFallbackFrame();
       }
     }
 
-    // رسم إطار افتراضي
-    function drawFallbackFrame() {
-      ctx.strokeStyle = '#0a4ea3';
-      ctx.lineWidth = 15;
-      ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-      
-      ctx.fillStyle = 'rgba(10, 78, 163, 0.1)';
-      ctx.fillRect(15, 15, canvas.width - 30, canvas.height - 30);
-      
-      ctx.font = 'bold 20px Cairo';
-      ctx.fillStyle = '#0a4ea3';
-      ctx.textAlign = 'center';
-      ctx.fillText('سامي العطار', canvas.width / 2, canvas.height - 30);
-    }
-
-    // إعادة الرسم عند تغيير الجودة
+    // إعادة رسم الصورة عند تغيير الجودة
     function redrawWithQuality() {
       if (imgLoaded) {
         setupCanvas();
@@ -660,53 +560,47 @@
       downloadBtn.classList.remove("active");
       canvas.classList.remove("active");
       qualityControls.classList.remove("active");
-      errorMessage.classList.remove("active");
-      fallbackFrame.classList.remove("active");
 
       img = new Image();
+      frame = new Image();
       
-      // تحميل الصورة باستخدام FileReader
+      // تحسين جودة تحميل الصور
+      frame.crossOrigin = "anonymous";
+      img.crossOrigin = "anonymous";
+
+      // استخدام FileReader لتحميل الصورة بأعلى جودة
       const reader = new FileReader();
-      reader.onload = async function(e) {
+      reader.onload = function(e) {
         img.src = e.target.result;
         
         img.onload = function() {
+          // حفظ الأبعاد الأصلية للصورة
           originalImageWidth = img.width;
           originalImageHeight = img.height;
+          
           imgLoaded = true;
+          frameLoaded = true;
           offsetX = 0;
           offsetY = 0;
           applied = false;
-
-          setupCanvas();
-          drawPreview();
 
           loading.classList.remove("active");
           canvas.classList.add("active");
           controls.classList.add("active");
           applyBtn.classList.add("active");
           qualityControls.classList.add("active");
-        };
-        
-        img.onerror = function() {
-          loading.classList.remove("active");
-          errorMessage.textContent = "حدث خطأ في تحميل الصورة. حاول مرة أخرى.";
-          errorMessage.classList.add("active");
+          downloadBtn.classList.remove("active");
+
+          setupCanvas();
+          drawPreview();
         };
       };
       
       reader.readAsDataURL(file);
-      
-      // تحميل الإطار
-      try {
-        await loadFrame();
-      } catch (error) {
-        console.error("فشل تحميل جميع الإطارات:", error);
-        frameLoaded = false;
-      }
+      frame.src = frameUrl;
     });
 
-    // أحداث التحكم في الجودة
+    // إضافة أحداث التحكم في الجودة
     document.querySelectorAll('.quality-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
@@ -729,16 +623,17 @@
     });
 
     downloadBtn.addEventListener("click", () => {
+      // استخدام جودة عالية للتحميل
       const quality = currentQuality === 1 ? 1.0 : currentQuality === 0.9 ? 0.95 : 0.8;
       const link = document.createElement("a");
-      link.download = "sami-alattar.png";
+      link.download = "sami-alattar-high-quality.png";
       link.href = canvas.toDataURL("image/png", quality);
       link.click();
     });
 
-    // التهيئة
+    // تهيئة الكانفاس عند تحميل الصفحة وعند تغيير حجم النافذة
     window.addEventListener("load", setupCanvas);
     window.addEventListener("resize", setupCanvas);
   </script>
 </body>
-</html> 
+</html>
