@@ -203,6 +203,39 @@
       display: block;
     }
 
+    .quality-controls {
+      display: none;
+      margin: 15px 0;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .quality-controls.active {
+      display: flex;
+    }
+
+    .quality-btn {
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .quality-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .quality-btn:hover {
+      transform: translateY(-2px);
+    }
+
     .controls {
       display: none;
       margin-top: 15px;
@@ -378,7 +411,7 @@
     /* تحسينات للشاشات الكبيرة */
     @media (min-width: 768px) {
       .container {
-        max-width: 450px;
+        max-width: 500px;
       }
       
       h1 {
@@ -406,6 +439,12 @@
       </div>
       <div class="loading" id="loading">جاري التحميل</div>
       
+      <div class="quality-controls" id="qualityControls">
+        <button class="quality-btn" data-quality="1">جودة عالية</button>
+        <button class="quality-btn active" data-quality="0.9">جودة متوسطة</button>
+        <button class="quality-btn" data-quality="0.7">جودة منخفضة</button>
+      </div>
+      
       <div class="preview-container">
         <canvas id="canvas"></canvas>
       </div>
@@ -426,12 +465,12 @@
       </button>
       
       <div class="instructions">
-        <h3>كيفية الاستخدام:</h3>
+        <h3>للحصول على أفضل جودة:</h3>
         <ul>
-          <li>اختر صورة من معرض الصور</li>
-          <li>حرك الصورة باستخدام الأسهم لتعديل موقعها</li>
-          <li>انقر على "تطبيق الإطار" لإضافة الإطار</li>
-          <li>انقر على "تحميل الصورة" لحفظ صورتك</li>
+          <li>اختر صورة عالية الدقة من البداية</li>
+          <li>استخدم خيار "جودة عالية" للتحميل</li>
+          <li>تجنب تكبير الصورة أكثر من حجمها الأصلي</li>
+          <li>استخدم الصور ذات الخلفية الواضحة</li>
         </ul>
       </div>
     </div>
@@ -440,11 +479,12 @@
   <script>
     const uploadInput = document.getElementById("imageUpload");
     const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: false });
     const downloadBtn = document.getElementById("downloadBtn");
     const applyBtn = document.getElementById("applyBtn");
     const controls = document.getElementById("controls");
     const loading = document.getElementById("loading");
+    const qualityControls = document.getElementById("qualityControls");
     const frameUrl = "https://www.hematech.xyz/FS1.png";
 
     let img = new Image();
@@ -454,37 +494,59 @@
     let imgLoaded = false;
     let frameLoaded = false;
     let applied = false;
+    let currentQuality = 0.9; // جودة افتراضية
+    let originalImageWidth = 0;
+    let originalImageHeight = 0;
 
-    // ضبط حجم الكانفاس بناءً على حجم الشاشة
+    // ضبط حجم الكانفاس بناءً على حجم الشاشة وجودة الصورة
     function setupCanvas() {
-      const maxWidth = Math.min(400, window.innerWidth - 40);
-      canvas.width = maxWidth;
-      canvas.height = maxWidth;
+      const maxWidth = Math.min(500, window.innerWidth - 40);
+      canvas.width = maxWidth * (currentQuality === 1 ? 1.5 : 1);
+      canvas.height = maxWidth * (currentQuality === 1 ? 1.5 : 1);
+      
+      // تحسين جودة الرسم على الكانفاس
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
     }
 
     function drawPreview() {
       if (!imgLoaded) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const imgAspect = img.width / img.height;
+      
+      // مسح الكانفاس بخلفية بيضاء لتحسين الجودة
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const imgAspect = originalImageWidth / originalImageHeight;
       const canvasAspect = canvas.width / canvas.height;
 
       let drawWidth, drawHeight;
       if (imgAspect > canvasAspect) {
         drawHeight = canvas.height;
-        drawWidth = img.width * (canvas.height / img.height);
+        drawWidth = originalImageWidth * (canvas.height / originalImageHeight);
       } else {
         drawWidth = canvas.width;
-        drawHeight = img.height * (canvas.width / img.width);
+        drawHeight = originalImageHeight * (canvas.width / originalImageWidth);
       }
 
       const x = -((drawWidth - canvas.width) / 2) + offsetX;
       const y = -((drawHeight - canvas.height) / 2) + offsetY;
 
-      ctx.drawImage(img, x, y, drawWidth, drawHeight);
+      // استخدام drawImage مع المعلمات الكاملة للحصول على أفضل جودة
+      ctx.drawImage(img, 0, 0, originalImageWidth, originalImageHeight, 
+                   x, y, drawWidth, drawHeight);
 
       if (applied && frameLoaded) {
-        ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
+        // رسم الإطار بأعلى جودة
+        ctx.drawImage(frame, 0, 0, frame.width, frame.height, 
+                     0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    // إعادة رسم الصورة عند تغيير الجودة
+    function redrawWithQuality() {
+      if (imgLoaded) {
+        setupCanvas();
+        drawPreview();
       }
     }
 
@@ -497,37 +559,55 @@
       applyBtn.classList.remove("active");
       downloadBtn.classList.remove("active");
       canvas.classList.remove("active");
+      qualityControls.classList.remove("active");
 
       img = new Image();
       frame = new Image();
+      
+      // تحسين جودة تحميل الصور
       frame.crossOrigin = "anonymous";
       img.crossOrigin = "anonymous";
 
-      img.src = URL.createObjectURL(file);
+      // استخدام FileReader لتحميل الصورة بأعلى جودة
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        img.src = e.target.result;
+        
+        img.onload = function() {
+          // حفظ الأبعاد الأصلية للصورة
+          originalImageWidth = img.width;
+          originalImageHeight = img.height;
+          
+          imgLoaded = true;
+          frameLoaded = true;
+          offsetX = 0;
+          offsetY = 0;
+          applied = false;
+
+          loading.classList.remove("active");
+          canvas.classList.add("active");
+          controls.classList.add("active");
+          applyBtn.classList.add("active");
+          qualityControls.classList.add("active");
+          downloadBtn.classList.remove("active");
+
+          setupCanvas();
+          drawPreview();
+        };
+      };
+      
+      reader.readAsDataURL(file);
       frame.src = frameUrl;
+    });
 
-      await Promise.all([
-        new Promise((res) => {
-          img.onload = res;
-        }),
-        new Promise((res) => {
-          frame.onload = res;
-        }),
-      ]);
-
-      imgLoaded = true;
-      frameLoaded = true;
-      offsetX = 0;
-      offsetY = 0;
-      applied = false;
-
-      loading.classList.remove("active");
-      canvas.classList.add("active");
-      controls.classList.add("active");
-      applyBtn.classList.add("active");
-      downloadBtn.classList.remove("active");
-
-      drawPreview();
+    // إضافة أحداث التحكم في الجودة
+    document.querySelectorAll('.quality-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.quality-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        currentQuality = parseFloat(this.dataset.quality);
+        redrawWithQuality();
+      });
     });
 
     document.getElementById("upBtn").onclick = () => { offsetY += 10; drawPreview(); };
@@ -543,9 +623,11 @@
     });
 
     downloadBtn.addEventListener("click", () => {
+      // استخدام جودة عالية للتحميل
+      const quality = currentQuality === 1 ? 1.0 : currentQuality === 0.9 ? 0.95 : 0.8;
       const link = document.createElement("a");
-      link.download = "sami-alattar.png";
-      link.href = canvas.toDataURL("image/png", 1.0);
+      link.download = "sami-alattar-high-quality.png";
+      link.href = canvas.toDataURL("image/png", quality);
       link.click();
     });
 
