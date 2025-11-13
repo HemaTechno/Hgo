@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>كلنا دِمّاط كلنا سامي العطار</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@600&display=swap');
+
+    body {
+      font-family: "Cairo", sans-serif;
+      background: linear-gradient(135deg, #e0f2ff, #b3d9ff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      backdrop-filter: blur(12px);
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #0a4ea3;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 15px 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      margin-bottom: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+
+    .upload-box {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+      width: 320px;
+    }
+
+    input[type="file"] {
+      margin: 15px 0;
+      background: #0a4ea3;
+      color: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      border: none;
+      font-size: 14px;
+    }
+
+    canvas {
+      margin-top: 20px;
+      border-radius: 20px;
+      display: none;
+    }
+
+    .controls {
+      display: none;
+      margin-top: 10px;
+      gap: 5px;
+    }
+
+    button {
+      background: #0a4ea3;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #083a7a;
+    }
+  </style>
+</head>
+<body>
+  <h1>كلنا دِمّاط كلنا سامي العطار</h1>
+  <div class="upload-box">
+    <p>📸 ارفع صورتك لإضافة الإطار</p>
+    <input type="file" id="imageUpload" accept="image/*" />
+    <div class="controls">
+      <button id="upBtn">⬆️</button>
+      <button id="downBtn">⬇️</button>
+      <button id="leftBtn">⬅️</button>
+      <button id="rightBtn">➡️</button>
+    </div>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <br />
+    <button id="downloadBtn" style="display:none;">⬇️ تحميل الصورة</button>
+  </div>
+
+  <script>
+    const uploadInput = document.getElementById("imageUpload");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const frameUrl = "https://www.hematech.xyz/FS1.png";
+    const controls = document.querySelector(".controls");
+
+    let img = new Image();
+    let frame = new Image();
+    let offsetX = 0;
+    let offsetY = 0;
+    let scale = 1;
+    let imgLoaded = false;
+
+    function drawImageWithFrame() {
+      if (!imgLoaded) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const imgAspect = img.width / img.height;
+      const canvasAspect = 1;
+
+      let drawWidth, drawHeight;
+
+      if (imgAspect > canvasAspect) {
+        drawHeight = 400;
+        drawWidth = img.width * (400 / img.height);
+      } else {
+        drawWidth = 400;
+        drawHeight = img.height * (400 / img.width);
+      }
+
+      const x = -((drawWidth - 400) / 2) + offsetX;
+      const y = -((drawHeight - 400) / 2) + offsetY;
+
+      ctx.drawImage(img, x, y, drawWidth, drawHeight);
+      ctx.drawImage(frame, 0, 0, 400, 400);
+    }
+
+    uploadInput.addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      img = new Image();
+      frame = new Image();
+      frame.crossOrigin = "anonymous";
+      img.crossOrigin = "anonymous";
+
+      img.src = URL.createObjectURL(file);
+      frame.src = frameUrl;
+
+      await Promise.all([
+        new Promise((res) => (img.onload = res)),
+        new Promise((res) => (frame.onload = res)),
+      ]);
+
+      imgLoaded = true;
+      offsetX = 0;
+      offsetY = 0;
+      drawImageWithFrame();
+
+      canvas.style.display = "block";
+      downloadBtn.style.display = "inline-block";
+      controls.style.display = "flex";
+    });
+
+    document.getElementById("upBtn").onclick = () => {
+      offsetY += 10;
+      drawImageWithFrame();
+    };
+    document.getElementById("downBtn").onclick = () => {
+      offsetY -= 10;
+      drawImageWithFrame();
+    };
+    document.getElementById("leftBtn").onclick = () => {
+      offsetX += 10;
+      drawImageWithFrame();
+    };
+    document.getElementById("rightBtn").onclick = () => {
+      offsetX -= 10;
+      drawImageWithFrame();
+    };
+
+    downloadBtn.addEventListener("click", () => {
+      const link = document.createElement("a");
+      link.download = "sami-alattar.png";
+      link.href = canvas.toDataURL("image/png", 1.0);
+      link.click();
+    });
+  </script>
+</body>
+</html>
