@@ -1,105 +1,28 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>HemaTech Secure Player</title>
-
-<!-- منع F12 / نسخ / فحص -->
-<script>
-document.onkeydown = (e) => {
-  if (e.key == "F12" || (e.ctrlKey && e.shiftKey && e.key == "I") || (e.ctrlKey && e.key == "U")) {
-    e.preventDefault();
-    return false;
-  }
-};
-document.addEventListener("contextmenu", (e) => e.preventDefault());
-</script>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HemaTech Player</title>
 <style>
-body {
-  background: #000;
-  margin: 0;
-  font-family: Arial, sans-serif;
-}
-
-#playerBox {
-  width: 100%;
-  max-width: 900px;
-  margin: 40px auto;
-  border: 3px solid #1e90ff;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-#warning {
-  display: none;
-  background: red;
-  padding: 15px;
-  color: white;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-}
+  body { margin: 0; background: #000; display: flex; justify-content: center; align-items: center; height: 100vh; }
+  #embedBox { width: 90%; max-width: 1000px; height: 56vw; max-height: 600px; border: 2px solid #1e90ff; border-radius: 10px; overflow: hidden; }
 </style>
 </head>
-
 <body>
 
-<div id="warning">⚠️ تم اكتشاف تسجيل الشاشة — هذه محاولة سرقة!</div>
-
-<div id="playerBox">
-  <div id="embedBox" style="width:100%; height:500px;"></div>
-</div>
+<div id="embedBox"></div>
 
 <script src="https://player.vdocipher.com/v2/api.js"></script>
-
 <script>
-// إنشاء المشغل
-const player = VdoPlayer.create({
-  otp: "20160313versUSE3232OKoI9OQx48SPw73KRbVsshV5wY9HsieApTVghvZmacvxi",
-  playbackInfo: "eyJ2aWRlb0lkIjoiMjFkZWM0MmMxOWRkNGE2Njg2NWNjNGRlMmQ4M2MyNTQifQ==",
-  container: "embedBox",
-  theme: "9blue",
-  watermark: {
-    text: "HemaTech - Protected Video",
-    opacity: 0.4
-  }
-});
-
-// 🔥 كود اكتشاف تسجيل الشاشة
-let prevState = "inactive";
-
-navigator.mediaDevices.addEventListener("devicechange", checkRecording);
-
-async function checkRecording() {
-  const displays = await navigator.mediaDevices.enumerateDevices();
-  const isRecording = displays.some(d => d.kind === "videoinput" || d.kind === "audioinput");
-
-  if (isRecording !== prevState) {
-    prevState = isRecording;
-  }
-
-  if (isRecording) {
-    document.getElementById("warning").style.display = "block";
-    player.pause();
-  }
-}
-
-// 🔥 مراقبة حالة Screen Capture API
-if (navigator.mediaDevices.getDisplayMedia) {
-  setInterval(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-      if (stream) {
-        document.getElementById("warning").style.display = "block";
-        player.pause();
-        stream.getTracks().forEach(t => t.stop());
-      }
-    } catch (e) {}
-  }, 1500);
-}
+  VdoPlayer.create({
+    otp: "20160313versUSE3232OKoI9OQx48SPw73KRbVsshV5wY9HsieApTVghvZmacvxi",
+    playbackInfo: "eyJ2aWRlb0lkIjoiMjFkZWM0MmMxOWRkNGE2Njg2NWNjNGRlMmQ4M2MyNTQifQ==",
+    container: "embedBox",
+    theme: "9blue"
+  });
 </script>
 
 </body>
 </html>
+ 
