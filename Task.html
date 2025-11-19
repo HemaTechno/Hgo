@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>تنفيذ المهمة</title>
+<style>
+  body { background:#0d0d0d; color:white; font-family:Tahoma; padding:20px; text-align:center; }
+  .box { background:#111; border:1px solid #00aaff; padding:20px; border-radius:12px; width:90%; margin:auto; margin-top:40px; }
+  button { background:#00aaff; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-size:20px; margin-top:20px; }
+  button:disabled { background:#444; cursor:not-allowed; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h2 id="title">جاري تحميل المهمة...</h2>
+  <p id="desc"></p>
+  <button id="finishBtn">إنهاء المهمة</button>
+  <button id="getScript" style="display:none;">الحصول على السكربت</button>
+</div>
+
+<script>
+// جلب التقدم الحالي
+let progress = localStorage.getItem("taskProgress");
+progress = Number(progress);
+
+const title = document.getElementById("title");
+const desc = document.getElementById("desc");
+const finishBtn = document.getElementById("finishBtn");
+const getScript = document.getElementById("getScript");
+
+if(!progress){
+  title.innerText = "لا يوجد مهمة مختارة";
+  finishBtn.style.display = "none";
+} else {
+  title.innerText = `المهمة ${progress}`;
+  desc.innerText = "نفّذ المطلوب في هذه المهمة ثم اضغط إنهاء.";
+}
+
+finishBtn.onclick = () => {
+  if(progress === 1){
+    localStorage.setItem("taskProgress", 2);
+    window.location.href = "index.html"; // يرجع للصفحة الأولى ويفتح المهمة 2
+  }
+  else if(progress === 2){
+    localStorage.setItem("taskProgress", 3);
+    window.location.href = "index.html";
+  }
+  else if(progress === 3){
+    // بعد الثالثة يظهر زر الحصول على السكربت
+    finishBtn.style.display = "none";
+    getScript.style.display = "inline-block";
+  }
+};
+
+getScript.onclick = () => {
+  window.open("https://example.com", "_blank"); // رابط السكربت
+  localStorage.removeItem("taskProgress");
+};
+</script>
+</body>
+</html>
