@@ -402,60 +402,49 @@
       }
     }
     
-    // تحديث التقدم عند العودة من المهمة
+    // التحقق من إكمال المهمة عند العودة للصفحة
     function checkTaskCompletion() {
-      // يمكنك إضافة منطق للتحقق من إكمال المهمة هنا
-      // هذا مثال بسيط للتوضيح
+      // التحقق من وجود معلمة في الرابط تشير إلى إكمال مهمة
       const urlParams = new URLSearchParams(window.location.search);
       const completedTask = urlParams.get('completed');
       
       if (completedTask && Number(completedTask) > progress) {
         progress = Number(completedTask);
         localStorage.setItem("taskProgress", progress);
+        
+        // إزالة المعلمة من الرابط
+        const url = new URL(window.location);
+        url.searchParams.delete('completed');
+        window.history.replaceState({}, '', url);
+        
+        // تحديث الواجهة
+        updateUI();
       }
     }
     
     // إضافة مستمعي الأحداث للروابط
     document.getElementById("t1").addEventListener("click", function(e) {
-      if (progress < 1) {
-        // حفظ أن المستخدم بدأ المهمة 1
-        localStorage.setItem("taskProgress", 1);
-        progress = 1;
-        updateUI();
-        
-        // يمكنك إضافة منطق لتتبع النقر هنا
-        console.log("بدأ المهمة 1");
-      }
+      // لا نقوم بتحديث التقدم هنا، بل ننتظر الضغط على زر "تحقق" في الصفحة الأخرى
+      console.log("بدأ المهمة 1");
     });
     
     document.getElementById("t2").addEventListener("click", function(e) {
-      if (progress < 2) {
-        // حفظ أن المستخدم بدأ المهمة 2
-        localStorage.setItem("taskProgress", 2);
-        progress = 2;
-        updateUI();
-        
-        // يمكنك إضافة منطق لتتبع النقر هنا
-        console.log("بدأ المهمة 2");
-      }
+      // لا نقوم بتحديث التقدم هنا، بل ننتظر الضغط على زر "تحقق" في الصفحة الأخرى
+      console.log("بدأ المهمة 2");
     });
     
     document.getElementById("t3").addEventListener("click", function(e) {
-      if (progress < 3) {
-        // حفظ أن المستخدم بدأ المهمة 3
-        localStorage.setItem("taskProgress", 3);
-        progress = 3;
-        updateUI();
-        
-        // يمكنك إضافة منطق لتتبع النقر هنا
-        console.log("بدأ المهمة 3");
-      }
+      // لا نقوم بتحديث التقدم هنا، بل ننتظر الضغط على زر "تحقق" في الصفحة الأخرى
+      console.log("بدأ المهمة 3");
     });
     
     // تهيئة الواجهة عند التحميل
     document.addEventListener('DOMContentLoaded', function() {
       checkTaskCompletion();
       updateUI();
+      
+      // التحقق من التقدم كل 2 ثانية (اختياري)
+      setInterval(checkTaskCompletion, 2000);
     });
   </script>
 </body>
