@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>نظام المهام</title>
+<style>
+  body { background:#0d0d0d; color:white; font-family:Tahoma; padding:20px; }
+  .task { background:#111; border:1px solid #00aaff; padding:15px; margin-bottom:15px; border-radius:10px; }
+  button { background:#00aaff; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-size:18px; }
+  button:disabled { background:#444; cursor:not-allowed; }
+</style>
+</head>
+<body>
+<h2>المهام</h2>
+<div class="task">
+  <p>المهمة 1</p>
+  <button id="t1">ابدأ المهمة 1</button>
+</div>
+<div class="task">
+  <p>المهمة 2</p>
+  <button id="t2" disabled>ابدأ المهمة 2</button>
+</div>
+<div class="task">
+  <p>المهمة 3</p>
+  <button id="t3" disabled>ابدأ المهمة 3</button>
+</div>
+<script>
+// عند الضغط على المهمة يتم حفظ التقدم في localStorage
+const t1 = document.getElementById("t1");
+const t2 = document.getElementById("t2");
+const t3 = document.getElementById("t3");
+
+function saveProgress(task){
+  localStorage.setItem("taskProgress", task);
+  window.location.href = "task.html"; // يروح للصفحة التانية
+}
+
+t1.onclick = ()=> saveProgress(1);
+t2.onclick = ()=> saveProgress(2);
+t3.onclick = ()=> saveProgress(3);
+
+// تحميل التقدم السابق
+const progress = localStorage.getItem("taskProgress");
+if(progress >= 1) t2.disabled = false;
+if(progress >= 2) t3.disabled = false;
+</script>
+</body>
+</html>
