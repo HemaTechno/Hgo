@@ -2,60 +2,412 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تنفيذ المهمة</title>
 <style>
-  body { background:#0d0d0d; color:white; font-family:Tahoma; padding:20px; text-align:center; }
-  .box { background:#111; border:1px solid #00aaff; padding:20px; border-radius:12px; width:90%; margin:auto; margin-top:40px; }
-  button { background:#00aaff; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-size:20px; margin-top:20px; }
-  button:disabled { background:#444; cursor:not-allowed; }
+  :root {
+    --primary-color: #00aaff;
+    --completed-color: #00cc66;
+    --bg-dark: #0d0d0d;
+    --bg-card: #111;
+    --text-light: #f0f0f0;
+    --text-muted: #888;
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    background: var(--bg-dark);
+    color: var(--text-light);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .container {
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  
+  .task-box {
+    background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .task-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary-color), #00ccff);
+  }
+  
+  .task-header {
+    margin-bottom: 25px;
+  }
+  
+  .task-icon {
+    font-size: 4rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+  }
+  
+  .task-title {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: var(--text-light);
+  }
+  
+  .task-description {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+  }
+  
+  .progress-container {
+    margin: 30px 0;
+  }
+  
+  .progress-bar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), #00ccff);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 1.5s ease;
+  }
+  
+  .progress-text {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+  }
+  
+  .btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px;
+  }
+  
+  .btn:hover {
+    background: #0099e6;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 170, 255, 0.4);
+  }
+  
+  .btn:active {
+    transform: translateY(0);
+  }
+  
+  .btn:disabled {
+    background: #444;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .btn-success {
+    background: var(--completed-color);
+  }
+  
+  .btn-success:hover {
+    background: #00b359;
+    box-shadow: 0 5px 15px rgba(0, 204, 102, 0.4);
+  }
+  
+  .btn-secondary {
+    background: #444;
+  }
+  
+  .btn-secondary:hover {
+    background: #555;
+    box-shadow: 0 5px 15px rgba(68, 68, 68, 0.4);
+  }
+  
+  .status-message {
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-weight: 500;
+  }
+  
+  .status-processing {
+    background: rgba(0, 170, 255, 0.1);
+    border: 1px solid rgba(0, 170, 255, 0.3);
+    color: var(--primary-color);
+  }
+  
+  .status-completed {
+    background: rgba(0, 204, 102, 0.1);
+    border: 1px solid rgba(0, 204, 102, 0.3);
+    color: var(--completed-color);
+  }
+  
+  .animation-container {
+    display: flex;
+    justify-content: center;
+    margin: 25px 0;
+  }
+  
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(0, 170, 255, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .checkmark {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: block;
+    stroke-width: 3;
+    stroke: var(--completed-color);
+    stroke-miterlimit: 10;
+    margin: 0 auto;
+    box-shadow: inset 0px 0px 0px var(--completed-color);
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+  }
+  
+  .checkmark__circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 3;
+    stroke-miterlimit: 10;
+    stroke: var(--completed-color);
+    fill: none;
+    animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+  }
+  
+  .checkmark__check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+  }
+  
+  @keyframes stroke {
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+  
+  @keyframes scale {
+    0%, 100% {
+      transform: none;
+    }
+    50% {
+      transform: scale3d(1.1, 1.1, 1);
+    }
+  }
+  
+  @keyframes fill {
+    100% {
+      box-shadow: inset 0px 0px 0px 30px rgba(0, 204, 102, 0.1);
+    }
+  }
+  
+  .hidden {
+    display: none;
+  }
+  
+  @media (max-width: 600px) {
+    .task-box {
+      padding: 20px;
+    }
+    
+    .task-title {
+      font-size: 1.5rem;
+    }
+    
+    .btn {
+      width: 100%;
+      margin: 5px 0;
+      justify-content: center;
+    }
+  }
 </style>
 </head>
 <body>
-<div class="box">
-  <h2 id="title">جاري تحميل المهمة...</h2>
-  <p id="desc"></p>
-  <button id="finishBtn">إنهاء المهمة</button>
-  <button id="getScript" style="display:none;">الحصول على السكربت</button>
-</div>
+  <div class="container">
+    <div class="task-box">
+      <div class="task-header">
+        <div class="task-icon" id="taskIcon">⚙️</div>
+        <h1 class="task-title" id="title">جاري تحميل المهمة...</h1>
+        <p class="task-description" id="desc">يرجى الانتظار أثناء تحميل تفاصيل المهمة</p>
+      </div>
+      
+      <div class="animation-container">
+        <div class="spinner" id="spinner"></div>
+        <svg class="checkmark hidden" id="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+          <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+          <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-text" id="progressText">جاري التحقق من المهمة...</div>
+      </div>
+      
+      <div class="status-message status-processing" id="statusMessage">
+        جاري التحقق من المهمة تلقائيًا...
+      </div>
+      
+      <div class="actions">
+        <button class="btn hidden" id="finishBtn">إنهاء المهمة</button>
+        <button class="btn btn-success hidden" id="getScript">الحصول على السكربت</button>
+        <button class="btn btn-secondary hidden" id="backBtn">العودة للرئيسية</button>
+      </div>
+    </div>
+  </div>
 
-<script>
-// جلب التقدم الحالي
-let progress = localStorage.getItem("taskProgress");
-progress = Number(progress);
+  <script>
+    // جلب رقم المهمة التي تم الضغط عليها
+    let progress = Number(localStorage.getItem("taskProgress")) || 1;
+    let taskCompleted = false;
 
-const title = document.getElementById("title");
-const desc = document.getElementById("desc");
-const finishBtn = document.getElementById("finishBtn");
-const getScript = document.getElementById("getScript");
+    const title = document.getElementById("title");
+    const desc = document.getElementById("desc");
+    const taskIcon = document.getElementById("taskIcon");
+    const finishBtn = document.getElementById("finishBtn");
+    const getScript = document.getElementById("getScript");
+    const backBtn = document.getElementById("backBtn");
+    const statusMessage = document.getElementById("statusMessage");
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
+    const spinner = document.getElementById("spinner");
+    const checkmark = document.getElementById("checkmark");
 
-if(!progress){
-  title.innerText = "لا يوجد مهمة مختارة";
-  finishBtn.style.display = "none";
-} else {
-  title.innerText = `المهمة ${progress}`;
-  desc.innerText = "نفّذ المطلوب في هذه المهمة ثم اضغط إنهاء.";
-}
+    // تعيين محتوى الصفحة بناءً على المهمة
+    function setupTask() {
+      title.innerText = `المهمة ${progress}`;
+      
+      if (progress === 1) {
+        desc.innerText = "تسجيل الدخول وإنشاء الحساب";
+        taskIcon.textContent = "👤";
+      } else if (progress === 2) {
+        desc.innerText = "إكمال الملف الشخصي والمعلومات";
+        taskIcon.textContent = "📝";
+      } else if (progress === 3) {
+        desc.innerText = "إكمال الدورة التدريبية النهائية";
+        taskIcon.textContent = "🎓";
+      }
+    }
 
-finishBtn.onclick = () => {
-  if(progress === 1){
-    localStorage.setItem("taskProgress", 2);
-    window.location.href = "index.html"; // يرجع للصفحة الأولى ويفتح المهمة 2
-  }
-  else if(progress === 2){
-    localStorage.setItem("taskProgress", 3);
-    window.location.href = "index.html";
-  }
-  else if(progress === 3){
-    // بعد الثالثة يظهر زر الحصول على السكربت
-    finishBtn.style.display = "none";
-    getScript.style.display = "inline-block";
-  }
-};
+    // محاكاة تنفيذ المهمة مع تأثيرات مرئية
+    function executeTask() {
+      let progressValue = 0;
+      const progressInterval = setInterval(() => {
+        progressValue += Math.random() * 15;
+        if (progressValue >= 100) {
+          progressValue = 100;
+          clearInterval(progressInterval);
+          completeTask();
+        }
+        progressFill.style.width = `${progressValue}%`;
+        progressText.textContent = `جاري التحقق... ${Math.round(progressValue)}%`;
+      }, 300);
+    }
 
-getScript.onclick = () => {
-  window.open("https://example.com", "_blank"); // رابط السكربت
-  localStorage.removeItem("taskProgress");
-};
-</script>
+    // إكمال المهمة
+    function completeTask() {
+      taskCompleted = true;
+      spinner.classList.add("hidden");
+      checkmark.classList.remove("hidden");
+      
+      setTimeout(() => {
+        if (progress === 1) {
+          localStorage.setItem("taskProgress", 2);
+          statusMessage.textContent = "تم إكمال المهمة الأولى بنجاح!";
+          statusMessage.className = "status-message status-completed";
+          showBackButton();
+        } else if (progress === 2) {
+          localStorage.setItem("taskProgress", 3);
+          statusMessage.textContent = "تم إكمال المهمة الثانية بنجاح!";
+          statusMessage.className = "status-message status-completed";
+          showBackButton();
+        } else if (progress === 3) {
+          // المهمة الأخيرة → الحصول على السكربت
+          statusMessage.textContent = "تهانينا! لقد أكملت جميع المهام بنجاح";
+          statusMessage.className = "status-message status-completed";
+          getScript.classList.remove("hidden");
+        }
+        
+        progressText.textContent = "تم التحقق بنجاح!";
+      }, 1000);
+    }
+
+    function showBackButton() {
+      backBtn.classList.remove("hidden");
+    }
+
+    // إعداد الصفحة عند التحميل
+    document.addEventListener('DOMContentLoaded', () => {
+      setupTask();
+      executeTask();
+    });
+
+    // أحداث الأزرار
+    backBtn.onclick = () => {
+      window.location.href = "PT.html";
+    };
+
+    getScript.onclick = () => {
+      // في التطبيق الحقيقي، يمكن فتح رابط السكربت
+      window.open("https://www.hematech.xyz/PT.html", "_blank");
+      
+      // عرض رسالة تأكيد
+      statusMessage.textContent = "تم تحويلك لتحميل السكربت. شكراً لمشاركتك!";
+      
+      // إعادة تعيين التقدم (اختياري)
+      setTimeout(() => {
+        localStorage.removeItem("taskProgress");
+        window.location.href = "index.html";
+      }, 3000);
+    };
+  </script>
 </body>
 </html>
