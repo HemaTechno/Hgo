@@ -21,6 +21,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+// -------------------------
+// Firebase Config (اللي بعتهالي)
+// -------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyBoPJbx5v6EkOqxOJkbhzHqIJdAByh79Rg",
   authDomain: "hhhhhh-d4fb8.firebaseapp.com",
@@ -33,54 +36,82 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase();
+const db = getDatabase(app);
 
-let userIP = "";
-
-// روابط كل مهمة
+// -------------------------
+// روابط المهمات
+// -------------------------
 const taskLinks = {
   task1: "https://example.com/task1",
   task2: "https://example.com/task2",
   task3: "https://example.com/task3"
 };
 
-// الحصول على IP
-fetch("https://api.ipify.org?format=json")
+// -------------------------
+// جلب عنوان IP
+// -------------------------
+let userIP = "";
+
+fetch("https://ipapi.co/json/")
   .then(r => r.json())
   .then(data => {
     userIP = data.ip;
-    set(ref(db, "users/" + userIP), { lastTask: "none" });
+
+    // إنشاء سجل للمستخدم لو مش موجود
+    set(ref(db, "users/" + userIP), {
+      lastTask: "none"
+    });
+  })
+  .catch(err => {
+    console.error("IP Error:", err);
+    alert("خطأ في الحصول على الـ IP");
   });
 
-// حفظ المهمة + فتح الرابط
+// -------------------------
+// عند الضغط على أي مهمة
+// -------------------------
 function completeTask(taskName) {
+
+  if (!userIP) {
+    alert("جاري الحصول على IP...");
+    return;
+  }
+
+  // حفظ المهمة في Firebase
   set(ref(db, "users/" + userIP), { lastTask: taskName });
 
   // فتح رابط المهمة
   window.open(taskLinks[taskName], "_blank");
 
-  // يروح صفحة التحقق بعد كدا
+  // بعد ثانية يروح صفحة check
   setTimeout(() => {
     window.location.href = "check.html";
   }, 1000);
 }
 
+// -------------------------
 // زر الحصول على السكربت
+// -------------------------
 function getScript() {
+
   get(ref(db, "users/" + userIP)).then(snapshot => {
+
     if (!snapshot.exists() || snapshot.val().lastTask !== "task3") {
-      alert("يجب إنهاء كل المهام أولاً!");
+      alert("لازم تكمل كل المهام الأول!");
       return;
     }
 
-    // مسح الداتا
+    // مسح الداتا بعد ما ياخد السكربت
     set(ref(db, "users/" + userIP), null);
 
-    // فتح صفحة السكربت
+    // افتح صفحة السكربت
     window.open("https://your-script-page.com", "_blank");
+
   });
+
 }
 </script>
 
 </body>
 </html>
+
