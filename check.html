@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>التحقق من المهمة</title>
+</head>
+<body>
+
+<h2 id="status">جاري التحقق...</h2>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API",
+  authDomain: "YOUR_DOMAIN",
+  databaseURL: "YOUR_DB",
+  projectId: "YOUR_ID",
+  storageBucket: "YOUR_STORAGE",
+  messagingSenderId: "YOUR_SEND",
+  appId: "YOUR_APP"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase();
+
+let userIP = "";
+
+fetch("https://api.ipify.org?format=json")
+  .then(r => r.json())
+  .then(data => {
+    userIP = data.ip;
+
+    get(ref(db, "users/" + userIP)).then(snapshot => {
+      if (!snapshot.exists()) {
+        document.getElementById("status").innerText = "لم يتم العثور على بيانات!";
+        return;
+      }
+
+      const task = snapshot.val().lastTask;
+
+      if (task === "none") {
+        document.getElementById("status").innerText = "أنت لم تكمل أي مهمة!";
+      } else {
+        document.getElementById("status").innerText =
+          "تم اكتمال " + task + " ✓ جاري توجيهك...";
+
+        setTimeout(() => {
+          window.location.href = "1Blox.html";
+        }, 2000);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
